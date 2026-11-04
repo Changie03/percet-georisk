@@ -1425,7 +1425,7 @@ try:
         f"Hola PERCET, estoy evaluando el proyecto '{nombre_proyecto}' en la coordenada [{lat_actual}, {lon_actual}] "
         f"({nombre_rubro_activo}) con PERCET GeoRisk y solicito asesoría técnica."
     )
-    url_whatsapp = f"https://wa.me/51999999999?text={urllib.parse.quote(mensaje_wa)}"
+    url_whatsapp = f"https://wa.me/51981328639?text={urllib.parse.quote(mensaje_wa)}"
 
     st.markdown(f"""
     <div class="b2b-banner">
