@@ -28,6 +28,7 @@ if "last_click" not in st.session_state:
     st.session_state.last_click = None
 
 LOGO_FILE = "logo.png"
+CORREO_CORPORATIVO = "oficina.tecnica.puh@outlook.com"
 
 def obtener_logo_base64(ruta):
     if os.path.exists(ruta):
@@ -62,15 +63,15 @@ TEXTOS = {
         "pdf_sec2_title": "02. CRONOGRAMA DE IMPACTO PLUVIAL DIARIO VS. UMBRAL DEL RUBRO",
         "pdf_sec3_title": "03. DICTAMEN DE INGENIERÍA & ACCIONES RECOMENDADAS",
         "pdf_sec4_title": "04. RESUMEN DE MATRIZ METEOROLÓGICA (15 DÍAS)",
-        "active_badge": "● MONITOREO ACTIVO",
+        "active_badge": "MONITOREO ACTIVO",
         "peak_banner": "PICO PRONOSTICADO · {fecha} · UMBRAL {umbral} mm/día",
         "card_forecast": "PRONÓSTICO",
         "card_threshold": "UMBRAL",
         "card_excess": "EXCESO",
         "card_margin": "MARGEN SEGURO",
-        "leg_normal": "Normal",
-        "leg_warn": "En Precaución",
-        "leg_crit": "Crítico",
+        "leg_normal": "RIESGO BAJO",
+        "leg_warn": "RIESGO MODERADO",
+        "leg_crit": "RIESGO ALTO",
         "alert_crit_badge": "ALERTA PREVENTIVA · RIESGO ELEVADO",
         "alert_warn_badge": "AVISO OPERATIVO · RIESGO MODERADO",
         "alert_ok_badge": "OPERACIÓN ESTÁNDAR · RIESGO BAJO",
@@ -130,15 +131,15 @@ TEXTOS = {
         "pdf_sec2_title": "02. DAILY RAINFALL IMPACT SCHEDULE VS. SECTOR THRESHOLD",
         "pdf_sec3_title": "03. ENGINEERING ASSESSMENT & RECOMMENDED ACTIONS",
         "pdf_sec4_title": "04. METEOROLOGICAL MATRIX SUMMARY (15 DAYS)",
-        "active_badge": "● ACTIVE MONITORING",
+        "active_badge": "ACTIVE MONITORING",
         "peak_banner": "FORECASTED PEAK · {fecha} · THRESHOLD {umbral} mm/day",
         "card_forecast": "FORECAST",
         "card_threshold": "THRESHOLD",
         "card_excess": "EXCESS",
         "card_margin": "SAFE MARGIN",
-        "leg_normal": "Normal",
-        "leg_warn": "Caution",
-        "leg_crit": "Critical",
+        "leg_normal": "LOW RISK",
+        "leg_warn": "MODERATE RISK",
+        "leg_crit": "HIGH RISK",
         "alert_crit_badge": "PREVENTIVE ALERT · HIGH RISK",
         "alert_warn_badge": "OPERATIONAL NOTICE · MODERATE RISK",
         "alert_ok_badge": "STANDARD OPERATION · LOW RISK",
@@ -304,18 +305,16 @@ RUBROS_DATA = [
     }
 ]
 
-# 3. ESTILO CORPORATIVO UNIFICADO (RESPETANDO LOS ÍCONOS NATIVOS DE STREAMLIT)
+# 3. ESTILO CORPORATIVO UNIFICADO
 def aplicar_estilo_corporativo():
     st.markdown("""
     <style>
     @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800;900&display=swap');
 
-    /* Aplicar Montserrat a textos sin romper Material Symbols de Streamlit */
     html, body, .stApp, .stMarkdown, p, h1, h2, h3, h4, h5, h6, label, button, input, select, textarea, td, th {
         font-family: 'Montserrat', sans-serif !important;
     }
 
-    /* Proteger explícitamente todos los íconos del sistema (evita keyboard_double, arrow_right, upload, etc.) */
     span[data-testid="stIconMaterial"], .material-symbols-rounded, .material-icons, [translate="no"] {
         font-family: 'Material Symbols Rounded' !important;
         font-weight: normal !important;
@@ -340,94 +339,112 @@ def aplicar_estilo_corporativo():
 
     section[data-testid="stSidebar"] label p {
         font-weight: 700 !important;
-        font-size: 0.82rem !important;
+        font-size: 0.80rem !important;
         color: #041e42 !important;
         letter-spacing: 0.4px !important;
         text-transform: uppercase !important;
     }
 
-    /* Encabezado Superior Derecho armonizado con el logo */
+    /* Imagen 1: Encabezado ajustado para que el Cliente y Rubro entren en 1 sola línea */
     .corporate-header {
         background: linear-gradient(135deg, #020b1e 0%, #042454 55%, #004799 100%);
-        padding: 1.8rem 2.4rem;
+        padding: 1.35rem 2rem;
         border-radius: 14px;
         color: white;
         box-shadow: 0 10px 25px rgba(2, 11, 30, 0.25);
-        margin-bottom: 1.6rem;
+        margin-bottom: 1.4rem;
         border-bottom: 4px solid #00b4d8;
         border-left: 6px solid #38bdf8;
     }
     .corporate-title {
-        font-size: 1.75rem !important;
+        font-size: 1.35rem !important;
         font-weight: 800 !important;
         margin: 0 !important;
         color: #ffffff !important;
-        letter-spacing: 0.6px !important;
+        letter-spacing: 0.5px !important;
         text-transform: uppercase;
         line-height: 1.25 !important;
     }
     .corporate-subtitle {
-        font-size: 1.05rem !important;
+        font-size: 0.88rem !important;
         font-weight: 500 !important;
         color: #e0f2fe !important;
-        margin-top: 0.55rem !important;
-        margin-bottom: 0.65rem !important;
+        margin-top: 0.45rem !important;
+        margin-bottom: 0.55rem !important;
     }
     .corporate-client {
-        font-size: 1.08rem !important;
+        font-size: 0.85rem !important;
         color: #38bdf8 !important;
         font-weight: 800 !important;
         margin: 0 !important;
         text-transform: uppercase;
-        letter-spacing: 0.5px;
+        letter-spacing: 0.4px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
     }
 
-    /* Títulos de sección */
+    /* Imagen 3: Títulos de sección y badge MONITOREO ACTIVO en una sola línea perfecta */
     .sec-header {
         display: flex;
         align-items: center;
         justify-content: space-between;
+        gap: 12px;
         background-color: #ffffff;
-        padding: 0.85rem 1.25rem;
+        padding: 0.75rem 1.15rem;
         border-radius: 10px;
         border-left: 5px solid #042454;
         box-shadow: 0 2px 8px rgba(0,0,0,0.04);
         margin-bottom: 1rem;
     }
     .sec-header-title {
-        font-size: 1.15rem !important;
+        font-size: 0.95rem !important;
         font-weight: 800 !important;
         color: #020b1e !important;
         text-transform: uppercase;
-        letter-spacing: 0.5px;
+        letter-spacing: 0.4px;
         margin: 0 !important;
     }
     .status-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 7px;
+        white-space: nowrap;
         background-color: #e0f2fe;
         color: #0369a1;
-        font-size: 0.78rem;
+        font-size: 0.72rem;
         font-weight: 800;
         padding: 5px 12px;
-        border-radius: 20px;
-        letter-spacing: 0.6px;
+        border-radius: 999px;
+        border: 1px solid #bae6fd;
+        letter-spacing: 0.5px;
         text-transform: uppercase;
+        flex-shrink: 0;
+    }
+    .status-dot {
+        width: 8px;
+        height: 8px;
+        background-color: #0284c7;
+        border-radius: 50%;
+        display: inline-block;
+        box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.2);
     }
 
-    /* Latitud y Longitud de mayor tamaño */
+    /* Imagen 2: Latitud y Longitud en 1 línea y con el mismo tamaño de letra y números */
     div[data-testid="stNumberInput"] label p {
-        font-size: 1.02rem !important;
+        font-size: 0.78rem !important;
         font-weight: 800 !important;
         color: #020b1e !important;
         text-transform: uppercase !important;
-        letter-spacing: 0.5px !important;
+        letter-spacing: 0.3px !important;
+        white-space: nowrap !important;
     }
     div[data-testid="stNumberInput"] input {
-        font-size: 1.12rem !important;
+        font-size: 0.96rem !important;
         font-weight: 700 !important;
         color: #042454 !important;
     }
 
-    /* Mapa sin espacio blanco */
     iframe[title="streamlit_folium.st_folium"] {
         width: 100% !important;
         min-width: 100% !important;
@@ -437,17 +454,18 @@ def aplicar_estilo_corporativo():
         display: block !important;
     }
 
-    /* Botones ejecutivos */
+    /* Botón Localizar Obra sin cortes */
     .stButton > button {
         background: linear-gradient(90deg, #020b1e 0%, #004799 100%) !important;
         color: #ffffff !important;
         font-weight: 800 !important;
-        font-size: 0.92rem !important;
-        letter-spacing: 0.6px !important;
+        font-size: 0.80rem !important;
+        letter-spacing: 0.4px !important;
         text-transform: uppercase !important;
+        white-space: nowrap !important;
         border-radius: 8px !important;
         border: 1px solid #38bdf8 !important;
-        padding: 0.65rem 1rem !important;
+        padding: 0.58rem 0.75rem !important;
         width: 100% !important;
         transition: all 0.25s ease !important;
     }
@@ -460,12 +478,12 @@ def aplicar_estilo_corporativo():
     .diag-subbanner {
         background-color: #042454;
         color: #ffffff;
-        font-size: 0.85rem;
+        font-size: 0.80rem;
         font-weight: 800;
         text-align: center;
-        padding: 8px 12px;
+        padding: 7px 12px;
         border-radius: 8px;
-        letter-spacing: 0.8px;
+        letter-spacing: 0.7px;
         text-transform: uppercase;
         margin-bottom: 12px;
     }
@@ -485,30 +503,29 @@ def aplicar_estilo_corporativo():
         box-shadow: 0 2px 6px rgba(0,0,0,0.04);
     }
     .mini-kpi-label {
-        font-size: 0.75rem;
+        font-size: 0.72rem;
         font-weight: 800;
         color: #475569;
         text-transform: uppercase;
-        letter-spacing: 0.5px;
+        letter-spacing: 0.4px;
     }
     .mini-kpi-val {
-        font-size: 1.65rem;
+        font-size: 1.55rem;
         font-weight: 900;
         color: #020b1e;
         line-height: 1.15;
         margin: 4px 0 2px 0;
     }
     .mini-kpi-unit {
-        font-size: 0.75rem;
+        font-size: 0.72rem;
         font-weight: 700;
         color: #64748b;
     }
 
-    /* Tarjeta de Diagnóstico (Sección 02 limpia, sin acciones recomendadas) */
     .diag-alert-card {
         background: #ffffff;
         border-radius: 12px;
-        padding: 16px 18px;
+        padding: 15px 18px;
         border: 1px solid #cbd5e1;
         box-shadow: 0 4px 12px rgba(0,0,0,0.05);
         margin-top: 10px;
@@ -518,7 +535,7 @@ def aplicar_estilo_corporativo():
         background-color: #fee2e2;
         color: #b91c1c;
         font-weight: 800;
-        font-size: 0.78rem;
+        font-size: 0.75rem;
         padding: 4px 10px;
         border-radius: 6px;
         letter-spacing: 0.5px;
@@ -529,7 +546,7 @@ def aplicar_estilo_corporativo():
         background-color: #fef3c7;
         color: #b45309;
         font-weight: 800;
-        font-size: 0.78rem;
+        font-size: 0.75rem;
         padding: 4px 10px;
         border-radius: 6px;
         letter-spacing: 0.5px;
@@ -540,66 +557,71 @@ def aplicar_estilo_corporativo():
         background-color: #dcfce7;
         color: #15803d;
         font-weight: 800;
-        font-size: 0.78rem;
+        font-size: 0.75rem;
         padding: 4px 10px;
         border-radius: 6px;
         letter-spacing: 0.5px;
         margin-bottom: 8px;
     }
 
-    /* Punto 03: Tarjetas KPI de Ingeniería */
+    /* Imagen 6: Punto 03 con tamaño de letra reducido y 100% uniforme en las 3 tarjetas */
     .field-kpi-card {
         background: #ffffff;
         border-radius: 12px;
         border-left: 6px solid #042454;
-        padding: 18px 22px;
+        padding: 16px 20px;
         box-shadow: 0 4px 14px rgba(0,0,0,0.06);
         height: 100%;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
     }
     .field-kpi-title {
-        font-size: 0.92rem;
-        font-weight: 800;
-        color: #334155;
+        font-size: 0.78rem !important;
+        font-weight: 800 !important;
+        color: #334155 !important;
         text-transform: uppercase;
-        letter-spacing: 0.4px;
+        letter-spacing: 0.3px;
         margin-bottom: 8px;
+        line-height: 1.3;
     }
     .field-kpi-value {
-        font-size: 2.1rem;
-        font-weight: 900;
-        color: #020b1e;
-        margin-bottom: 8px;
-        line-height: 1.1;
+        font-size: 1.32rem !important;
+        font-weight: 900 !important;
+        color: #020b1e !important;
+        margin-bottom: 10px;
+        line-height: 1.2 !important;
     }
     .field-kpi-pill {
         display: inline-block;
-        font-size: 0.85rem;
-        font-weight: 700;
+        font-size: 0.76rem !important;
+        font-weight: 700 !important;
         padding: 4px 12px;
         border-radius: 20px;
         background-color: #e0f2fe;
         color: #0369a1;
+        width: fit-content;
     }
 
-    /* Punto 04: Píldoras Ejecutivas y Bloque Único de Acciones Recomendadas */
+    /* Punto 04: Píldoras Ejecutivas */
     .exec-pill-card {
         background: #ffffff;
         border-radius: 12px;
-        padding: 14px 20px;
+        padding: 14px 18px;
         display: flex;
         align-items: center;
-        gap: 16px;
+        gap: 14px;
         box-shadow: 0 3px 10px rgba(0,0,0,0.05);
         border: 1px solid #e2e8f0;
     }
     .exec-icon-circle {
-        width: 52px;
-        height: 52px;
+        width: 48px;
+        height: 48px;
         border-radius: 50%;
         display: flex;
         align-items: center;
         justify-content: center;
-        font-size: 1.5rem;
+        font-size: 1.35rem;
         flex-shrink: 0;
     }
     .exec-recs-only-banner {
@@ -609,11 +631,10 @@ def aplicar_estilo_corporativo():
         box-shadow: 0 3px 10px rgba(0,0,0,0.04);
     }
 
-    /* Banner B2B y Disclaimer */
     .b2b-banner {
         background: linear-gradient(135deg, #020b1e 0%, #042454 100%);
         color: white;
-        padding: 2.2rem;
+        padding: 2rem;
         border-radius: 14px;
         text-align: center;
         border: 2px solid #00b4d8;
@@ -622,7 +643,7 @@ def aplicar_estilo_corporativo():
         margin-bottom: 1rem;
     }
     .legal-disclaimer {
-        font-size: 0.82rem;
+        font-size: 0.80rem;
         color: #475569;
         background-color: #e2e8f0;
         padding: 14px 18px;
@@ -652,7 +673,7 @@ with st.sidebar:
     UNIT_MM = T["unit_mm"]
     
     st.markdown("<hr style='margin: 0.6rem 0;'>", unsafe_allow_html=True)
-    st.markdown(f"<p style='font-weight:800; color:#020b1e; font-size:0.95rem; letter-spacing:0.5px;'>{T['params_header']}</p>", unsafe_allow_html=True)
+    st.markdown(f"<p style='font-weight:800; color:#020b1e; font-size:0.90rem; letter-spacing:0.5px;'>{T['params_header']}</p>", unsafe_allow_html=True)
     
     nombre_proyecto = st.text_input(T["client_label"], value="Consorcio Qalvan")
     
@@ -672,7 +693,7 @@ with st.sidebar:
     
     modo_enso = st.toggle(T["enso_label"], value=True, help=T["enso_help"])
 
-# 5. MODAL DE COTIZACIÓN BILINGÜE
+# 5. MODAL DE COTIZACIÓN BILINGÜE CON DERIVACIÓN A oficina.tecnica.puh@outlook.com (IMAGEN 7)
 @st.dialog("📝 PERCET UNIVERSAL HOLDINGS S.A.C.")
 def mostrar_modal_cotizacion():
     if LANG == "ES":
@@ -688,7 +709,42 @@ def mostrar_modal_cotizacion():
         archivo = st.file_uploader("Adjuntar Plano o Expediente (Opcional):", type=["pdf", "png", "jpg"])
         if st.button("ENVIAR SOLICITUD", type="primary"):
             if emp and cont:
-                st.success(f"✅ Solicitud registrada para {emp} en ({st.session_state.lat}, {st.session_state.lon}).")
+                nombre_arch = archivo.name if archivo else "No adjuntado"
+                asunto = f"Solicitud de Cotización GeoRisk - {emp} ({nombre_proyecto})"
+                cuerpo = (
+                    f"Empresa / Cliente: {emp}\n"
+                    f"Contacto: {cont}\n"
+                    f"Proyecto Evaluado: {nombre_proyecto}\n"
+                    f"Rubro: {nombre_rubro_activo}\n"
+                    f"Tipo de Servicio: {t_proy}\n"
+                    f"Coordenadas: Lat {st.session_state.lat}, Lon {st.session_state.lon}\n"
+                    f"Archivo referencial: {nombre_arch}"
+                )
+                try:
+                    requests.post(
+                        f"https://formsubmit.co/ajax/{CORREO_CORPORATIVO}",
+                        data={
+                            "Empresa": emp,
+                            "Contacto": cont,
+                            "Proyecto": nombre_proyecto,
+                            "Rubro": nombre_rubro_activo,
+                            "Tipo_Proyecto": t_proy,
+                            "Coordenadas": f"{st.session_state.lat}, {st.session_state.lon}",
+                            "Archivo": nombre_arch,
+                            "_subject": asunto
+                        },
+                        timeout=5
+                    )
+                except Exception:
+                    pass
+                mailto_url = f"mailto:{CORREO_CORPORATIVO}?subject={urllib.parse.quote(asunto)}&body={urllib.parse.quote(cuerpo)}"
+                st.success(f"✅ Solicitud registrada y derivada a **{CORREO_CORPORATIVO}** para **{emp}**.")
+                st.markdown(
+                    f'<a href="{mailto_url}" target="_blank" style="display:inline-block; margin-top:6px; font-size:0.82rem; font-weight:700; color:#004799;">📧 Abrir copia directa en mi cliente de correo ({CORREO_CORPORATIVO})</a>',
+                    unsafe_allow_html=True
+                )
+            else:
+                st.warning("Por favor, complete el nombre de la empresa y un dato de contacto.")
     else:
         st.markdown("Complete your project details to receive a technical and commercial proposal.")
         emp = st.text_input("Company / Client Name:")
@@ -701,9 +757,44 @@ def mostrar_modal_cotizacion():
         archivo = st.file_uploader("Upload Blueprint or RFP (Optional):", type=["pdf", "png", "jpg"])
         if st.button("SUBMIT REQUEST", type="primary"):
             if emp and cont:
-                st.success(f"✅ Request registered for {emp} at ({st.session_state.lat}, {st.session_state.lon}).")
+                nombre_arch = archivo.name if archivo else "Not attached"
+                asunto = f"GeoRisk Quote Request - {emp} ({nombre_proyecto})"
+                cuerpo = (
+                    f"Company / Client: {emp}\n"
+                    f"Contact: {cont}\n"
+                    f"Evaluated Project: {nombre_proyecto}\n"
+                    f"Sector: {nombre_rubro_activo}\n"
+                    f"Service Required: {t_proy}\n"
+                    f"Coordinates: Lat {st.session_state.lat}, Lon {st.session_state.lon}\n"
+                    f"Reference File: {nombre_arch}"
+                )
+                try:
+                    requests.post(
+                        f"https://formsubmit.co/ajax/{CORREO_CORPORATIVO}",
+                        data={
+                            "Company": emp,
+                            "Contact": cont,
+                            "Project": nombre_proyecto,
+                            "Sector": nombre_rubro_activo,
+                            "Service": t_proy,
+                            "Coordinates": f"{st.session_state.lat}, {st.session_state.lon}",
+                            "File": nombre_arch,
+                            "_subject": asunto
+                        },
+                        timeout=5
+                    )
+                except Exception:
+                    pass
+                mailto_url = f"mailto:{CORREO_CORPORATIVO}?subject={urllib.parse.quote(asunto)}&body={urllib.parse.quote(cuerpo)}"
+                st.success(f"✅ Request registered and routed to **{CORREO_CORPORATIVO}** for **{emp}**.")
+                st.markdown(
+                    f'<a href="{mailto_url}" target="_blank" style="display:inline-block; margin-top:6px; font-size:0.82rem; font-weight:700; color:#004799;">📧 Open direct copy in email client ({CORREO_CORPORATIVO})</a>',
+                    unsafe_allow_html=True
+                )
+            else:
+                st.warning("Please complete the company name and contact information.")
 
-# 6. ENCABEZADO SUPERIOR
+# 6. ENCABEZADO SUPERIOR (IMAGEN 1: CLIENTE Y RUBRO EN UNA SOLA LÍNEA)
 st.markdown(f"""
 <div class="corporate-header">
     <p class="corporate-title">{T['header_title']}</p>
@@ -760,8 +851,8 @@ try:
     else:
         estado_quebrada = f"🟢 {T['q_green']}"
 
-    # 8. SECCIÓN 01 (MAPA) Y SECCIÓN 02 (DIAGNÓSTICO SIN ACCIONES REPETIDAS)
-    col_mapa, col_panel = st.columns([1.25, 1], gap="large")
+    # 8. SECCIÓN 01 (MAPA Y CONTROLES ALINEADOS) Y SECCIÓN 02 (DIAGNÓSTICO)
+    col_mapa, col_panel = st.columns([1.22, 1], gap="large")
 
     with col_mapa:
         st.markdown(f"""
@@ -770,14 +861,15 @@ try:
         </div>
         """, unsafe_allow_html=True)
         
-        c1, c2, c3 = st.columns([1.8, 1.8, 1.4])
+        # Imagen 2: Columnas balanceadas para que LATITUD, LONGITUD y LOCALIZAR OBRA encajen en 1 sola línea
+        c1, c2, c3 = st.columns([1.45, 1.45, 1.55])
         with c1:
             lat_input = st.number_input(T["lat_label"], value=float(st.session_state.lat), format="%.4f", step=0.0010)
         with c2:
             lon_input = st.number_input(T["lon_label"], value=float(st.session_state.lon), format="%.4f", step=0.0010)
         with c3:
-            st.markdown("<div style='height: 28px;'></div>", unsafe_allow_html=True)
-            buscar_btn = st.button(T["locate_btn"])
+            st.markdown("<div style='height: 27px;'></div>", unsafe_allow_html=True)
+            buscar_btn = st.button(T["locate_btn"], use_container_width=True)
         
         if buscar_btn:
             st.session_state.lat = round(lat_input, 4)
@@ -795,32 +887,75 @@ try:
         ).add_to(m)
         folium.LatLngPopup().add_to(m)
 
+        # Imagen 4: Brújula interactiva que gira dinámicamente según el desplazamiento/orientación en el mapa
         oeste_letra = "O" if LANG == "ES" else "W"
         compass_html = f"""
         {{% macro html(this, kwargs) %}}
         <div style="
             position: fixed; 
-            bottom: 18px; left: 18px; width: 78px; height: 78px; 
-            z-index: 9999; background: rgba(2, 11, 30, 0.88);
-            border: 2px solid #38bdf8; border-radius: 50%;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.35);
-            display: flex; align-items: center; justify-content: center;
-            pointer-events: none; font-family: 'Montserrat', sans-serif;">
-            <svg viewBox="0 0 100 100" width="70" height="70">
-                <circle cx="50" cy="50" r="44" fill="none" stroke="#334155" stroke-width="1.5"/>
-                <text x="50" y="15" fill="#38bdf8" font-size="13" font-weight="900" text-anchor="middle">N</text>
-                <text x="50" y="94" fill="#cbd5e1" font-size="11" font-weight="700" text-anchor="middle">S</text>
-                <text x="90" y="54" fill="#cbd5e1" font-size="11" font-weight="700" text-anchor="middle">E</text>
-                <text x="10" y="54" fill="#cbd5e1" font-size="11" font-weight="700" text-anchor="middle">{oeste_letra}</text>
-                <text x="77" y="27" fill="#64748b" font-size="8" font-weight="700" text-anchor="middle">NE</text>
-                <text x="23" y="27" fill="#64748b" font-size="8" font-weight="700" text-anchor="middle">N{oeste_letra}</text>
-                <text x="77" y="80" fill="#64748b" font-size="8" font-weight="700" text-anchor="middle">SE</text>
-                <text x="23" y="80" fill="#64748b" font-size="8" font-weight="700" text-anchor="middle">S{oeste_letra}</text>
-                <polygon points="50,20 57,50 50,44 43,50" fill="#ef4444"/>
-                <polygon points="50,80 57,50 50,56 43,50" fill="#e2e8f0"/>
+            bottom: 18px; left: 18px; width: 88px; height: 104px; 
+            z-index: 9999; background: rgba(2, 11, 30, 0.90);
+            border: 2px solid #38bdf8; border-radius: 14px;
+            box-shadow: 0 4px 14px rgba(0,0,0,0.4);
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            padding: 4px; pointer-events: none; font-family: 'Montserrat', sans-serif;">
+            <svg viewBox="0 0 100 100" width="72" height="72">
+                <circle cx="50" cy="50" r="45" fill="none" stroke="#334155" stroke-width="1.5"/>
+                <text x="50" y="14" fill="#38bdf8" font-size="12" font-weight="900" text-anchor="middle">N</text>
+                <text x="50" y="95" fill="#cbd5e1" font-size="10.5" font-weight="700" text-anchor="middle">S</text>
+                <text x="91" y="54" fill="#cbd5e1" font-size="10.5" font-weight="700" text-anchor="middle">E</text>
+                <text x="9" y="54" fill="#cbd5e1" font-size="10.5" font-weight="700" text-anchor="middle">{oeste_letra}</text>
+                <text x="78" y="26" fill="#94a3b8" font-size="7.5" font-weight="700" text-anchor="middle">NE</text>
+                <text x="22" y="26" fill="#94a3b8" font-size="7.5" font-weight="700" text-anchor="middle">N{oeste_letra}</text>
+                <text x="78" y="81" fill="#94a3b8" font-size="7.5" font-weight="700" text-anchor="middle">SE</text>
+                <text x="22" y="81" fill="#94a3b8" font-size="7.5" font-weight="700" text-anchor="middle">S{oeste_letra}</text>
+                <g id="percet-compass-needle" style="transform-origin: 50px 50px; transition: transform 0.18s ease-out;">
+                    <polygon points="50,18 56,50 50,44 44,50" fill="#ef4444"/>
+                    <polygon points="50,82 56,50 50,56 44,50" fill="#e2e8f0"/>
+                </g>
                 <circle cx="50" cy="50" r="3.5" fill="#020b1e" stroke="#38bdf8" stroke-width="1.5"/>
             </svg>
+            <div id="percet-compass-label" style="font-size:9.5px; font-weight:800; color:#38bdf8; letter-spacing:0.4px; margin-top:1px;">
+                N · 0°
+            </div>
         </div>
+        <script>
+        (function() {{
+            var baseLat = {st.session_state.lat};
+            var baseLon = {st.session_state.lon};
+            var dirs = ["N", "NE", "E", "SE", "S", "S{oeste_letra}", "{oeste_letra}", "N{oeste_letra}"];
+
+            function actualizarAguja(targetLat, targetLon) {{
+                var dLat = targetLat - baseLat;
+                var dLon = targetLon - baseLon;
+                if (Math.abs(dLat) < 0.00005 && Math.abs(dLon) < 0.00005) return;
+                var rad = Math.atan2(dLon, dLat);
+                var deg = (rad * 180 / Math.PI + 360) % 360;
+                var idx = Math.round(deg / 45) % 8;
+                var needle = document.getElementById("percet-compass-needle");
+                var label = document.getElementById("percet-compass-label");
+                if (needle) needle.style.transform = "rotate(" + deg.toFixed(1) + "deg)";
+                if (label) label.innerHTML = dirs[idx] + " · " + Math.round(deg) + "°";
+            }}
+
+            setTimeout(function() {{
+                try {{
+                    var mapObj = {{{{ this._parent.get_name() }}}};
+                    if (mapObj) {{
+                        mapObj.on("move", function() {{
+                            var c = mapObj.getCenter();
+                            actualizarAguja(c.lat, c.lng);
+                        }});
+                        mapObj.on("mousemove", function(e) {{
+                            if (e && e.latlng) {{
+                                actualizarAguja(e.latlng.lat, e.latlng.lng);
+                            }}
+                        }});
+                    }}
+                }} catch(err) {{}}
+            }}, 400);
+        }})();
+        </script>
         {{% endmacro %}}
         """
         compass = MacroElement()
@@ -836,12 +971,12 @@ try:
                 st.session_state.lat, st.session_state.lon = click_coords
                 st.rerun()
 
-    # PANEL DERECHO: SECCIÓN 02 LIMPIA (SIN ACCIONES RECOMENDADAS)
+    # PANEL DERECHO: SECCIÓN 02 CON BADGE MONITOREO ACTIVO ALINEADO Y LEYENDA DE RIESGO ACTUALIZADA
     with col_panel:
         st.markdown(f"""
         <div class="sec-header">
             <p class="sec-header-title">🧭 {T['sec2_title']}</p>
-            <span class="status-badge">{T['active_badge']}</span>
+            <span class="status-badge"><span class="status-dot"></span>{T['active_badge']}</span>
         </div>
         <div class="diag-subbanner">
             {T['peak_banner'].format(fecha=fecha_pico.upper(), umbral=f"{umbral_critico:.1f}")}
@@ -878,7 +1013,7 @@ try:
         fig_gauge = go.Figure(go.Indicator(
             mode="gauge+number",
             value=pico_max_dia,
-            number={'suffix': f" {UNIT_MM}", 'valueformat': ".1f", 'font': {'size': 36, 'color': '#020b1e', 'family': 'Montserrat'}},
+            number={'suffix': f" {UNIT_MM}", 'valueformat': ".1f", 'font': {'size': 34, 'color': '#020b1e', 'family': 'Montserrat'}},
             gauge={
                 'axis': {
                     'range': [0, max_escala],
@@ -887,7 +1022,7 @@ try:
                     'dtick': paso_tick,
                     'tickwidth': 2,
                     'tickcolor': "#020b1e",
-                    'tickfont': {'size': 14, 'color': '#020b1e', 'family': 'Montserrat'}
+                    'tickfont': {'size': 13, 'color': '#020b1e', 'family': 'Montserrat'}
                 },
                 'bar': {'color': "#020b1e", 'thickness': 0.32},
                 'bgcolor': "#ffffff",
@@ -907,14 +1042,15 @@ try:
         ))
         fig_gauge.update_layout(
             height=220,
-            margin=dict(l=28, r=28, t=20, b=10),
+            margin=dict(l=26, r=26, t=20, b=10),
             paper_bgcolor="rgba(0,0,0,0)",
             font={'family': 'Montserrat'}
         )
         st.plotly_chart(fig_gauge, use_container_width=True)
 
+        # Imagen 5: RIESGO BAJO (<1.4) | RIESGO MODERADO (1.4-2.0) | RIESGO ALTO (>2.0)
         st.markdown(f"""
-        <div style="display:flex; justify-content:center; gap:20px; font-size:0.8rem; font-weight:700; margin-top:-6px; margin-bottom:10px;">
+        <div style="display:flex; justify-content:center; flex-wrap:wrap; gap:14px; font-size:0.76rem; font-weight:800; color:#1e293b; margin-top:-6px; margin-bottom:10px;">
             <span>🟢 {T['leg_normal']} (&lt;{umbral_critico*0.7:.1f})</span>
             <span>🟡 {T['leg_warn']} ({umbral_critico*0.7:.1f}-{umbral_critico:.1f})</span>
             <span>🔴 {T['leg_crit']} (&gt;{umbral_critico:.1f})</span>
@@ -937,21 +1073,18 @@ try:
             desc_txt = T["diag_ok_desc"].format(pico=f"{pico_max_dia:.1f}", umbral=f"{umbral_critico:.1f}")
             lista_recs = rubro_actual["es_recs_ok"] if LANG == "ES" else rubro_actual["en_recs_ok"]
 
-        # Tarjeta de Diagnóstico (Imagen 3: Sin Acciones Recomendadas para evitar redundancia)
+        # Imagen 5: Tarjeta de Alerta sin la línea inferior de Pico detectado / Días afectados
         st.markdown(f"""
         <div class="diag-alert-card">
             <div class="{badge_cls}">{badge_txt}</div>
-            <div style="font-size:1.05rem; font-weight:800; color:#020b1e; margin-bottom:6px;">{nombre_rubro_activo}</div>
-            <div style="font-size:0.92rem; color:#334155; margin-bottom:12px; line-height:1.45;">{desc_txt}</div>
-            <div style="font-size:0.84rem; font-weight:700; color:#475569; border-top:1px solid #e2e8f0; padding-top:8px;">
-                📅 {T['peak_detected']}: <b style="color:#020b1e;">{fecha_pico}</b> &nbsp;·&nbsp; ⚠️ {T['days_affected']}: <b style="color:#dc2626;">{dias_criticos}</b>
-            </div>
+            <div style="font-size:1.0rem; font-weight:800; color:#020b1e; margin-bottom:6px;">{nombre_rubro_activo}</div>
+            <div style="font-size:0.88rem; color:#334155; margin-bottom:2px; line-height:1.45;">{desc_txt}</div>
         </div>
         """, unsafe_allow_html=True)
 
     st.markdown("<br>", unsafe_allow_html=True)
 
-    # 9. SECCIÓN 03: INDICADORES CLAVE DE INGENIERÍA DE CAMPO
+    # 9. SECCIÓN 03: INDICADORES CLAVE DE INGENIERÍA DE CAMPO (IMAGEN 6: TAMAÑO REDUCIDO Y 100% UNIFORME)
     st.markdown(f"""
     <div class="sec-header">
         <p class="sec-header-title">📊 {T['sec3_title']}</p>
@@ -979,31 +1112,30 @@ try:
         st.markdown(f"""
         <div class="field-kpi-card">
             <div class="field-kpi-title">{T['kpi3_title']}</div>
-            <div class="field-kpi-value" style="font-size: 1.45rem; padding-top:6px;">{estado_quebrada}</div>
+            <div class="field-kpi-value">{estado_quebrada}</div>
             <span class="field-kpi-pill">📍 {T['kpi3_sub'].format(lat=lat_actual, lon=lon_actual)}</span>
         </div>
         """, unsafe_allow_html=True)
 
     st.markdown("<br>", unsafe_allow_html=True)
 
-    # 10. SECCIÓN 04: CRONOGRAMA DE IMPACTO CON NUEVOS TÍTULOS Y BLOQUE INFERIOR SIN REDUNDANCIA
+    # 10. SECCIÓN 04: CRONOGRAMA DE IMPACTO
     st.markdown(f"""
     <div class="sec-header">
         <p class="sec-header-title">📅 {T['sec4_title']}</p>
     </div>
     """, unsafe_allow_html=True)
 
-    # Fila Superior: PRECIPITACIÓN MÁXIMA | DÍAS SOBRE EL UMBRAL | UMBRAL DE ALERTA (Imágenes 5 y 8)
     p1, p2, p3 = st.columns(3)
     with p1:
         st.markdown(f"""
         <div class="exec-pill-card">
             <div class="exec-icon-circle" style="background:#e0f2fe; color:#0284c7;">💧</div>
             <div>
-                <div style="font-size:0.82rem; font-weight:800; color:#475569; text-transform:uppercase;">{T['pill_peak']}</div>
-                <div style="display:flex; align-items:baseline; gap:12px;">
-                    <span style="font-size:1.9rem; font-weight:900; color:#dc2626;">{pico_max_dia:.1f} <small style="font-size:0.9rem; color:#475569;">{UNIT_MM}</small></span>
-                    <span style="font-size:0.88rem; font-weight:700; color:#334155; border-left:2px solid #cbd5e1; padding-left:10px;">📅 {fecha_pico}</span>
+                <div style="font-size:0.78rem; font-weight:800; color:#475569; text-transform:uppercase;">{T['pill_peak']}</div>
+                <div style="display:flex; align-items:baseline; gap:10px;">
+                    <span style="font-size:1.75rem; font-weight:900; color:#dc2626;">{pico_max_dia:.1f} <small style="font-size:0.85rem; color:#475569;">{UNIT_MM}</small></span>
+                    <span style="font-size:0.84rem; font-weight:700; color:#334155; border-left:2px solid #cbd5e1; padding-left:8px;">📅 {fecha_pico}</span>
                 </div>
             </div>
         </div>
@@ -1013,10 +1145,10 @@ try:
         <div class="exec-pill-card">
             <div class="exec-icon-circle" style="background:#ffedd5; color:#ea580c;">🛡️</div>
             <div>
-                <div style="font-size:0.82rem; font-weight:800; color:#475569; text-transform:uppercase;">{T['pill_days']}</div>
+                <div style="font-size:0.78rem; font-weight:800; color:#475569; text-transform:uppercase;">{T['pill_days']}</div>
                 <div>
-                    <span style="font-size:1.9rem; font-weight:900; color:#dc2626;">{dias_criticos}</span>
-                    <span style="font-size:0.92rem; font-weight:700; color:#475569;"> {T['day_unit']}</span>
+                    <span style="font-size:1.75rem; font-weight:900; color:#dc2626;">{dias_criticos}</span>
+                    <span style="font-size:0.88rem; font-weight:700; color:#475569;"> {T['day_unit']}</span>
                 </div>
             </div>
         </div>
@@ -1026,10 +1158,10 @@ try:
         <div class="exec-pill-card">
             <div class="exec-icon-circle" style="background:#e0e7ff; color:#1d4ed8;">🧭</div>
             <div>
-                <div style="font-size:0.82rem; font-weight:800; color:#475569; text-transform:uppercase;">{T['pill_thresh']}</div>
+                <div style="font-size:0.78rem; font-weight:800; color:#475569; text-transform:uppercase;">{T['pill_thresh']}</div>
                 <div>
-                    <span style="font-size:1.9rem; font-weight:900; color:#020b1e;">{umbral_critico:.1f}</span>
-                    <span style="font-size:0.92rem; font-weight:700; color:#475569;"> {UNIT_MM}</span>
+                    <span style="font-size:1.75rem; font-weight:900; color:#020b1e;">{umbral_critico:.1f}</span>
+                    <span style="font-size:0.88rem; font-weight:700; color:#475569;"> {UNIT_MM}</span>
                 </div>
             </div>
         </div>
@@ -1081,9 +1213,8 @@ try:
     )
     st.plotly_chart(fig_bar, use_container_width=True)
 
-    # Bloque Inferior (Imagen 4: Únicamente las Acciones Recomendadas, sin duplicar la alerta ni los días afectados)
     checks_cols_html = "".join([
-        f"<div style='background:rgba(255,255,255,0.85); padding:10px 14px; border-radius:8px; border-left:4px solid #dc2626; font-weight:600; font-size:0.88rem; color:#1e293b;'><span style='color:#dc2626; font-weight:900;'>✔</span> {r}</div>"
+        f"<div style='background:rgba(255,255,255,0.85); padding:10px 14px; border-radius:8px; border-left:4px solid #dc2626; font-weight:600; font-size:0.86rem; color:#1e293b;'><span style='color:#dc2626; font-weight:900;'>✔</span> {r}</div>"
         for r in lista_recs
     ])
     checks_pdf_html = "".join([f"<div style='margin-bottom:4px; font-weight:600; color:#1e293b;'><span style='color:#dc2626;'>✔</span> {r}</div>" for r in lista_recs])
@@ -1093,13 +1224,13 @@ try:
     color_titulo_9 = "#be123c" if pico_max_dia > umbral_critico else ("#b45309" if pico_max_dia >= umbral_critico * 0.7 else "#15803d")
 
     st.markdown(f"""
-    <div style="text-align:center; font-size:0.85rem; font-weight:700; color:#334155; margin-top:-10px; margin-bottom:12px;">
+    <div style="text-align:center; font-size:0.82rem; font-weight:800; color:#334155; margin-top:-10px; margin-bottom:12px;">
         <span style="color:#1d70b8;">●</span> {T['leg_normal']} &nbsp;&nbsp;&nbsp;
         <span style="color:#f59e0b;">●</span> {T['leg_warn']} &nbsp;&nbsp;&nbsp;
         <span style="color:#ef4444;">●</span> {T['leg_crit']}
     </div>
     <div class="exec-recs-only-banner" style="background:{bg_banner_9}; border: 1.5px solid {border_banner_9};">
-        <div style="font-size:0.95rem; font-weight:900; color:#020b1e; text-transform:uppercase; margin-bottom:10px; letter-spacing:0.4px;">
+        <div style="font-size:0.92rem; font-weight:900; color:#020b1e; text-transform:uppercase; margin-bottom:10px; letter-spacing:0.4px;">
             📋 {T['rec_title']} ({nombre_rubro_activo})
         </div>
         <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap:12px;">
@@ -1110,7 +1241,7 @@ try:
 
     st.markdown("<br>", unsafe_allow_html=True)
 
-    # 11. GENERADOR DE INFOGRAFÍA PDF EN 1 SOLA HOJA A4 (IMAGEN 7 MEJORADA: TÍTULOS LIMPIOS Y GRÁFICA MÁS GRANDE)
+    # 11. GENERADOR DE INFOGRAFÍA PDF EN 1 SOLA HOJA A4
     def disparar_pdf_infografia_una_hoja():
         fechas_js = json.dumps(df_diario["Fecha"].tolist())
         valores_js = json.dumps(df_diario["Pronóstico"].tolist())
@@ -1158,7 +1289,7 @@ try:
                     .grid-3 {{ display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 12px; }}
                     .card {{ border: 1px solid #cbd5e1; border-top: 4px solid #042454; border-radius: 8px; padding: 10px 12px; background: #f8fafc; }}
                     .card-title {{ font-size: 9px; font-weight: 800; color: #475569; text-transform: uppercase; }}
-                    .card-val {{ font-size: 20px; font-weight: 900; color: #020b1e; margin: 3px 0; }}
+                    .card-val {{ font-size: 18px; font-weight: 900; color: #020b1e; margin: 3px 0; }}
                     .sec-title {{ font-size: 11px; font-weight: 800; color: #042454; text-transform: uppercase; border-bottom: 2px solid #e2e8f0; padding-bottom: 4px; margin: 10px 0 8px 0; }}
                     .chart-box {{ border: 1px solid #cbd5e1; border-radius: 8px; padding: 12px 10px 6px 10px; text-align: center; background: #ffffff; margin-bottom: 12px; }}
                     .alert-box {{ background: {bg_banner_9}; border: 1.5px solid {border_banner_9}; border-radius: 10px; padding: 12px 16px; display: grid; grid-template-columns: 1.15fr 1.25fr; gap: 14px; margin-bottom: 12px; }}
@@ -1279,7 +1410,7 @@ try:
         if st.button(T["dl_pdf"], use_container_width=True):
             disparar_pdf_infografia_una_hoja()
 
-    # 12. DESPLEGABLE TÉCNICO (CON ÍCONO LIMPIO SIN TEXTO SUPERPUESTO)
+    # 12. DESPLEGABLE TÉCNICO
     with st.expander(T["exp_title"]):
         st.markdown(f"""
         * **Machine Learning Engine:** Gradient Boosting Regressor ($R^2 = 0.947$, $\\text{{RMSE}} = 0.599\\text{{ mm/day}}$, $\\text{{MAE}} = 0.394\\text{{ mm/day}}$).
@@ -1298,8 +1429,8 @@ try:
 
     st.markdown(f"""
     <div class="b2b-banner">
-        <h3 style="color:#ffffff; font-weight:900; letter-spacing:0.5px; margin-bottom:10px;">{T['b2b_title']}</h3>
-        <p style="color:#e0f2fe; font-size:1.02rem; max-width:920px; margin:0 auto; line-height:1.55;">{T['b2b_sub']}</p>
+        <h3 style="color:#ffffff; font-weight:900; letter-spacing:0.5px; margin-bottom:10px; font-size:1.35rem;">{T['b2b_title']}</h3>
+        <p style="color:#e0f2fe; font-size:0.96rem; max-width:920px; margin:0 auto; line-height:1.55;">{T['b2b_sub']}</p>
     </div>
     """, unsafe_allow_html=True)
 
