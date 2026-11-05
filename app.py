@@ -60,7 +60,7 @@ TEXTOS = {
         "locate_btn": "📍 LOCALIZAR OBRA",
         "map_hint": "Ingrese coordenadas de planos/GPS o haga clic directamente sobre cualquier punto del mapa.",
         "sec2_title": "02. DIAGNÓSTICO OPERATIVO EN TIEMPO REAL",
-        "pdf_sec1_title": "01. DIAGNÓSTICO OPERATIVO EN TIEMPO REAL & KPI SUMMARY (30 DÍAS)",
+        "pdf_sec1_title": "01. DIAGNÓSTICO OPERATIVO EN TIEMPO REAL & RESUMEN KPI (30 DÍAS)",
         "pdf_sec2_title": "02. CRONOGRAMA DE IMPACTO PLUVIAL MENSUAL (30 DÍAS) VS. UMBRAL DEL RUBRO",
         "pdf_sec3_title": "03. DICTAMEN DE INGENIERÍA & ACCIONES RECOMENDADAS",
         "pdf_sec4_title": "04. RESUMEN DE MATRIZ METEOROLÓGICA COMPLETA (30 DÍAS)",
@@ -84,11 +84,11 @@ TEXTOS = {
         "days_affected": "Días afectados",
         "day_unit": "sobre el umbral",
         "sec3_title": "03. INDICADORES CLAVE DE INGENIERÍA DE CAMPO (HORIZONTE 30 DÍAS)",
-        "kpi1_title": "1. PRECIPITACIÓN PRONOSTICADA (PICO / ACUM.)",
+        "kpi1_title": "PRECIPITACIÓN PRONOSTICADA (PICO / ACUM.)",
         "kpi1_sub": "Acumulado 30 días: {acum} mm",
-        "kpi2_title": "2. HUMEDAD RELATIVA DEL AMBIENTE / SUELO",
+        "kpi2_title": "HUMEDAD RELATIVA DEL AMBIENTE / SUELO",
         "kpi2_sub": "Monitoreo de saturación superficial",
-        "kpi3_title": "3. ESTADO DE ALERTA FLUVIAL / QUEBRADAS",
+        "kpi3_title": "ESTADO DE ALERTA FLUVIAL / QUEBRADAS",
         "kpi3_sub": "Coordenada: {lat}, {lon}",
         "q_red": "ALERTA ROJA (Riesgo de Escombros)",
         "q_yellow": "VIGILANCIA (Caudal Moderado)",
@@ -103,9 +103,11 @@ TEXTOS = {
         "dl_csv": "📥 DESCARGAR MATRIZ 30 DÍAS (EXCEL / CSV)",
         "dl_pdf": "📄 EXPORTAR REPORTE TÉCNICO PDF (1 HOJA)",
         "exp_title": "🛠️ VER PARÁMETROS DE INFERENCIA TÉCNICA Y MATRIZ METEOROLÓGICA COMPLETA (30 DÍAS)",
+        "ml_bullet_1": "* **Motor de Machine Learning:** Regresor Gradient Boosting ($R^2 = 0.947$, $\\text{{RMSE}} = 0.599\\text{{ mm/día}}$, $\\text{{MAE}} = 0.394\\text{{ mm/día}}$).",
+        "ml_bullet_2": "* **Ecuación de Ajuste Lineal:** $y = 0.871x + 0.163$ | **Presión Superficial:** `{presion} hPa`",
         "disclaimer": "<b>🛡️ AVISO LEGAL / DISCLAIMER:</b> PERCET GeoRisk™ es una herramienta analítica de asistencia y soporte basada en modelos predictivos satelitales y probabilísticos. Los resultados constituyen estimaciones técnicas de riesgo y no eximen al usuario de aplicar los protocolos oficiales de seguridad, supervisión en campo y normativas técnicas locales de construcción.",
         "b2b_title": "🏢 PERCET UNIVERSAL HOLDINGS S.A.C. | INGENIERÍA, OBRAS Y CONSULTORÍA",
-        "b2b_sub": "Respaldamos tus proyectos de infraestructura con soluciones de alto nivel técnico:<br>🇵🇪 <b>Operaciones en Perú:</b> Cotización y ejecución física de obras civiles, estructuras metálicas, remodelaciones y supervisión BIM/VDC en campo.<br>🌎 <b>Cobertura en toda Latinoamérica:</b> Consultoría especializada en mitigación hidrológica, modelamiento BIM/VDC y soporte técnico remoto.",
+        "b2b_sub": "Respaldamos tus proyectos de infraestructura con soluciones de alto nivel técnico:<br>🇵🇪 <b>Operaciones en Perú:</b> Cotización y ejecución física de obras civiles, estructuras metálicas, remodelaciones y supervisión BIM/VDC en campo.<br>🌎 <b>Cobertura en Latinoamérica:</b> Consultoría especializada en mitigación hidrológica, modelamiento BIM/VDC y soporte técnico remoto.",
         "btn_quote": "📝 SOLICITAR COTIZACIÓN DE OBRA / CONSULTORÍA",
         "btn_wa": "💬 HABLAR CON UN ASESOR POR WHATSAPP",
         "col_date": "Fecha",
@@ -118,6 +120,12 @@ TEXTOS = {
         "col_prob": "Prob. Lluvia (%)",
         "col_base": "Precipitación Base (mm)",
         "col_fcst": "Pronóstico (mm/día)",
+        "pdf_col_date": "FECHA",
+        "pdf_col_fcst": "PRONÓSTICO (mm/día)",
+        "pdf_col_prob": "PROB. (%)",
+        "pdf_col_tmax": "T.MÁX (°C)",
+        "pdf_col_tmin": "T.MÍN (°C)",
+        "pdf_col_wind": "VIENTO (km/h)",
         "pdf_quebradas": "QUEBRADAS",
         "pdf_days_1_15": "DÍAS 01 AL 15",
         "pdf_days_16_30": "DÍAS 16 AL 30"
@@ -165,11 +173,11 @@ TEXTOS = {
         "days_affected": "Affected days",
         "day_unit": "above threshold",
         "sec3_title": "03. KEY FIELD ENGINEERING INDICATORS (30-DAY HORIZON)",
-        "kpi1_title": "1. FORECASTED PRECIPITATION (PEAK / ACCUM.)",
+        "kpi1_title": "FORECASTED PRECIPITATION (PEAK / ACCUM.)",
         "kpi1_sub": "30-day cumulative: {acum} mm",
-        "kpi2_title": "2. AMBIENT / SOIL RELATIVE HUMIDITY",
+        "kpi2_title": "AMBIENT / SOIL RELATIVE HUMIDITY",
         "kpi2_sub": "Surface saturation monitoring",
-        "kpi3_title": "3. FLUVIAL / RAVINE ACTIVATION STATUS",
+        "kpi3_title": "FLUVIAL / RAVINE ACTIVATION STATUS",
         "kpi3_sub": "Coordinate: {lat}, {lon}",
         "q_red": "RED ALERT (Debris Flow Risk)",
         "q_yellow": "WATCH (Moderate Flow)",
@@ -184,6 +192,8 @@ TEXTOS = {
         "dl_csv": "📥 DOWNLOAD 30-DAY MATRIX (EXCEL / CSV)",
         "dl_pdf": "📄 EXPORT TECHNICAL PDF REPORT (1 PAGE)",
         "exp_title": "🛠️ VIEW TECHNICAL INFERENCE PARAMETERS & FULL METEOROLOGICAL MATRIX (30 DAYS)",
+        "ml_bullet_1": "* **Machine Learning Engine:** Gradient Boosting Regressor ($R^2 = 0.947$, $\\text{{RMSE}} = 0.599\\text{{ mm/day}}$, $\\text{{MAE}} = 0.394\\text{{ mm/day}}$).",
+        "ml_bullet_2": "* **Linear Fit Equation:** $y = 0.871x + 0.163$ | **Surface Pressure:** `{presion} hPa`",
         "disclaimer": "<b>🛡️ LEGAL DISCLAIMER:</b> PERCET GeoRisk™ is an analytical support tool based on satellite and probabilistic predictive models. Results constitute technical risk estimates and do not exempt the user from applying official safety protocols, field supervision, and local construction codes.",
         "b2b_title": "🌎 PERCET UNIVERSAL HOLDINGS S.A.C. | ENGINEERING & INFRASTRUCTURE SUPPORT",
         "b2b_sub": "We support your infrastructure projects with high-level engineering solutions:<br>🌐 <b>International Coverage:</b> Remote hydrological risk consulting, climate modeling, and BIM/VDC digital supervision worldwide.<br>🇵🇪 <b>Operations in Peru:</b> Full on-site civil works execution, structural steel, remodeling, and field engineering.",
@@ -199,6 +209,12 @@ TEXTOS = {
         "col_prob": "Rain Prob. (%)",
         "col_base": "Base Precipitation (mm)",
         "col_fcst": "Forecast (mm/day)",
+        "pdf_col_date": "DATE",
+        "pdf_col_fcst": "FORECAST (mm/day)",
+        "pdf_col_prob": "PROB. (%)",
+        "pdf_col_tmax": "T.MAX (°C)",
+        "pdf_col_tmin": "T.MIN (°C)",
+        "pdf_col_wind": "WIND (km/h)",
         "pdf_quebradas": "RAVINES",
         "pdf_days_1_15": "DAYS 01 TO 15",
         "pdf_days_16_30": "DAYS 16 TO 30"
@@ -332,7 +348,7 @@ RUBROS_DATA = [
     }
 ]
 
-# 3. SISTEMA DE ESTILOS ADAPTATIVO
+# 3. SISTEMA DE ESTILOS ADAPTATIVO (LIGHT & DARK MODE DE ALTO CONTRASTE EN ESPAÑOL E INGLÉS)
 def aplicar_estilo_corporativo():
     st.markdown("""
     <style>
@@ -374,22 +390,23 @@ def aplicar_estilo_corporativo():
         --p-input-bg: #ffffff;
     }
 
+    /* MODO OSCURO EJECUTIVO (IMÁGENES 4, 5 Y 6): Fondo negro/carbón, tarjetas oscuras, letras 100% blancas/rojas/celestes */
     body[data-percet-theme="dark"] {
-        --p-bg-main: #0a0f1d;
-        --p-bg-sidebar: #0d1527;
-        --p-bg-card: #131e36;
-        --p-border-card: #233554;
+        --p-bg-main: #0b0e14;
+        --p-bg-sidebar: #111621;
+        --p-bg-card: #161c28;
+        --p-border-card: #263248;
         --p-border-accent: #38bdf8;
         --p-text-primary: #ffffff;
-        --p-text-secondary: #e2e8f0;
+        --p-text-secondary: #f1f5f9;
         --p-text-muted: #cbd5e1;
-        --p-badge-bg: rgba(56, 189, 248, 0.16);
+        --p-badge-bg: rgba(56, 189, 248, 0.18);
         --p-badge-text: #38bdf8;
         --p-badge-border: #0284c7;
-        --p-disclaimer-bg: #131e36;
+        --p-disclaimer-bg: #161c28;
         --p-disclaimer-text: #e2e8f0;
-        --p-rec-item-bg: #192744;
-        --p-input-bg: #192744;
+        --p-rec-item-bg: #1c2536;
+        --p-input-bg: #1c2536;
     }
 
     .stApp {
@@ -411,20 +428,34 @@ def aplicar_estilo_corporativo():
         color: var(--p-text-primary) !important;
     }
 
+    /* En Modo Oscuro ninguna letra queda en negro */
     body[data-percet-theme="dark"] label p,
     body[data-percet-theme="dark"] .stCaption,
     body[data-percet-theme="dark"] div[data-testid="stCaptionContainer"] p,
     body[data-percet-theme="dark"] details summary p,
+    body[data-percet-theme="dark"] details summary span,
     body[data-percet-theme="dark"] .stMarkdown p,
-    body[data-percet-theme="dark"] .stMarkdown li {
-        color: #f8fafc !important;
+    body[data-percet-theme="dark"] .stMarkdown li,
+    body[data-percet-theme="dark"] .stMarkdown strong,
+    body[data-percet-theme="dark"] div[data-testid="stNumberInput"] input,
+    body[data-percet-theme="dark"] div[data-testid="stTextInput"] input,
+    body[data-percet-theme="dark"] div[data-baseweb="select"] span {
+        color: #ffffff !important;
     }
 
-    body[data-percet-theme="dark"] .js-plotly-plot .plotly .main-svg text {
-        fill: #f8fafc !important;
+    body[data-percet-theme="dark"] div[data-baseweb="input"],
+    body[data-percet-theme="dark"] div[data-baseweb="base-input"],
+    body[data-percet-theme="dark"] div[data-baseweb="select"] > div {
+        background-color: #161c28 !important;
+        border-color: #2d3b55 !important;
     }
-    body[data-percet-theme="dark"] .js-plotly-plot .plotly .main-svg .gridlayer path {
-        stroke: rgba(255, 255, 255, 0.12) !important;
+
+    /* Forzar todos los textos y números de Plotly (barras y velocímetro) en blanco en Modo Oscuro */
+    body[data-percet-theme="dark"] .js-plotly-plot .plotly text {
+        fill: #ffffff !important;
+    }
+    body[data-percet-theme="dark"] .js-plotly-plot .plotly .gridlayer path {
+        stroke: rgba(255, 255, 255, 0.14) !important;
     }
 
     .corporate-header {
@@ -534,8 +565,9 @@ def aplicar_estilo_corporativo():
         display: block !important;
     }
 
+    /* Botones en azul corporativo resaltante tanto en Light como en Dark (Imagen 6) */
     .stButton > button, .stDownloadButton > button, a[data-testid="stBaseLinkButton-secondary"] {
-        background: linear-gradient(90deg, #020b1e 0%, #004799 100%) !important;
+        background: linear-gradient(90deg, #031536 0%, #004799 100%) !important;
         color: #ffffff !important;
         font-weight: 800 !important;
         font-size: 0.78rem !important;
@@ -543,14 +575,14 @@ def aplicar_estilo_corporativo():
         text-transform: uppercase !important;
         white-space: nowrap !important;
         border-radius: 8px !important;
-        border: 1px solid #38bdf8 !important;
+        border: 1.5px solid #38bdf8 !important;
         padding: 0.58rem 0.65rem !important;
         width: 100% !important;
         transition: all 0.25s ease !important;
     }
     .stButton > button:hover, .stDownloadButton > button:hover, a[data-testid="stBaseLinkButton-secondary"]:hover {
         background: linear-gradient(90deg, #004799 0%, #00b4d8 100%) !important;
-        box-shadow: 0 4px 12px rgba(0, 180, 216, 0.4) !important;
+        box-shadow: 0 4px 14px rgba(0, 180, 216, 0.45) !important;
     }
 
     .diag-subbanner {
@@ -611,8 +643,8 @@ def aplicar_estilo_corporativo():
     }
     .diag-badge-crit {
         display: inline-block;
-        background-color: rgba(239, 68, 68, 0.2);
-        color: #f87171;
+        background-color: rgba(239, 68, 68, 0.22);
+        color: #ff5a5f;
         border: 1px solid #ef4444;
         font-weight: 800;
         font-size: 0.75rem;
@@ -627,7 +659,7 @@ def aplicar_estilo_corporativo():
     }
     .diag-badge-warn {
         display: inline-block;
-        background-color: rgba(245, 158, 11, 0.2);
+        background-color: rgba(245, 158, 11, 0.22);
         color: #fbbf24;
         border: 1px solid #f59e0b;
         font-weight: 800;
@@ -643,7 +675,7 @@ def aplicar_estilo_corporativo():
     }
     .diag-badge-ok {
         display: inline-block;
-        background-color: rgba(34, 197, 94, 0.2);
+        background-color: rgba(34, 197, 94, 0.22);
         color: #4ade80;
         border: 1px solid #22c55e;
         font-weight: 800;
@@ -659,19 +691,21 @@ def aplicar_estilo_corporativo():
     }
 
     /* =========================================================================
-       IMAGEN 1: SECCIÓN 03 - LÍNEA 1 A LA IZQUIERDA, LÍNEAS 2 Y 3 CENTRADAS
+       IMAGEN 7: SECCIÓN 03 SIN NÚMEROS (1, 2, 3) Y TODO 100% CENTRADO
        ========================================================================= */
     .field-kpi-card {
         background: var(--p-bg-card);
         border-radius: 12px;
         border: 1px solid var(--p-border-card);
         border-left: 6px solid var(--p-border-accent);
-        padding: 16px 20px;
+        padding: 18px 20px;
         box-shadow: 0 4px 14px rgba(0,0,0,0.08);
         height: 100%;
         display: flex;
         flex-direction: column;
-        justify-content: space-between;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
     }
     .field-kpi-title {
         font-size: 0.78rem !important;
@@ -681,12 +715,12 @@ def aplicar_estilo_corporativo():
         letter-spacing: 0.3px;
         margin-bottom: 10px;
         line-height: 1.3;
-        text-align: left !important;
-        align-self: flex-start !important;
+        text-align: center !important;
+        align-self: center !important;
         width: 100% !important;
     }
     .field-kpi-value {
-        font-size: 1.34rem !important;
+        font-size: 1.35rem !important;
         font-weight: 900 !important;
         color: var(--p-text-primary) !important;
         margin-bottom: 12px;
@@ -750,9 +784,6 @@ def aplicar_estilo_corporativo():
         color: var(--p-text-primary) !important;
     }
 
-    /* =========================================================================
-       IMAGEN 3: BANNER B2B CON LETRA MÁS GRANDE, ALINEACIÓN LIMPIA Y ELEGANTE
-       ========================================================================= */
     .b2b-banner {
         background: linear-gradient(135deg, #020b1e 0%, #042454 60%, #00357a 100%);
         color: white;
@@ -794,9 +825,6 @@ def aplicar_estilo_corporativo():
         line-height: 1.5;
     }
 
-    /* =========================================================================
-       IMAGEN 2: OCULTAR "REGISTRO CORPORATIVO PERCET" Y AGRANDAR LOGO + TÍTULO
-       ========================================================================= */
     div[role="dialog"] [data-testid="stDialogHeader"] {
         height: 18px !important;
         min-height: 18px !important;
@@ -900,33 +928,61 @@ def aplicar_estilo_corporativo():
     </style>
     """, unsafe_allow_html=True)
 
+    # Detector infalible de Modo Claro / Modo Oscuro + Actualizador en vivo de colores en gráficos Plotly
     components.html("""
     <script>
     (function() {
+        function getLuminanceFromRgb(rgbStr) {
+            if (!rgbStr) return null;
+            var nums = rgbStr.match(/\\d+/g);
+            if (nums && nums.length >= 3) {
+                var r = parseInt(nums[0]), g = parseInt(nums[1]), b = parseInt(nums[2]);
+                if (nums.length >= 4 && parseFloat(nums[3]) === 0) return null;
+                return (r * 299 + g * 587 + b * 114) / 1000;
+            }
+            return null;
+        }
+
         function syncPercetTheme() {
             try {
                 var pDoc = window.parent.document;
-                var appEl = pDoc.querySelector('.stApp') || pDoc.body;
-                var bg = window.parent.getComputedStyle(appEl).getPropertyValue('--background-color').trim();
                 var isDark = false;
-                if (bg.startsWith('#')) {
-                    var hex = bg.replace('#', '');
-                    if (hex.length === 3) hex = hex[0]+hex[0]+hex[1]+hex[1]+hex[2]+hex[2];
-                    var r = parseInt(hex.substr(0,2), 16);
-                    var g = parseInt(hex.substr(2,2), 16);
-                    var b = parseInt(hex.substr(4,2), 16);
-                    isDark = ((r*299 + g*587 + b*114) / 1000) < 128;
-                } else if (bg.startsWith('rgb')) {
-                    var nums = bg.match(/\\d+/g);
-                    if (nums && nums.length >= 3) {
-                        isDark = ((parseInt(nums[0])*299 + parseInt(nums[1])*587 + parseInt(nums[2])*114) / 1000) < 128;
+
+                // 1. Verificar el header nativo o los inputs nativos de Streamlit (que cambian instantáneamente al pulsar Dark/Light)
+                var headerEl = pDoc.querySelector('header[data-testid="stHeader"]');
+                var inputEl = pDoc.querySelector('div[data-baseweb="select"] > div') || pDoc.querySelector('div[data-baseweb="input"]');
+                var lum = null;
+
+                if (headerEl) {
+                    lum = getLuminanceFromRgb(window.parent.getComputedStyle(headerEl).backgroundColor);
+                }
+                if (lum === null && inputEl) {
+                    lum = getLuminanceFromRgb(window.parent.getComputedStyle(inputEl).backgroundColor);
+                }
+                if (lum !== null) {
+                    isDark = (lum < 128);
+                } else {
+                    var cs = window.parent.getComputedStyle(pDoc.documentElement).colorScheme;
+                    if (cs && cs.indexOf('dark') !== -1) isDark = true;
+                }
+
+                pDoc.body.setAttribute('data-percet-theme', isDark ? 'dark' : 'light');
+
+                // 2. Actualizar textos SVG dentro de Plotly para que ningún número quede negro en Modo Oscuro
+                var textColor = isDark ? '#ffffff' : '#020b1e';
+                var svgTexts = pDoc.querySelectorAll('.js-plotly-plot svg text');
+                for (var i = 0; i < svgTexts.length; i++) {
+                    var t = svgTexts[i];
+                    if (t.closest('.annotation-text-g')) {
+                        t.style.setProperty('fill', '#ffffff', 'important');
+                    } else {
+                        t.style.setProperty('fill', textColor, 'important');
                     }
                 }
-                pDoc.body.setAttribute('data-percet-theme', isDark ? 'dark' : 'light');
             } catch (e) {}
         }
         syncPercetTheme();
-        setInterval(syncPercetTheme, 250);
+        setInterval(syncPercetTheme, 200);
     })();
     </script>
     """, height=0, width=0)
@@ -971,7 +1027,7 @@ with st.sidebar:
     
     modo_enso = st.toggle(T["enso_label"], value=True, help=T["enso_help"])
 
-# 5. MODAL DE SOLICITUD SIN TÍTULO SUPERIOR EXTRA Y CON LOGO + NOMBRE AGRANDADOS (IMAGEN 2)
+# 5. MODAL DE SOLICITUD SIN TÍTULO SUPERIOR EXTRA Y CON LOGO + NOMBRE AGRANDADOS
 @st.dialog(" ")
 def mostrar_modal_cotizacion():
     logo_html = f'<img src="data:image/png;base64,{LOGO_B64}" class="modal-brand-logo">' if LOGO_B64 else ""
@@ -989,7 +1045,7 @@ def mostrar_modal_cotizacion():
                 📐 COTIZACIÓN DE OBRAS E INGENIERÍA ESPECIALIZADA
             </div>
             <div style="font-size: 0.78rem; font-weight: 700; margin-top: 3px;">
-                Ejecución física de obras disponible en Perú. Consultoría especializada y supervisión BIM/VDC remota disponible en toda Latinoamérica.
+                Ejecución física de obras disponible en Perú. Consultoría especializada y supervisión BIM/VDC remota disponible en Latinoamérica.
             </div>
         </div>
         """, unsafe_allow_html=True)
@@ -1104,7 +1160,6 @@ st.markdown(f"""
 lat_actual = st.session_state.lat
 lon_actual = st.session_state.lon
 
-# Open-Meteo entrega hasta 16 días por consulta directa; luego proyectamos los días 17 al 30 con inferencia ML local
 url_api = (
     f"https://api.open-meteo.com/v1/forecast?latitude={lat_actual}&longitude={lon_actual}"
     f"&daily=temperature_2m_max,temperature_2m_min,temperature_2m_mean,"
@@ -1128,7 +1183,6 @@ try:
     prob_base = [int(x) if x is not None else 15 for x in data["daily"]["precipitation_probability_max"]]
     prec_base = [float(x) if x is not None else 0.0 for x in data["daily"]["precipitation_sum"]]
 
-    # Semilla determinística por coordenada para extender del día 17 al día 30 con consistencia física
     semilla_coord = int(abs(lat_actual * 10000) + abs(lon_actual * 10000)) % (2**31 - 1)
     rng = np.random.RandomState(semilla_coord)
     
@@ -1293,7 +1347,7 @@ try:
         """, unsafe_allow_html=True)
 
         etiqueta_dif = T["card_excess"] if diferencia_umbral > 0 else T["card_margin"]
-        color_dif = "#f87171" if diferencia_umbral > 0 else "#4ade80"
+        color_dif = "#ff5a5f" if diferencia_umbral > 0 else "#4ade80"
         signo_dif = f"+{diferencia_umbral:.1f}" if diferencia_umbral > 0 else f"{diferencia_umbral:.1f}"
 
         st.markdown(f"""
@@ -1391,7 +1445,7 @@ try:
 
     st.markdown("<br>", unsafe_allow_html=True)
 
-    # 9. SECCIÓN 03: INDICADORES CLAVE (LÍNEA 1 IZQUIERDA, LÍNEAS 2 Y 3 CENTRADAS - HORIZONTE 30 DÍAS)
+    # 9. SECCIÓN 03: INDICADORES CLAVE SIN NUMERACIÓN Y 100% CENTRADOS (IMAGEN 7)
     st.markdown(f"""
     <div class="sec-header">
         <p class="sec-header-title">📊 {T['sec3_title']}</p>
@@ -1441,7 +1495,7 @@ try:
             <div>
                 <div style="font-size:0.78rem; font-weight:800; color:var(--p-text-muted); text-transform:uppercase;">{T['pill_peak']}</div>
                 <div style="display:flex; align-items:baseline; gap:10px;">
-                    <span style="font-size:1.75rem; font-weight:900; color:#f87171;">{pico_max_dia:.1f} <small style="font-size:0.85rem; color:var(--p-text-secondary);">{UNIT_MM}</small></span>
+                    <span style="font-size:1.75rem; font-weight:900; color:#ff5a5f;">{pico_max_dia:.1f} <small style="font-size:0.85rem; color:var(--p-text-secondary);">{UNIT_MM}</small></span>
                     <span style="font-size:0.84rem; font-weight:700; color:var(--p-text-secondary); border-left:2px solid var(--p-border-card); padding-left:8px;">📅 {fecha_pico}</span>
                 </div>
             </div>
@@ -1454,7 +1508,7 @@ try:
             <div>
                 <div style="font-size:0.78rem; font-weight:800; color:var(--p-text-muted); text-transform:uppercase;">{T['pill_days']}</div>
                 <div>
-                    <span style="font-size:1.75rem; font-weight:900; color:#f87171;">{dias_criticos}</span>
+                    <span style="font-size:1.75rem; font-weight:900; color:#ff5a5f;">{dias_criticos}</span>
                     <span style="font-size:0.88rem; font-weight:700; color:var(--p-text-secondary);"> {T['day_unit']}</span>
                 </div>
             </div>
@@ -1486,14 +1540,14 @@ try:
         marker_color=colores_barras,
         text=[f"<b>{v:.1f}</b>" if v > 0 else "0" for v in df_diario["Pronóstico"]],
         textposition="outside",
-        textfont=dict(size=10),
+        textfont=dict(size=10.5),
         name=T["card_forecast"]
     ))
     fig_bar.add_trace(go.Scatter(
         x=df_diario["Fecha"],
         y=df_diario["Pronóstico"],
         mode="lines",
-        line=dict(color="rgba(56, 189, 248, 0.45)", width=2, shape="spline"),
+        line=dict(color="rgba(56, 189, 248, 0.55)", width=2, shape="spline"),
         hoverinfo="skip",
         showlegend=False
     ))
@@ -1553,7 +1607,7 @@ try:
 
     st.markdown("<br>", unsafe_allow_html=True)
 
-    # 11. GENERADOR DE INFOGRAFÍA PDF EN 1 SOLA HOJA A4 CON LOS 30 DÍAS COMPLETOS
+    # 11. GENERADOR DE INFOGRAFÍA PDF EN 1 SOLA HOJA A4 CON UNIDADES EN PRONÓSTICO Y VIENTO (IMAGEN 1)
     def disparar_pdf_infografia_una_hoja():
         fechas_js = json.dumps(df_diario["Fecha"].tolist())
         valores_js = json.dumps(df_diario["Pronóstico"].tolist())
@@ -1610,14 +1664,14 @@ try:
                     .header {{ display: flex; justify-content: space-between; align-items: center; background: linear-gradient(135deg, #020b1e 0%, #042454 100%); color: white; padding: 9px 14px; border-radius: 8px; border-bottom: 4px solid #00b4d8; margin-bottom: 7px; }}
                     .grid-3 {{ display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 7px; }}
                     .card {{ border: 1px solid #cbd5e1; border-top: 3.5px solid #042454; border-radius: 7px; padding: 6px 9px; background: #f8fafc; text-align: center; }}
-                    .card-title {{ font-size: 8px; font-weight: 800; color: #475569; text-transform: uppercase; text-align: left; }}
+                    .card-title {{ font-size: 8px; font-weight: 800; color: #475569; text-transform: uppercase; text-align: center; }}
                     .card-val {{ font-size: 15px; font-weight: 900; color: #020b1e; margin: 2px 0; }}
                     .sec-title {{ font-size: 9.5px; font-weight: 800; color: #042454; text-transform: uppercase; border-bottom: 1.5px solid #e2e8f0; padding-bottom: 2px; margin: 6px 0 5px 0; }}
                     .chart-box {{ border: 1px solid #cbd5e1; border-radius: 7px; padding: 6px 6px 2px 6px; text-align: center; background: #ffffff; margin-bottom: 7px; }}
                     .alert-box {{ background: {bg_banner_pdf}; border: 1.5px solid {border_banner_pdf}; border-radius: 8px; padding: 8px 12px; display: grid; grid-template-columns: 1.15fr 1.25fr; gap: 10px; margin-bottom: 7px; }}
                     .tables-2col {{ display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 6px; }}
                     table {{ width: 100%; border-collapse: collapse; font-size: 7.1px; }}
-                    th {{ background: #042454; color: white; padding: 3px 2px; text-transform: uppercase; font-weight: 700; font-size: 6.8px; }}
+                    th {{ background: #042454; color: white; padding: 3px 2px; text-transform: uppercase; font-weight: 700; font-size: 6.4px; }}
                     td {{ border-bottom: 1px solid #e2e8f0; padding: 2.1px 2px; text-align: center; font-weight: 600; }}
                     .sub-tbl-hdr {{ background: #e0f2fe; color: #0369a1; font-size: 7.5px; font-weight: 800; text-align: center; padding: 2px; border-radius: 4px 4px 0 0; border: 1px solid #bae6fd; border-bottom: none; }}
                     .footer {{ font-size: 7.2px; color: #64748b; background: #f1f5f9; padding: 5px 9px; border-radius: 5px; line-height: 1.28; }}
@@ -1690,12 +1744,12 @@ try:
                             <table>
                                 <thead>
                                     <tr>
-                                        <th>{T['col_date']}</th>
-                                        <th>{T['card_forecast']}</th>
-                                        <th>Prob.</th>
-                                        <th>T.Máx</th>
-                                        <th>T.Mín</th>
-                                        <th>Viento</th>
+                                        <th>{T['pdf_col_date']}</th>
+                                        <th>{T['pdf_col_fcst']}</th>
+                                        <th>{T['pdf_col_prob']}</th>
+                                        <th>{T['pdf_col_tmax']}</th>
+                                        <th>{T['pdf_col_tmin']}</th>
+                                        <th>{T['pdf_col_wind']}</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -1708,12 +1762,12 @@ try:
                             <table>
                                 <thead>
                                     <tr>
-                                        <th>{T['col_date']}</th>
-                                        <th>{T['card_forecast']}</th>
-                                        <th>Prob.</th>
-                                        <th>T.Máx</th>
-                                        <th>T.Mín</th>
-                                        <th>Viento</th>
+                                        <th>{T['pdf_col_date']}</th>
+                                        <th>{T['pdf_col_fcst']}</th>
+                                        <th>{T['pdf_col_prob']}</th>
+                                        <th>{T['pdf_col_tmax']}</th>
+                                        <th>{T['pdf_col_tmin']}</th>
+                                        <th>{T['pdf_col_wind']}</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -1757,15 +1811,15 @@ try:
         if st.button(T["dl_pdf"], use_container_width=True):
             disparar_pdf_infografia_una_hoja()
 
-    # 12. DESPLEGABLE TÉCNICO (30 DÍAS)
+    # 12. DESPLEGABLE TÉCNICO (30 DÍAS) TRADUCIDO SEGÚN EL IDIOMA (IMAGEN 2)
     with st.expander(T["exp_title"]):
         st.markdown(f"""
-        * **Machine Learning Engine:** Gradient Boosting Regressor ($R^2 = 0.947$, $\\text{{RMSE}} = 0.599\\text{{ mm/day}}$, $\\text{{MAE}} = 0.394\\text{{ mm/day}}$).
-        * **Linear Fit Equation:** $y = 0.871x + 0.163$ | **Surface Pressure:** `{presion_media} hPa`
+{T['ml_bullet_1']}
+{T['ml_bullet_2'].format(presion=presion_media)}
         """)
         st.dataframe(df_mostrar, use_container_width=True, hide_index=True)
 
-    # 13. DISCLAIMER Y BANNER B2B MEJORADO (IMAGEN 3)
+    # 13. DISCLAIMER Y BANNER B2B MEJORADO
     st.markdown(f'<div class="legal-disclaimer">{T["disclaimer"]}</div>', unsafe_allow_html=True)
 
     if LANG == "ES":
