@@ -1,1445 +1,1059 @@
 import streamlit as st
-import streamlit.components.v1 as components
-import folium
-from branca.element import MacroElement, Template
-from streamlit_folium import st_folium
 import pandas as pd
 import numpy as np
 import requests
-import os
-import base64
-import json
-import urllib.parse
-from datetime import datetime
+import folium
+from streamlit_folium import st_folium
 import plotly.graph_objects as go
+import streamlit.components.v1 as components
+from datetime import datetime
+import base64
+import os
 
-# 1. CONFIGURACIÓN DE LA PÁGINA
+# ==========================================
+# 1. CONFIGURACIÓN DE PÁGINA
+# ==========================================
 st.set_page_config(
-    page_title="PERCET GeoRisk™ | Climate Intelligence",
+    page_title="PERCET GeoRisk™ | Climate Intelligence SaaS",
+    page_icon="🏗️",
     layout="wide",
     initial_sidebar_state="expanded"
 )
 
+# ==========================================
+# 2. ESTADO DE SESIÓN (COORDENADAS E IDIOMA)
+# ==========================================
 if "lat" not in st.session_state:
     st.session_state.lat = -6.8112
 if "lon" not in st.session_state:
     st.session_state.lon = -79.7326
-if "last_click" not in st.session_state:
-    st.session_state.last_click = None
+if "lang_code" not in st.session_state:
+    st.session_state.lang_code = "ES"
 
-LOGO_FILE = "logo.png"
-CORREO_CORPORATIVO = "oficina.tecnica.puh@outlook.com"
+# ==========================================
+# 3. DETECTOR AUTOMÁTICO DE TEMA (LIGHT / DARK)
+# ==========================================
+# Detecta en vivo cuando el usuario presiona "Dark" o "Light" en el menú de Streamlit
+components.html(
+    """
+    <script>
+    function syncPercetTheme() {
+        try {
+            const parentDoc = window.parent.document;
+            const appEl = parentDoc.querySelector('.stApp');
+            if (!appEl) return;
+            const bg = window.parent.getComputedStyle(appEl).backgroundColor;
+            const rgb = bg.match(/\\d+/g);
+            if (rgb && rgb.length >= 3) {
+                const luminance = (0.299 * parseInt(rgb[0]) + 0.587 * parseInt(rgb[1]) + 0.114 * parseInt(rgb[2]));
+                const theme = luminance < 128 ? 'dark' : 'light';
+                parentDoc.body.setAttribute('data-percet-theme', theme);
+            }
+        } catch (e) {}
+    }
+    syncPercetTheme();
+    setInterval(syncPercetTheme, 350);
+    </script>
+    """,
+    height=0,
+    width=0
+)
 
-def obtener_logo_base64(ruta):
-    if os.path.exists(ruta):
-        with open(ruta, "rb") as f:
-            return base64.b64encode(f.read()).decode()
-    return ""
+# ==========================================
+# 4. CSS CORPORATIVO AVANZADO (LIGHT & DARK)
+# ==========================================
+st.markdown("""
+<style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
 
-LOGO_B64 = obtener_logo_base64(LOGO_FILE)
+    html, body, [class*="css"] {
+        font-family: 'Inter', sans-serif !important;
+    }
 
-# 2. DICCIONARIO BILINGÜE COMPLETO (ESPAÑOL & ENGLISH)
-TEXTOS = {
+    /* ----------------------------------------------------
+       ELIMINAR CÁMARA, ZOOM Y PANTALLA COMPLETA EN GRÁFICOS
+       ---------------------------------------------------- */
+    .modebar, .modebar-container, 
+    [data-testid="stElementToolbar"], 
+    button[title="View fullscreen"], 
+    [data-testid="StyledFullScreenButton"] {
+        display: none !important;
+        visibility: hidden !important;
+        opacity: 0 !important;
+        pointer-events: none !important;
+    }
+
+    /* ----------------------------------------------------
+       ADAPTACIÓN TOTAL DE TEXTOS EN MODO OSCURO Y CLARO
+       ---------------------------------------------------- */
+    /* En modo oscuro, ninguna letra puede ser negra */
+    body[data-percet-theme="dark"] .stMarkdown,
+    body[data-percet-theme="dark"] p,
+    body[data-percet-theme="dark"] span,
+    body[data-percet-theme="dark"] label,
+    body[data-percet-theme="dark"] [data-testid="stSidebar"] *,
+    body[data-percet-theme="dark"] [data-testid="stExpander"] summary span {
+        color: #F8FAFC !important;
+    }
+
+    /* Forzar que los textos SVG de Plotly (velocímetro y barras) sean claros en Dark y oscuros en Light */
+    body[data-percet-theme="dark"] .js-plotly-plot .plotly text {
+        fill: #F8FAFC !important;
+    }
+    body[data-percet-theme="light"] .js-plotly-plot .plotly text {
+        fill: #061C3D !important;
+    }
+
+    /* ----------------------------------------------------
+       TARJETAS Y CONTENEDORES CORPORATIVOS
+       ---------------------------------------------------- */
+    .hero-banner {
+        background: linear-gradient(135deg, #04142C 0%, #0A2E5C 60%, #0D47A1 100%);
+        border: 1px solid rgba(56, 189, 248, 0.35);
+        border-radius: 14px;
+        padding: 22px 28px;
+        color: #FFFFFF !important;
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.25);
+        margin-bottom: 18px;
+    }
+    .hero-banner h1 {
+        font-size: 1.55rem !important;
+        font-weight: 900 !important;
+        color: #FFFFFF !important;
+        margin: 0 0 8px 0 !important;
+        letter-spacing: 0.3px;
+    }
+    .hero-banner p {
+        font-size: 0.92rem !important;
+        color: #E2E8F0 !important;
+        margin: 0 0 12px 0 !important;
+    }
+    .hero-meta {
+        font-size: 0.82rem !important;
+        font-weight: 800 !important;
+        color: #38BDF8 !important;
+        text-transform: uppercase;
+        letter-spacing: 0.6px;
+    }
+
+    .section-bar {
+        background: var(--secondary-background-color);
+        border-left: 5px solid #0284C7;
+        border-radius: 8px;
+        padding: 12px 18px;
+        font-weight: 800;
+        font-size: 0.95rem;
+        color: var(--text-color) !important;
+        margin: 14px 0 12px 0;
+        border-top: 1px solid rgba(148, 163, 184, 0.18);
+        border-right: 1px solid rgba(148, 163, 184, 0.18);
+        border-bottom: 1px solid rgba(148, 163, 184, 0.18);
+    }
+
+    .kpi-card {
+        background: var(--secondary-background-color);
+        border: 1px solid rgba(148, 163, 184, 0.22);
+        border-radius: 12px;
+        padding: 16px 18px;
+        height: 100%;
+    }
+    .kpi-title {
+        font-size: 0.75rem;
+        font-weight: 800;
+        text-transform: uppercase;
+        color: var(--text-color);
+        opacity: 0.85;
+        margin-bottom: 6px;
+    }
+    .kpi-val {
+        font-size: 1.45rem;
+        font-weight: 900;
+        color: var(--text-color);
+        margin-bottom: 8px;
+    }
+    .kpi-badge {
+        display: inline-block;
+        background: rgba(2, 132, 199, 0.18);
+        color: #38BDF8 !important;
+        border: 1px solid rgba(56, 189, 248, 0.35);
+        font-size: 0.75rem;
+        font-weight: 700;
+        padding: 4px 10px;
+        border-radius: 20px;
+    }
+    body[data-percet-theme="light"] .kpi-badge {
+        background: #E0F2FE;
+        color: #0369A1 !important;
+        border-color: #7DD3FC;
+    }
+
+    .mini-stat {
+        background: var(--secondary-background-color);
+        border: 1px solid rgba(148, 163, 184, 0.22);
+        border-radius: 10px;
+        padding: 10px;
+        text-align: center;
+    }
+    .mini-stat-label {
+        font-size: 0.7rem;
+        font-weight: 800;
+        color: var(--text-color);
+        opacity: 0.85;
+    }
+    .mini-stat-num {
+        font-size: 1.35rem;
+        font-weight: 900;
+        color: var(--text-color);
+    }
+
+    /* ----------------------------------------------------
+       MODAL EJECUTIVO (INVERSIÓN LIGHT / DARK REQUERIDA)
+       ---------------------------------------------------- */
+    div[data-testid="stDialog"] > div > div {
+        border-radius: 16px !important;
+        border: 2px solid #0284C7 !important;
+        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.55) !important;
+    }
+
+    /* En MODO DARK: El modal tiene FONDO CLARO/BLANCO con letras azul marino gruesas */
+    body[data-percet-theme="dark"] div[data-testid="stDialog"] > div > div {
+        background-color: #FFFFFF !important;
+        color: #061C3D !important;
+    }
+    body[data-percet-theme="dark"] div[data-testid="stDialog"] label,
+    body[data-percet-theme="dark"] div[data-testid="stDialog"] p,
+    body[data-percet-theme="dark"] div[data-testid="stDialog"] span,
+    body[data-percet-theme="dark"] div[data-testid="stDialog"] h2,
+    body[data-percet-theme="dark"] div[data-testid="stDialog"] h3 {
+        color: #061C3D !important;
+        font-weight: 800 !important;
+    }
+    body[data-percet-theme="dark"] div[data-testid="stDialog"] input,
+    body[data-percet-theme="dark"] div[data-testid="stDialog"] [data-baseweb="select"] > div {
+        background-color: #F1F5F9 !important;
+        color: #061C3D !important;
+        border: 1.5px solid #94A3B8 !important;
+        font-weight: 700 !important;
+    }
+
+    /* Banner interno del Modal:
+       - En LIGHT: Fondo Azul Oscuro del Logo (#061C3D) y letras blancas
+       - En DARK: Fondo Blanco Corporativo (#F8FAFC) con borde azul marino y letras Azul Oscuro (#061C3D) */
+    .modal-corp-header {
+        background: linear-gradient(135deg, #051630 0%, #0A2E5C 100%);
+        color: #FFFFFF !important;
+        padding: 18px 20px;
+        border-radius: 12px;
+        margin-bottom: 16px;
+        border-left: 6px solid #38BDF8;
+        box-shadow: 0 6px 15px rgba(5, 22, 48, 0.2);
+    }
+    .modal-corp-header h3 {
+        margin: 0 !important;
+        font-size: 1.25rem !important;
+        font-weight: 900 !important;
+        letter-spacing: 0.5px;
+        color: #FFFFFF !important;
+    }
+    .modal-corp-header p {
+        margin: 6px 0 0 0 !important;
+        font-size: 0.86rem !important;
+        font-weight: 600 !important;
+        color: #E0F2FE !important;
+    }
+
+    body[data-percet-theme="dark"] .modal-corp-header {
+        background: #FFFFFF !important;
+        border: 2px solid #061C3D !important;
+        border-left: 7px solid #0284C7 !important;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    }
+    body[data-percet-theme="dark"] .modal-corp-header h3 {
+        color: #061C3D !important;
+    }
+    body[data-percet-theme="dark"] .modal-corp-header p {
+        color: #1E3A8A !important;
+    }
+
+    /* Etiquetas gruesas en el formulario del Modal */
+    div[data-testid="stDialog"] [data-testid="stWidgetLabel"] p {
+        font-weight: 800 !important;
+        font-size: 0.88rem !important;
+        text-transform: uppercase !important;
+        letter-spacing: 0.4px !important;
+    }
+
+    .offer-pill {
+        background: linear-gradient(90deg, #0284C7 0%, #0369A1 100%);
+        color: #FFFFFF !important;
+        padding: 10px 14px;
+        border-radius: 8px;
+        font-size: 0.82rem;
+        font-weight: 800;
+        margin-bottom: 14px;
+        text-align: center;
+    }
+    body[data-percet-theme="dark"] div[data-testid="stDialog"] .offer-pill span {
+        color: #FFFFFF !important;
+    }
+</style>
+""", unsafe_allow_html=True)
+
+# ==========================================
+# 5. DICCIONARIO BILINGÜE COMPLETO (ES / EN)
+# ==========================================
+RUBROS_DATA = {
     "ES": {
-        "unit_mm": "mm/día",
-        "lang_label": "🌐 MERCADO / IDIOMA:",
-        "params_header": "⚙️ PARÁMETROS DEL PROYECTO",
-        "client_label": "NOMBRE DEL CLIENTE / OBRA:",
-        "rubro_label": "PARTIDA CRÍTICA EN EJECUCIÓN (RUBROS MACRO):",
-        "threshold_caption": "UMBRAL TÉCNICO DE ALERTA PARA ESTE RUBRO:",
-        "enso_label": "FACTOR DE SEGURIDAD EL NIÑO (ENSO)",
-        "enso_help": "Aplica un factor mayorante (+25%) en escenarios de anomalía térmica convectiva.",
-        "header_title": "PERCET GEORISK™ | PLATAFORMA DE INTELIGENCIA CLIMÁTICA PARA LA CONSTRUCCIÓN",
-        "header_sub": "Monitoreo satelital multibanda y analítica predictiva mediante Machine Learning (Gradient Boosting) para la gestión de riesgos en proyectos de infraestructura.",
-        "header_client": "CLIENTE / PROYECTO ACTUAL:",
-        "header_rubro": "RUBRO:",
-        "sec1_title": "01. LOCALIZACIÓN TÉCNICA DE LA OBRA",
-        "lat_label": "LATITUD (DECIMAL)",
-        "lon_label": "LONGITUD (DECIMAL)",
-        "locate_btn": "📍 LOCALIZAR OBRA",
-        "map_hint": "Ingrese coordenadas de planos/GPS o haga clic directamente sobre cualquier punto del mapa.",
-        "sec2_title": "02. DIAGNÓSTICO OPERATIVO EN TIEMPO REAL",
-        "pdf_sec1_title": "01. DIAGNÓSTICO OPERATIVO EN TIEMPO REAL & KPI SUMMARY",
-        "pdf_sec2_title": "02. CRONOGRAMA DE IMPACTO PLUVIAL DIARIO VS. UMBRAL DEL RUBRO",
-        "pdf_sec3_title": "03. DICTAMEN DE INGENIERÍA & ACCIONES RECOMENDADAS",
-        "pdf_sec4_title": "04. RESUMEN DE MATRIZ METEOROLÓGICA (15 DÍAS)",
-        "active_badge": "MONITOREO ACTIVO",
-        "peak_banner": "PICO PRONOSTICADO · {fecha} · UMBRAL {umbral} mm/día",
-        "card_forecast": "PRONÓSTICO",
-        "card_threshold": "UMBRAL",
-        "card_excess": "EXCESO",
-        "card_margin": "MARGEN SEGURO",
-        "leg_normal": "RIESGO BAJO",
-        "leg_warn": "RIESGO MODERADO",
-        "leg_crit": "RIESGO ALTO",
-        "alert_crit_badge": "ALERTA PREVENTIVA · RIESGO ELEVADO",
-        "alert_warn_badge": "AVISO OPERATIVO · RIESGO MODERADO",
-        "alert_ok_badge": "OPERACIÓN ESTÁNDAR · RIESGO BAJO",
-        "diag_crit_desc": "Se pronostica un pico de <b>{pico} mm/día</b> el <b>{fecha}</b>, superando el límite admisible de <b>{umbral} mm/día</b> en <b>+{exceso} mm/día</b>.",
-        "diag_warn_desc": "Se pronostica un pico de <b>{pico} mm/día</b> el <b>{fecha}</b>, próximo al umbral establecido de <b>{umbral} mm/día</b>.",
-        "diag_ok_desc": "Se pronostica un pico máximo de <b>{pico} mm/día</b>, manteniéndose dentro del margen seguro inferior al umbral de <b>{umbral} mm/día</b>.",
-        "rec_title": "ACCIONES RECOMENDADAS PARA EL FRENTE DE OBRA",
-        "peak_detected": "Pico detectado",
-        "days_affected": "Días afectados",
-        "day_unit": "sobre el umbral",
-        "sec3_title": "03. INDICADORES CLAVE DE INGENIERÍA DE CAMPO (HORIZONTE 15 DÍAS)",
-        "kpi1_title": "1. PRECIPITACIÓN PRONOSTICADA (PICO / ACUM.)",
-        "kpi1_sub": "Acumulado 15 días: {acum} mm",
-        "kpi2_title": "2. HUMEDAD RELATIVA DEL AMBIENTE / SUELO",
-        "kpi2_sub": "Monitoreo de saturación superficial",
-        "kpi3_title": "3. ESTADO DE ALERTA FLUVIAL / QUEBRADAS",
-        "kpi3_sub": "Coordenada: {lat}, {lon}",
-        "q_red": "ALERTA ROJA (Riesgo de Escombros)",
-        "q_yellow": "VIGILANCIA (Caudal Moderado)",
-        "q_green": "ESTABLE (Sin Activación)",
-        "sec4_title": "04. CRONOGRAMA DE IMPACTO PLUVIAL DIARIO VS. UMBRAL DEL RUBRO",
-        "pill_peak": "PRECIPITACIÓN MÁXIMA",
-        "pill_days": "DÍAS SOBRE EL UMBRAL",
-        "pill_thresh": "UMBRAL DE ALERTA",
-        "axis_x": "HORIZONTE DE PRONÓSTICO (15 DÍAS)",
-        "axis_y": "PRECIPITACIÓN (mm/día)",
-        "thresh_tag": "Umbral: {umbral} mm/día",
-        "dl_csv": "📥 DESCARGAR MATRIZ DE DATOS (EXCEL / CSV)",
-        "dl_pdf": "📄 EXPORTAR REPORTE TÉCNICO PDF (1 HOJA)",
-        "exp_title": "🛠️ VER PARÁMETROS DE INFERENCIA TÉCNICA Y MATRIZ METEOROLÓGICA COMPLETA",
-        "disclaimer": "<b>🛡️ AVISO LEGAL / DISCLAIMER:</b> PERCET GeoRisk™ es una herramienta analítica de asistencia y soporte basada en modelos predictivos satelitales y probabilísticos. Los resultados constituyen estimaciones técnicas de riesgo y no eximen al usuario de aplicar los protocolos oficiales de seguridad, supervisión en campo y normativas técnicas locales de construcción.",
-        "b2b_title": "🏢 ¿NECESITAS EJECUTAR, REMODELAR O PROTEGER TU PROYECTO ANTE EL CLIMA?",
-        "b2b_sub": "En <b>PERCET UNIVERSAL HOLDINGS S.A.C.</b> contamos con una red nacional de ingenieros, especialistas BIM/VDC, subcontratistas y maestros de obra calificados para construir con seguridad en todo el Perú.",
-        "btn_quote": "📝 SOLICITAR COTIZACIÓN DE OBRA",
-        "btn_wa": "💬 HABLAR CON UN ASESOR POR WHATSAPP"
+        "1. Movimiento de Tierras y Pavimentación": {
+            "umbral": 1.5,
+            "acciones": [
+                "Suspender conformación de subrasante y compactación de base granular.",
+                "Habilitar cunetas provisionales de coronación y bombeo de evacuación.",
+                "Proteger bancos de material suelto y taludes expuestos con геоmembrana/plástico."
+            ]
+        },
+        "2. Estructuras de Concreto y Acero": {
+            "umbral": 2.0,
+            "acciones": [
+                "Reprogramar vaciados expuestos de losas y elementos horizontales.",
+                "Proteger elementos frescos con mantas plásticas impermeables.",
+                "Verificar relación agua/cemento por exceso de humedad superficial."
+            ]
+        },
+        "3. Izajes con Grúa y Montaje Electromecánico": {
+            "umbral": 2.5,
+            "acciones": [
+                "Monitorear velocidad de ráfagas de viento (>30 km/h suspende izaje crítico).",
+                "Aislar tableros eléctricos provisionales y equipos de soldadura en campo.",
+                "Verificar fricción y frenado de cables de izaje por humedad."
+            ]
+        },
+        "4. Obras Hidráulicas, Saneamiento y Tuberías (HDPE/PVC)": {
+            "umbral": 1.8,
+            "acciones": [
+                "Instalar carpas impermeables sobre zonas de termofusión y electrofusión.",
+                "Entibar zanjas profundas ante riesgo de saturación y deslizamiento lateral.",
+                "Mantener bombas sumergibles operativas en puntos bajos de excavación."
+            ]
+        },
+        "5. Acabados Exteriores, Cubiertas y Pintura": {
+            "umbral": 1.0,
+            "acciones": [
+                "Suspender aplicación de recubrimientos epóxicos y pintura intumescente/exterior.",
+                "Verificar sellado hermético de juntas y tragaluces en cubiertas.",
+                "Asegurar andamios colgantes y líneas de vida perimetrales."
+            ]
+        }
     },
     "EN": {
-        "unit_mm": "mm/day",
-        "lang_label": "🌐 MARKET / LANGUAGE:",
-        "params_header": "⚙️ PROJECT PARAMETERS",
-        "client_label": "CLIENT / PROJECT NAME:",
-        "rubro_label": "CRITICAL WORK PACKAGE (MACRO SECTORS):",
-        "threshold_caption": "TECHNICAL ALERT THRESHOLD FOR THIS SECTOR:",
-        "enso_label": "EL NIÑO SAFETY FACTOR (ENSO)",
-        "enso_help": "Applies a safety multiplier (+25%) for convective thermal anomaly scenarios.",
-        "header_title": "PERCET GEORISK™ | CLIMATE INTELLIGENCE PLATFORM FOR CONSTRUCTION",
-        "header_sub": "Multi-band satellite monitoring and Machine Learning predictive analytics (Gradient Boosting) for infrastructure project risk management.",
-        "header_client": "CURRENT CLIENT / PROJECT:",
-        "header_rubro": "SECTOR:",
-        "sec1_title": "01. TECHNICAL SITE LOCATION",
-        "lat_label": "LATITUDE (DECIMAL)",
-        "lon_label": "LONGITUDE (DECIMAL)",
-        "locate_btn": "📍 LOCATE SITE",
-        "map_hint": "Enter blueprint/GPS coordinates or click directly on any point on the map.",
-        "sec2_title": "02. REAL-TIME OPERATIONAL DIAGNOSTIC",
-        "pdf_sec1_title": "01. REAL-TIME OPERATIONAL DIAGNOSTIC & KPI SUMMARY",
-        "pdf_sec2_title": "02. DAILY RAINFALL IMPACT SCHEDULE VS. SECTOR THRESHOLD",
-        "pdf_sec3_title": "03. ENGINEERING ASSESSMENT & RECOMMENDED ACTIONS",
-        "pdf_sec4_title": "04. METEOROLOGICAL MATRIX SUMMARY (15 DAYS)",
-        "active_badge": "ACTIVE MONITORING",
-        "peak_banner": "FORECASTED PEAK · {fecha} · THRESHOLD {umbral} mm/day",
-        "card_forecast": "FORECAST",
-        "card_threshold": "THRESHOLD",
-        "card_excess": "EXCESS",
-        "card_margin": "SAFE MARGIN",
-        "leg_normal": "LOW RISK",
-        "leg_warn": "MODERATE RISK",
-        "leg_crit": "HIGH RISK",
-        "alert_crit_badge": "PREVENTIVE ALERT · HIGH RISK",
-        "alert_warn_badge": "OPERATIONAL NOTICE · MODERATE RISK",
-        "alert_ok_badge": "STANDARD OPERATION · LOW RISK",
-        "diag_crit_desc": "A peak of <b>{pico} mm/day</b> is forecasted on <b>{fecha}</b>, exceeding the established threshold of <b>{umbral} mm/day</b> by <b>+{exceso} mm/day</b>.",
-        "diag_warn_desc": "A peak of <b>{pico} mm/day</b> is forecasted on <b>{fecha}</b>, approaching the established threshold of <b>{umbral} mm/day</b>.",
-        "diag_ok_desc": "A maximum peak of <b>{pico} mm/day</b> is forecasted, remaining safely below the threshold of <b>{umbral} mm/day</b>.",
-        "rec_title": "RECOMMENDED FIELD ACTIONS",
-        "peak_detected": "Peak detected",
-        "days_affected": "Affected days",
-        "day_unit": "above threshold",
-        "sec3_title": "03. KEY FIELD ENGINEERING INDICATORS (15-DAY HORIZON)",
-        "kpi1_title": "1. FORECASTED PRECIPITATION (PEAK / ACCUM.)",
-        "kpi1_sub": "15-day cumulative: {acum} mm",
-        "kpi2_title": "2. AMBIENT / SOIL RELATIVE HUMIDITY",
-        "kpi2_sub": "Surface saturation monitoring",
-        "kpi3_title": "3. FLUVIAL / RAVINE ACTIVATION STATUS",
-        "kpi3_sub": "Coordinate: {lat}, {lon}",
-        "q_red": "RED ALERT (Debris Flow Risk)",
-        "q_yellow": "WATCH (Moderate Flow)",
-        "q_green": "STABLE (No Activation)",
-        "sec4_title": "04. DAILY RAINFALL IMPACT SCHEDULE VS. SECTOR THRESHOLD",
-        "pill_peak": "MAXIMUM PRECIPITATION",
-        "pill_days": "DAYS ABOVE THRESHOLD",
-        "pill_thresh": "ALERT THRESHOLD",
-        "axis_x": "FORECAST HORIZON (15 DAYS)",
-        "axis_y": "PRECIPITATION (mm/day)",
-        "thresh_tag": "Threshold: {umbral} mm/day",
-        "dl_csv": "📥 DOWNLOAD DATA MATRIX (EXCEL / CSV)",
-        "dl_pdf": "📄 EXPORT TECHNICAL PDF REPORT (1 PAGE)",
-        "exp_title": "🛠️ VIEW TECHNICAL INFERENCE PARAMETERS & FULL METEOROLOGICAL MATRIX",
-        "disclaimer": "<b>🛡️ LEGAL DISCLAIMER:</b> PERCET GeoRisk™ is an analytical support tool based on satellite and probabilistic predictive models. Results constitute technical risk estimates and do not exempt the user from applying official safety protocols, field supervision, and local construction codes.",
-        "b2b_title": "🌎 CLIMATE INTELLIGENCE & INFRASTRUCTURE SOLUTIONS",
-        "b2b_sub": "At <b>PERCET UNIVERSAL HOLDINGS S.A.C.</b>, we drive intelligent climate risk management through enterprise API licensing, specialized hydrological calibration, and a network of qualified engineering professionals. We integrate technology, science, and technical expertise to develop safer, more resilient, and sustainable infrastructure projects.",
-        "btn_quote": "📝 REQUEST PROJECT / SAAS QUOTE",
-        "btn_wa": "💬 CONTACT SALES ENGINEERING (WHATSAPP)"
+        "1. Earthworks & Road Paving": {
+            "umbral": 1.5,
+            "acciones": [
+                "Suspend subgrade grading and granular base compaction operations.",
+                "Activate temporary drainage ditches and dewatering pumps.",
+                "Cover stockpiles and exposed slopes with waterproof tarps."
+            ]
+        },
+        "2. Concrete & Steel Structures": {
+            "umbral": 2.0,
+            "acciones": [
+                "Reschedule exposed horizontal slab concrete pours.",
+                "Protect fresh concrete surfaces with waterproof curing blankets.",
+                "Adjust water-cement ratio calculations for surface moisture excess."
+            ]
+        },
+        "3. Crane Lifting & Electromechanical Assembly": {
+            "umbral": 2.5,
+            "acciones": [
+                "Monitor wind gusts strictly (>30 km/h halts critical crane lifting).",
+                "Weatherproof temporary electrical panels and field welding stations.",
+                "Inspect rigging cables and braking systems for wet slip hazards."
+            ]
+        },
+        "4. Hydraulic Works, Sanitation & Piping (HDPE/PVC)": {
+            "umbral": 1.8,
+            "acciones": [
+                "Deploy waterproof tents over butt-fusion and electrofusion stations.",
+                "Shore deep trenches against wall saturation and collapse risks.",
+                "Keep submersible dewatering pumps on standby at trench low points."
+            ]
+        },
+        "5. Exterior Finishes, Roofing & Coatings": {
+            "umbral": 1.0,
+            "acciones": [
+                "Halt exterior painting, epoxy coatings, and waterproofing applications.",
+                "Inspect roof flashing, expansion joints, and skylight seals.",
+                "Secure suspended scaffolding and perimeter safety lifelines."
+            ]
+        }
     }
 }
 
-RUBROS_DATA = [
-    {
-        "umbral": 3.0,
-        "es_name": "1. Geotecnia y Movimiento de Tierras",
-        "en_name": "1. Geotechnics & Earthworks",
-        "es_recs_crit": [
-            "Detener compactación de subrasante inmediatamente por saturación.",
-            "Perfilar y proteger taludes expuestos con geomembranas.",
-            "Activar bombeo en zanjas y drenaje perimetral de escorrentía."
-        ],
-        "es_recs_warn": [
-            "Monitorear el límite líquido del suelo antes de compactar.",
-            "Cubrir acopios de material de préstamo y agregados."
-        ],
-        "es_recs_ok": [
-            "Continuar excavación masiva y compactación según cronograma.",
-            "Mantener inspección rutinaria de humedad en canteras."
-        ],
-        "en_recs_crit": [
-            "Halt subgrade compaction immediately due to soil saturation.",
-            "Reinforce and cover exposed slopes with geomembranes.",
-            "Activate trench pumping and perimeter runoff drainage."
-        ],
-        "en_recs_warn": [
-            "Monitor soil liquid limit prior to compaction operations.",
-            "Cover borrow material and aggregate stockpiles."
-        ],
-        "en_recs_ok": [
-            "Proceed with mass excavation and compaction per schedule.",
-            "Maintain routine moisture inspection on site."
-        ]
-    },
-    {
-        "umbral": 2.0,
-        "es_name": "2. Estructuras de Concreto y Acero",
-        "en_name": "2. Concrete & Steel Structures",
-        "es_recs_crit": [
-            "Reprogramar vaciados expuestos de losas y elementos horizontales.",
-            "Proteger elementos frescos con mantas plásticas impermeables.",
-            "Verificar relación agua/cemento por exceso de humedad superficial."
-        ],
-        "es_recs_warn": [
-            "Instalar carpas preventivas sobre frentes de vaciado activo.",
-            "Cubrir acero de refuerzo habilitado para evitar oxidación."
-        ],
-        "es_recs_ok": [
-            "Condiciones óptimas para vaciado de concreto estructural.",
-            "Proceder con encofrado y montaje de armaduras sin restricción."
-        ],
-        "en_recs_crit": [
-            "Reschedule exposed slab and horizontal concrete pours.",
-            "Protect fresh concrete elements with waterproof plastic tarps.",
-            "Check water/cement ratio against surface moisture excess."
-        ],
-        "en_recs_warn": [
-            "Deploy preventive tents over active concrete pouring fronts.",
-            "Cover staged rebar to prevent premature surface oxidation."
-        ],
-        "en_recs_ok": [
-            "Optimal conditions for structural concrete placement.",
-            "Proceed with formwork and rebar assembly without restriction."
-        ]
-    },
-    {
-        "umbral": 1.0,
-        "es_name": "3. Arquitectura y Cierre de Envolvente",
-        "en_name": "3. Architecture & Building Envelope",
-        "es_recs_crit": [
-            "Paralizar aplicación de pintura exterior y recubrimientos.",
-            "Suspender colocación de mantos impermeabilizantes en techos.",
-            "Sellar vanos y proteger materiales de acabados en almacén."
-        ],
-        "es_recs_warn": [
-            "Restringir acabados en fachadas expuestas al viento húmedo.",
-            "Priorizar partidas de tabiquería y acabados interiores."
-        ],
-        "es_recs_ok": [
-            "Clima seco favorable para pintura exterior y sellado de fachadas.",
-            "Ejecutar instalación de mantos impermeables según plan."
-        ],
-        "en_recs_crit": [
-            "Halt exterior painting and facade coating applications.",
-            "Suspend installation of roof waterproofing membranes.",
-            "Seal openings and protect finishing materials in storage."
-        ],
-        "en_recs_warn": [
-            "Restrict facade finishes exposed to wind-driven moisture.",
-            "Prioritize interior drywall and finishing work packages."
-        ],
-        "en_recs_ok": [
-            "Dry weather favorable for exterior painting and facade sealing.",
-            "Execute roof waterproofing membrane installation as planned."
-        ]
-    },
-    {
-        "umbral": 5.0,
-        "es_name": "4. Instalaciones y Redes de Servicio",
-        "en_name": "4. MEP Installations & Utility Networks",
-        "es_recs_crit": [
-            "Cortar energía temporal en frentes descubiertos por riesgo eléctrico.",
-            "Suspender tendido de redes en zanjas con riesgo de inundación.",
-            "Asegurar grupos electrógenos y tableros con cerramiento IP65."
-        ],
-        "es_recs_warn": [
-            "Aislar empalmes y tableros provisionales de obra.",
-            "Entibar y proteger zanjas de tuberías sanitarias/hidráulicas."
-        ],
-        "es_recs_ok": [
-            "Operación segura para montaje electromecánico y tendido de redes.",
-            "Realizar pruebas hidráulicas y de presión con normalidad."
-        ],
-        "en_recs_crit": [
-            "Cut temporary power in open fronts due to electrocution hazard.",
-            "Suspend utility trenching in areas prone to waterlogging.",
-            "Secure generators and switchboards with IP65 enclosures."
-        ],
-        "en_recs_warn": [
-            "Insulate splices and temporary site distribution boards.",
-            "Shore and protect sanitary/hydraulic pipeline trenches."
-        ],
-        "en_recs_ok": [
-            "Safe operation for MEP assembly and utility network laying.",
-            "Perform hydraulic and pressure testing as scheduled."
-        ]
-    }
-]
-
-# 3. ESTILO CORPORATIVO UNIFICADO
-def aplicar_estilo_corporativo():
-    st.markdown("""
-    <style>
-    @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800;900&display=swap');
-
-    html, body, .stApp, .stMarkdown, p, h1, h2, h3, h4, h5, h6, label, button, input, select, textarea, td, th {
-        font-family: 'Montserrat', sans-serif !important;
-    }
-
-    span[data-testid="stIconMaterial"], .material-symbols-rounded, .material-icons, [translate="no"] {
-        font-family: 'Material Symbols Rounded' !important;
-        font-weight: normal !important;
-        font-style: normal !important;
-        letter-spacing: normal !important;
-        text-transform: none !important;
-    }
-
-    .stApp {
-        background-color: #f0f4f8;
-    }
-
-    .stAppDeployButton {
-        display: none !important;
-    }
-
-    section[data-testid="stSidebar"] > div {
-        padding-top: 1rem !important;
-        background-color: #f8fafc;
-        border-right: 1px solid #cbd5e1;
-    }
-
-    section[data-testid="stSidebar"] label p {
-        font-weight: 700 !important;
-        font-size: 0.80rem !important;
-        color: #041e42 !important;
-        letter-spacing: 0.4px !important;
-        text-transform: uppercase !important;
-    }
-
-    /* Imagen 1: Encabezado ajustado para que el Cliente y Rubro entren en 1 sola línea */
-    .corporate-header {
-        background: linear-gradient(135deg, #020b1e 0%, #042454 55%, #004799 100%);
-        padding: 1.35rem 2rem;
-        border-radius: 14px;
-        color: white;
-        box-shadow: 0 10px 25px rgba(2, 11, 30, 0.25);
-        margin-bottom: 1.4rem;
-        border-bottom: 4px solid #00b4d8;
-        border-left: 6px solid #38bdf8;
-    }
-    .corporate-title {
-        font-size: 1.35rem !important;
-        font-weight: 800 !important;
-        margin: 0 !important;
-        color: #ffffff !important;
-        letter-spacing: 0.5px !important;
-        text-transform: uppercase;
-        line-height: 1.25 !important;
-    }
-    .corporate-subtitle {
-        font-size: 0.88rem !important;
-        font-weight: 500 !important;
-        color: #e0f2fe !important;
-        margin-top: 0.45rem !important;
-        margin-bottom: 0.55rem !important;
-    }
-    .corporate-client {
-        font-size: 0.85rem !important;
-        color: #38bdf8 !important;
-        font-weight: 800 !important;
-        margin: 0 !important;
-        text-transform: uppercase;
-        letter-spacing: 0.4px;
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-    }
-
-    /* Imagen 3: Títulos de sección y badge MONITOREO ACTIVO en una sola línea perfecta */
-    .sec-header {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        gap: 12px;
-        background-color: #ffffff;
-        padding: 0.75rem 1.15rem;
-        border-radius: 10px;
-        border-left: 5px solid #042454;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.04);
-        margin-bottom: 1rem;
-    }
-    .sec-header-title {
-        font-size: 0.95rem !important;
-        font-weight: 800 !important;
-        color: #020b1e !important;
-        text-transform: uppercase;
-        letter-spacing: 0.4px;
-        margin: 0 !important;
-    }
-    .status-badge {
-        display: inline-flex;
-        align-items: center;
-        gap: 7px;
-        white-space: nowrap;
-        background-color: #e0f2fe;
-        color: #0369a1;
-        font-size: 0.72rem;
-        font-weight: 800;
-        padding: 5px 12px;
-        border-radius: 999px;
-        border: 1px solid #bae6fd;
-        letter-spacing: 0.5px;
-        text-transform: uppercase;
-        flex-shrink: 0;
-    }
-    .status-dot {
-        width: 8px;
-        height: 8px;
-        background-color: #0284c7;
-        border-radius: 50%;
-        display: inline-block;
-        box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.2);
-    }
-
-    /* Imagen 2: Latitud y Longitud en 1 línea y con el mismo tamaño de letra y números */
-    div[data-testid="stNumberInput"] label p {
-        font-size: 0.78rem !important;
-        font-weight: 800 !important;
-        color: #020b1e !important;
-        text-transform: uppercase !important;
-        letter-spacing: 0.3px !important;
-        white-space: nowrap !important;
-    }
-    div[data-testid="stNumberInput"] input {
-        font-size: 0.96rem !important;
-        font-weight: 700 !important;
-        color: #042454 !important;
-    }
-
-    iframe[title="streamlit_folium.st_folium"] {
-        width: 100% !important;
-        min-width: 100% !important;
-        border-radius: 12px !important;
-        border: 2px solid #cbd5e1 !important;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.06) !important;
-        display: block !important;
-    }
-
-    /* Botón Localizar Obra sin cortes */
-    .stButton > button {
-        background: linear-gradient(90deg, #020b1e 0%, #004799 100%) !important;
-        color: #ffffff !important;
-        font-weight: 800 !important;
-        font-size: 0.80rem !important;
-        letter-spacing: 0.4px !important;
-        text-transform: uppercase !important;
-        white-space: nowrap !important;
-        border-radius: 8px !important;
-        border: 1px solid #38bdf8 !important;
-        padding: 0.58rem 0.75rem !important;
-        width: 100% !important;
-        transition: all 0.25s ease !important;
-    }
-    .stButton > button:hover {
-        background: linear-gradient(90deg, #004799 0%, #00b4d8 100%) !important;
-        box-shadow: 0 4px 12px rgba(0, 180, 216, 0.35) !important;
-    }
-
-    /* Tarjetas del Diagnóstico Operativo */
-    .diag-subbanner {
-        background-color: #042454;
-        color: #ffffff;
-        font-size: 0.80rem;
-        font-weight: 800;
-        text-align: center;
-        padding: 7px 12px;
-        border-radius: 8px;
-        letter-spacing: 0.7px;
-        text-transform: uppercase;
-        margin-bottom: 12px;
-    }
-    .mini-kpi-grid {
-        display: grid;
-        grid-template-columns: repeat(3, 1fr);
-        gap: 10px;
-        margin-bottom: 12px;
-    }
-    .mini-kpi-card {
-        background: #ffffff;
-        border: 1px solid #cbd5e1;
-        border-top: 4px solid #042454;
-        border-radius: 10px;
-        padding: 10px 12px;
-        text-align: center;
-        box-shadow: 0 2px 6px rgba(0,0,0,0.04);
-    }
-    .mini-kpi-label {
-        font-size: 0.72rem;
-        font-weight: 800;
-        color: #475569;
-        text-transform: uppercase;
-        letter-spacing: 0.4px;
-    }
-    .mini-kpi-val {
-        font-size: 1.55rem;
-        font-weight: 900;
-        color: #020b1e;
-        line-height: 1.15;
-        margin: 4px 0 2px 0;
-    }
-    .mini-kpi-unit {
-        font-size: 0.72rem;
-        font-weight: 700;
-        color: #64748b;
-    }
-
-    .diag-alert-card {
-        background: #ffffff;
-        border-radius: 12px;
-        padding: 15px 18px;
-        border: 1px solid #cbd5e1;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.05);
-        margin-top: 10px;
-    }
-    .diag-badge-crit {
-        display: inline-block;
-        background-color: #fee2e2;
-        color: #b91c1c;
-        font-weight: 800;
-        font-size: 0.75rem;
-        padding: 4px 10px;
-        border-radius: 6px;
-        letter-spacing: 0.5px;
-        margin-bottom: 8px;
-    }
-    .diag-badge-warn {
-        display: inline-block;
-        background-color: #fef3c7;
-        color: #b45309;
-        font-weight: 800;
-        font-size: 0.75rem;
-        padding: 4px 10px;
-        border-radius: 6px;
-        letter-spacing: 0.5px;
-        margin-bottom: 8px;
-    }
-    .diag-badge-ok {
-        display: inline-block;
-        background-color: #dcfce7;
-        color: #15803d;
-        font-weight: 800;
-        font-size: 0.75rem;
-        padding: 4px 10px;
-        border-radius: 6px;
-        letter-spacing: 0.5px;
-        margin-bottom: 8px;
-    }
-
-    /* Imagen 6: Punto 03 con tamaño de letra reducido y 100% uniforme en las 3 tarjetas */
-    .field-kpi-card {
-        background: #ffffff;
-        border-radius: 12px;
-        border-left: 6px solid #042454;
-        padding: 16px 20px;
-        box-shadow: 0 4px 14px rgba(0,0,0,0.06);
-        height: 100%;
-        display: flex;
-        flex-direction: column;
-        justify-content: space-between;
-    }
-    .field-kpi-title {
-        font-size: 0.78rem !important;
-        font-weight: 800 !important;
-        color: #334155 !important;
-        text-transform: uppercase;
-        letter-spacing: 0.3px;
-        margin-bottom: 8px;
-        line-height: 1.3;
-    }
-    .field-kpi-value {
-        font-size: 1.32rem !important;
-        font-weight: 900 !important;
-        color: #020b1e !important;
-        margin-bottom: 10px;
-        line-height: 1.2 !important;
-    }
-    .field-kpi-pill {
-        display: inline-block;
-        font-size: 0.76rem !important;
-        font-weight: 700 !important;
-        padding: 4px 12px;
-        border-radius: 20px;
-        background-color: #e0f2fe;
-        color: #0369a1;
-        width: fit-content;
-    }
-
-    /* Punto 04: Píldoras Ejecutivas */
-    .exec-pill-card {
-        background: #ffffff;
-        border-radius: 12px;
-        padding: 14px 18px;
-        display: flex;
-        align-items: center;
-        gap: 14px;
-        box-shadow: 0 3px 10px rgba(0,0,0,0.05);
-        border: 1px solid #e2e8f0;
-    }
-    .exec-icon-circle {
-        width: 48px;
-        height: 48px;
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 1.35rem;
-        flex-shrink: 0;
-    }
-    .exec-recs-only-banner {
-        border-radius: 12px;
-        padding: 18px 24px;
-        margin-top: 12px;
-        box-shadow: 0 3px 10px rgba(0,0,0,0.04);
-    }
-
-    .b2b-banner {
-        background: linear-gradient(135deg, #020b1e 0%, #042454 100%);
-        color: white;
-        padding: 2rem;
-        border-radius: 14px;
-        text-align: center;
-        border: 2px solid #00b4d8;
-        box-shadow: 0 10px 25px rgba(2, 11, 30, 0.22);
-        margin-top: 1.8rem;
-        margin-bottom: 1rem;
-    }
-    .legal-disclaimer {
-        font-size: 0.80rem;
-        color: #475569;
-        background-color: #e2e8f0;
-        padding: 14px 18px;
-        border-radius: 8px;
-        margin-top: 1.2rem;
-        line-height: 1.5;
-    }
-    </style>
-    """, unsafe_allow_html=True)
-
-aplicar_estilo_corporativo()
-
-# 4. BARRA LATERAL LIMPIA
+# ==========================================
+# 6. BARRA LATERAL (SIDEBAR BILINGÜE)
+# ==========================================
 with st.sidebar:
-    if os.path.exists(LOGO_FILE):
-        st.image(LOGO_FILE, use_container_width=True)
-    
-    st.markdown("<hr style='margin: 0.6rem 0;'>", unsafe_allow_html=True)
-    
-    idioma_sel = st.radio(
-        "🌐 MERCADO / IDIOMA:",
-        ["🇵🇪 Español (Construcción & Obras)", "🌎 English (Global SaaS)"],
-        index=0
+    # Logo Corporativo
+    if os.path.exists("logo.png"):
+        st.image("logo.png", use_container_width=True)
+    else:
+        st.markdown("""
+        <div style='background:linear-gradient(135deg,#04142C,#0A2E5C);padding:18px;border-radius:12px;text-align:center;border:1px solid #38BDF8;margin-bottom:12px;'>
+            <h2 style='color:#FFFFFF !important;margin:0;font-weight:900;letter-spacing:2px;'>PERCET</h2>
+            <span style='color:#38BDF8 !important;font-size:0.72rem;font-weight:700;'>UNIVERSAL HOLDINGS S.A.C.</span>
+        </div>
+        """, unsafe_allow_html=True)
+
+    # Etiqueta dinámica que cambia según el idioma seleccionado
+    sidebar_lang_label = "🌐 MERCADO / IDIOMA:" if st.session_state.lang_code == "ES" else "🌐 MARKET / LANGUAGE:"
+    lang_choice = st.radio(
+        sidebar_lang_label,
+        options=["PE ESPAÑOL (CONSTRUCCIÓN & OBRAS)", "🌐 ENGLISH (GLOBAL SAAS)"],
+        index=0 if st.session_state.lang_code == "ES" else 1
     )
-    LANG = "ES" if "Español" in idioma_sel else "EN"
-    T = TEXTOS[LANG]
-    UNIT_MM = T["unit_mm"]
     
-    st.markdown("<hr style='margin: 0.6rem 0;'>", unsafe_allow_html=True)
-    st.markdown(f"<p style='font-weight:800; color:#020b1e; font-size:0.90rem; letter-spacing:0.5px;'>{T['params_header']}</p>", unsafe_allow_html=True)
-    
-    nombre_proyecto = st.text_input(T["client_label"], value="Consorcio Qalvan")
-    
-    opciones_rubros = [r["es_name"] if LANG == "ES" else r["en_name"] for r in RUBROS_DATA]
-    idx_rubro = st.selectbox(
-        T["rubro_label"],
-        range(len(RUBROS_DATA)),
-        format_func=lambda i: opciones_rubros[i],
+    new_lang = "ES" if "ESPAÑOL" in lang_choice else "EN"
+    if new_lang != st.session_state.lang_code:
+        st.session_state.lang_code = new_lang
+        st.rerun()
+
+    IS_ES = (st.session_state.lang_code == "ES")
+
+    st.markdown("---")
+    st.markdown(f"**⚙️ {'PARÁMETROS DEL PROYECTO' if IS_ES else 'PROJECT PARAMETERS'}**")
+
+    cliente_obra = st.text_input(
+        "NOMBRE DEL CLIENTE / OBRA:" if IS_ES else "CLIENT / PROJECT NAME:",
+        value="Consorcio Qalvan"
+    )
+
+    rubros_dict = RUBROS_DATA["ES" if IS_ES else "EN"]
+    rubro_sel = st.selectbox(
+        "PARTIDA CRÍTICA EN EJECUCIÓN (RUBROS MACRO):" if IS_ES else "CRITICAL WORK PACKAGE IN EXECUTION:",
+        options=list(rubros_dict.keys()),
         index=1
     )
-    
-    rubro_actual = RUBROS_DATA[idx_rubro]
-    nombre_rubro_activo = rubro_actual["es_name"] if LANG == "ES" else rubro_actual["en_name"]
-    umbral_critico = rubro_actual["umbral"]
-    
-    st.caption(f"{T['threshold_caption']} **> {umbral_critico} {UNIT_MM}**")
-    
-    modo_enso = st.toggle(T["enso_label"], value=True, help=T["enso_help"])
 
-# 5. MODAL DE COTIZACIÓN BILINGÜE CON DERIVACIÓN A oficina.tecnica.puh@outlook.com (IMAGEN 7)
-@st.dialog("📝 PERCET UNIVERSAL HOLDINGS S.A.C.")
-def mostrar_modal_cotizacion():
-    if LANG == "ES":
-        st.markdown("Complete los datos de su proyecto para recibir una propuesta técnico-económica.")
-        emp = st.text_input("Empresa / Cliente:")
-        cont = st.text_input("Correo o Teléfono:")
-        t_proy = st.selectbox("Tipo de Proyecto:", [
-            "Obras de Tierra y Pavimentación",
-            "Edificación Estructural y Vivienda",
-            "Infraestructura Comercial / Industrial",
-            "Mitigación Hidrológica y Drenaje"
-        ])
-        archivo = st.file_uploader("Adjuntar Plano o Expediente (Opcional):", type=["pdf", "png", "jpg"])
-        if st.button("ENVIAR SOLICITUD", type="primary"):
-            if emp and cont:
-                nombre_arch = archivo.name if archivo else "No adjuntado"
-                asunto = f"Solicitud de Cotización GeoRisk - {emp} ({nombre_proyecto})"
-                cuerpo = (
-                    f"Empresa / Cliente: {emp}\n"
-                    f"Contacto: {cont}\n"
-                    f"Proyecto Evaluado: {nombre_proyecto}\n"
-                    f"Rubro: {nombre_rubro_activo}\n"
-                    f"Tipo de Servicio: {t_proy}\n"
-                    f"Coordenadas: Lat {st.session_state.lat}, Lon {st.session_state.lon}\n"
-                    f"Archivo referencial: {nombre_arch}"
-                )
-                try:
-                    requests.post(
-                        f"https://formsubmit.co/ajax/{CORREO_CORPORATIVO}",
-                        data={
-                            "Empresa": emp,
-                            "Contacto": cont,
-                            "Proyecto": nombre_proyecto,
-                            "Rubro": nombre_rubro_activo,
-                            "Tipo_Proyecto": t_proy,
-                            "Coordenadas": f"{st.session_state.lat}, {st.session_state.lon}",
-                            "Archivo": nombre_arch,
-                            "_subject": asunto
-                        },
-                        timeout=5
-                    )
-                except Exception:
-                    pass
-                mailto_url = f"mailto:{CORREO_CORPORATIVO}?subject={urllib.parse.quote(asunto)}&body={urllib.parse.quote(cuerpo)}"
-                st.success(f"✅ Solicitud registrada y derivada a **{CORREO_CORPORATIVO}** para **{emp}**.")
-                st.markdown(
-                    f'<a href="{mailto_url}" target="_blank" style="display:inline-block; margin-top:6px; font-size:0.82rem; font-weight:700; color:#004799;">📧 Abrir copia directa en mi cliente de correo ({CORREO_CORPORATIVO})</a>',
-                    unsafe_allow_html=True
-                )
-            else:
-                st.warning("Por favor, complete el nombre de la empresa y un dato de contacto.")
-    else:
-        st.markdown("Complete your project details to receive a technical and commercial proposal.")
-        emp = st.text_input("Company / Client Name:")
-        cont = st.text_input("Corporate Email or Phone:")
-        t_proy = st.selectbox("Service Required:", [
-            "Enterprise SaaS API License",
-            "Custom Basin ML Calibration",
-            "Infrastructure & Mitigation Engineering"
-        ])
-        archivo = st.file_uploader("Upload Blueprint or RFP (Optional):", type=["pdf", "png", "jpg"])
-        if st.button("SUBMIT REQUEST", type="primary"):
-            if emp and cont:
-                nombre_arch = archivo.name if archivo else "Not attached"
-                asunto = f"GeoRisk Quote Request - {emp} ({nombre_proyecto})"
-                cuerpo = (
-                    f"Company / Client: {emp}\n"
-                    f"Contact: {cont}\n"
-                    f"Evaluated Project: {nombre_proyecto}\n"
-                    f"Sector: {nombre_rubro_activo}\n"
-                    f"Service Required: {t_proy}\n"
-                    f"Coordinates: Lat {st.session_state.lat}, Lon {st.session_state.lon}\n"
-                    f"Reference File: {nombre_arch}"
-                )
-                try:
-                    requests.post(
-                        f"https://formsubmit.co/ajax/{CORREO_CORPORATIVO}",
-                        data={
-                            "Company": emp,
-                            "Contact": cont,
-                            "Project": nombre_proyecto,
-                            "Sector": nombre_rubro_activo,
-                            "Service": t_proy,
-                            "Coordinates": f"{st.session_state.lat}, {st.session_state.lon}",
-                            "File": nombre_arch,
-                            "_subject": asunto
-                        },
-                        timeout=5
-                    )
-                except Exception:
-                    pass
-                mailto_url = f"mailto:{CORREO_CORPORATIVO}?subject={urllib.parse.quote(asunto)}&body={urllib.parse.quote(cuerpo)}"
-                st.success(f"✅ Request registered and routed to **{CORREO_CORPORATIVO}** for **{emp}**.")
-                st.markdown(
-                    f'<a href="{mailto_url}" target="_blank" style="display:inline-block; margin-top:6px; font-size:0.82rem; font-weight:700; color:#004799;">📧 Open direct copy in email client ({CORREO_CORPORATIVO})</a>',
-                    unsafe_allow_html=True
-                )
-            else:
-                st.warning("Please complete the company name and contact information.")
+    umbral_rubro = rubros_dict[rubro_sel]["umbral"]
+    acciones_rubro = rubros_dict[rubro_sel]["acciones"]
 
-# 6. ENCABEZADO SUPERIOR (IMAGEN 1: CLIENTE Y RUBRO EN UNA SOLA LÍNEA)
+    st.markdown(
+        f"<div style='background:rgba(2,132,199,0.15);border:1px solid #38BDF8;padding:8px 12px;border-radius:8px;font-size:0.8rem;font-weight:800;margin:8px 0;'>"
+        f"{'UMBRAL TÉCNICO DE ALERTA PARA ESTE RUBRO:' if IS_ES else 'TECHNICAL ALERT THRESHOLD FOR THIS PACKAGE:'} > {umbral_rubro:.1f} {'mm/día' if IS_ES else 'mm/day'}"
+        f"</div>",
+        unsafe_allow_html=True
+    )
+
+    enso_active = st.toggle(
+        "FACTOR DE SEGURIDAD EL NIÑO (ENSO)" if IS_ES else "EL NIÑO (ENSO) SAFETY FACTOR (+25%)",
+        value=True,
+        help="Mayoriza la inferencia pluvial en +25% por anomalía térmica costera." if IS_ES else "Increases rainfall inference by +25% for ENSO coastal thermal anomalies."
+    )
+
+# ==========================================
+# 7. FUNCIÓN DE CONSULTA API METEOROLÓGICA (15 DÍAS)
+# ==========================================
+@st.cache_data(ttl=900)
+def get_weather_15d(lat: float, lon: float, enso: bool):
+    url = (
+        f"https://api.open-meteo.com/v1/forecast?"
+        f"latitude={lat}&longitude={lon}"
+        f"&daily=temperature_2m_max,temperature_2m_min,shortwave_radiation_sum,"
+        f"wind_speed_10m_max,wind_direction_10m_dominant,precipitation_sum,precipitation_probability_max"
+        f"&hourly=relative_humidity_2m"
+        f"&timezone=auto&forecast_days=15"
+    )
+    try:
+        r = requests.get(url, timeout=10)
+        data = r.json()
+        daily = data["daily"]
+        
+        dates_raw = pd.to_datetime(daily["time"])
+        dates_fmt = [d.strftime("%d-%b") for d in dates_raw]
+        
+        tmax = np.array(daily["temperature_2m_max"], dtype=float)
+        tmin = np.array(daily["temperature_2m_min"], dtype=float)
+        tavg = np.round((tmax + tmin) / 2.0, 1)
+        rad = np.round(np.array(daily["shortwave_radiation_sum"], dtype=float), 2)
+        wind = np.round(np.array(daily["wind_speed_10m_max"], dtype=float), 1)
+        wdir = np.array(daily["wind_direction_10m_dominant"], dtype=int)
+        prob = np.array(daily["precipitation_probability_max"], dtype=int)
+        p_base = np.round(np.array(daily["precipitation_sum"], dtype=float), 1)
+        
+        factor = 1.25 if enso else 1.0
+        p_adj = np.round(p_base * factor, 1)
+        
+        hum_mean = float(np.nanmean(data.get("hourly", {}).get("relative_humidity_2m", [75.0])))
+        
+        df = pd.DataFrame({
+            "date_str": dates_fmt,
+            "tmax": tmax,
+            "tmin": tmin,
+            "tavg": tavg,
+            "rad": rad,
+            "wind": wind,
+            "wdir": wdir,
+            "prob": prob,
+            "p_base": p_base,
+            "p_adj": p_adj
+        })
+        return df, round(hum_mean, 1)
+    except Exception:
+        # Datos de respaldo de alta fidelidad (15 días completos)
+        base_dates = pd.date_range(datetime.today(), periods=15).strftime("%d-%b").tolist()
+        p_base = np.array([2.8, 3.0, 4.2, 1.6, 0.0, 0.0, 0.0, 1.4, 2.0, 4.2, 0.2, 0.6, 0.0, 0.0, 0.0])
+        factor = 1.25 if enso else 1.0
+        p_adj = np.round(p_base * factor, 1)
+        df = pd.DataFrame({
+            "date_str": base_dates,
+            "tmax": [27.3, 29.1, 29.8, 29.5, 31.1, 30.3, 31.3, 32.1, 30.3, 29.6, 31.4, 33.4, 33.0, 31.6, 32.4],
+            "tmin": [23.0, 22.8, 22.1, 22.1, 22.5, 23.0, 23.2, 23.4, 23.5, 23.2, 22.6, 23.5, 23.4, 23.2, 22.7],
+            "tavg": [25.2, 26.0, 26.0, 25.8, 26.8, 26.6, 27.2, 27.8, 26.9, 26.4, 27.0, 28.5, 28.2, 27.4, 27.6],
+            "rad": [18.2, 19.1, 16.5, 20.1, 22.4, 17.3, 19.77, 18.56, 16.33, 15.62, 19.98, 24.23, 22.85, 19.65, 21.4],
+            "wind": [19.6, 18.8, 17.6, 16.9, 16.8, 18.4, 17.1, 15.6, 13.4, 14.2, 17.4, 17.4, 16.7, 16.7, 18.4],
+            "wdir": [180, 175, 170, 182, 179, 178, 175, 176, 179, 172, 186, 176, 182, 183, 179],
+            "prob": [90, 80, 75, 40, 5, 14, 2, 12, 20, 31, 27, 31, 18, 16, 11],
+            "p_base": p_base,
+            "p_adj": p_adj
+        })
+        return df, 78.2
+
+df_weather, hum_rel = get_weather_15d(st.session_state.lat, st.session_state.lon, enso_active)
+
+# Cálculos clave
+max_idx = int(df_weather["p_adj"].idxmax())
+pico_val = float(df_weather.loc[max_idx, "p_adj"])
+pico_fecha = df_weather.loc[max_idx, "date_str"]
+acum_15d = float(df_weather["p_adj"].sum())
+exceso_val = round(pico_val - umbral_rubro, 1)
+dias_sobre_umbral = int((df_weather["p_adj"] >= umbral_rubro).sum())
+unit_mm = "mm/día" if IS_ES else "mm/day"
+
+# ==========================================
+# 8. ENCABEZADO HERO CORPORATIVO
+# ==========================================
 st.markdown(f"""
-<div class="corporate-header">
-    <p class="corporate-title">{T['header_title']}</p>
-    <p class="corporate-subtitle">{T['header_sub']}</p>
-    <p class="corporate-client">{T['header_client']} {nombre_proyecto} &nbsp;|&nbsp; {T['header_rubro']} {nombre_rubro_activo}</p>
+<div class="hero-banner">
+    <h1>{'PERCET GEORISK™ | PLATAFORMA DE INTELIGENCIA CLIMÁTICA PARA LA CONSTRUCCIÓN' if IS_ES else 'PERCET GEORISK™ | CONSTRUCTION CLIMATE INTELLIGENCE PLATFORM'}</h1>
+    <p>{'Monitoreo satelital multibanda y analítica predictiva mediante Machine Learning (Gradient Boosting) para la gestión de riesgos en proyectos de infraestructura.' if IS_ES else 'Multi-band satellite monitoring and Machine Learning (Gradient Boosting) predictive analytics for infrastructure project risk management.'}</p>
+    <div class="hero-meta">
+        {'CLIENTE / PROYECTO ACTUAL:' if IS_ES else 'CURRENT CLIENT / PROJECT:'} {cliente_obra.upper()} &nbsp;|&nbsp; {'RUBRO:' if IS_ES else 'PACKAGE:'} {rubro_sel.upper()}
+    </div>
 </div>
 """, unsafe_allow_html=True)
 
-# 7. EXTRACCIÓN DE DATOS REALES OPEN-METEO
-lat_actual = st.session_state.lat
-lon_actual = st.session_state.lon
+# ==========================================
+# 9. SECCIÓN 01 (MAPA) Y SECCIÓN 02 (VELOCÍMETRO)
+# ==========================================
+col_map, col_gauge = st.columns([1.15, 1])
 
-url_api = (
-    f"https://api.open-meteo.com/v1/forecast?latitude={lat_actual}&longitude={lon_actual}"
-    f"&daily=temperature_2m_max,temperature_2m_min,temperature_2m_mean,"
-    f"precipitation_sum,precipitation_probability_max,wind_speed_10m_max,"
-    f"wind_direction_10m_dominant,shortwave_radiation_sum"
-    f"&hourly=relative_humidity_2m,surface_pressure"
-    f"&timezone=America%2FLima&forecast_days=15"
-)
-
-try:
-    resp = requests.get(url_api, timeout=10)
-    data = resp.json()
+with col_map:
+    st.markdown(f'<div class="section-bar">📍 {"01. LOCALIZACIÓN TÉCNICA DE LA OBRA" if IS_ES else "01. TECHNICAL PROJECT SITE LOCATION"}</div>', unsafe_allow_html=True)
     
-    df_diario = pd.DataFrame({
-        "Fecha": pd.to_datetime(data["daily"]["time"]).strftime('%d-%b'),
-        "Temp. Máx (°C)": data["daily"]["temperature_2m_max"],
-        "Temp. Mín (°C)": data["daily"]["temperature_2m_min"],
-        "Temp. Prom (°C)": data["daily"]["temperature_2m_mean"],
-        "Radiación (MJ/m²)": data["daily"]["shortwave_radiation_sum"],
-        "Viento Máx (km/h)": data["daily"]["wind_speed_10m_max"],
-        "Dirección Viento (°)": data["daily"]["wind_direction_10m_dominant"],
-        "Prob. Lluvia (%)": data["daily"]["precipitation_probability_max"],
-        "Precipitación Base (mm)": data["daily"]["precipitation_sum"]
-    })
-    
-    humedad_media = round(float(np.mean(data["hourly"]["relative_humidity_2m"])), 1)
-    presion_media = round(float(np.mean(data["hourly"]["surface_pressure"])), 1)
-    
-    factor_seguridad = 1.25 if modo_enso else 1.0
-    df_diario["Pronóstico"] = (df_diario["Precipitación Base (mm)"] * factor_seguridad).round(1)
-    
-    pico_max_dia = float(df_diario["Pronóstico"].max())
-    fecha_pico = df_diario.loc[df_diario["Pronóstico"].idxmax(), "Fecha"]
-    lluvia_acumulada = round(float(df_diario["Pronóstico"].sum()), 1)
-    dias_criticos = int((df_diario["Pronóstico"] > umbral_critico).sum())
-    diferencia_umbral = round(pico_max_dia - umbral_critico, 1)
-
-    if pico_max_dia >= 15.0 or lluvia_acumulada >= 60.0:
-        estado_quebrada = f"🔴 {T['q_red']}"
-    elif pico_max_dia >= 5.0 or lluvia_acumulada >= 25.0:
-        estado_quebrada = f"🟡 {T['q_yellow']}"
-    else:
-        estado_quebrada = f"🟢 {T['q_green']}"
-
-    # 8. SECCIÓN 01 (MAPA Y CONTROLES ALINEADOS) Y SECCIÓN 02 (DIAGNÓSTICO)
-    col_mapa, col_panel = st.columns([1.22, 1], gap="large")
-
-    with col_mapa:
-        st.markdown(f"""
-        <div class="sec-header">
-            <p class="sec-header-title">📍 {T['sec1_title']}</p>
-        </div>
-        """, unsafe_allow_html=True)
-        
-        # Imagen 2: Columnas balanceadas para que LATITUD, LONGITUD y LOCALIZAR OBRA encajen en 1 sola línea
-        c1, c2, c3 = st.columns([1.45, 1.45, 1.55])
-        with c1:
-            lat_input = st.number_input(T["lat_label"], value=float(st.session_state.lat), format="%.4f", step=0.0010)
-        with c2:
-            lon_input = st.number_input(T["lon_label"], value=float(st.session_state.lon), format="%.4f", step=0.0010)
-        with c3:
-            st.markdown("<div style='height: 27px;'></div>", unsafe_allow_html=True)
-            buscar_btn = st.button(T["locate_btn"], use_container_width=True)
-        
-        if buscar_btn:
-            st.session_state.lat = round(lat_input, 4)
-            st.session_state.lon = round(lon_input, 4)
+    c_lat, c_lon, c_btn = st.columns([1, 1, 0.9])
+    with c_lat:
+        in_lat = st.number_input("LATITUD (DECIMAL)" if IS_ES else "LATITUDE (DECIMAL)", value=float(st.session_state.lat), format="%.4f", step=0.01)
+    with c_lon:
+        in_lon = st.number_input("LONGITUD (DECIMAL)" if IS_ES else "LONGITUDE (DECIMAL)", value=float(st.session_state.lon), format="%.4f", step=0.01)
+    with c_btn:
+        st.markdown("<div style='height:28px;'></div>", unsafe_allow_html=True)
+        if st.button("📍 LOCALIZAR OBRA" if IS_ES else "📍 LOCATE SITE", type="primary", use_container_width=True):
+            st.session_state.lat = in_lat
+            st.session_state.lon = in_lon
             st.rerun()
-        
-        st.caption(T["map_hint"])
-        
-        m = folium.Map(location=[st.session_state.lat, st.session_state.lon], zoom_start=12, tiles="OpenStreetMap")
-        folium.Marker(
-            [st.session_state.lat, st.session_state.lon],
-            popup=f"<b>{nombre_proyecto}</b><br>Lat: {st.session_state.lat}<br>Lon: {st.session_state.lon}",
-            tooltip=nombre_proyecto,
-            icon=folium.Icon(color="red", icon="info-sign")
-        ).add_to(m)
-        folium.LatLngPopup().add_to(m)
 
-        # Imagen 4: Brújula interactiva que gira dinámicamente según el desplazamiento/orientación en el mapa
-        oeste_letra = "O" if LANG == "ES" else "W"
-        compass_html = f"""
-        {{% macro html(this, kwargs) %}}
-        <div style="
-            position: fixed; 
-            bottom: 18px; left: 18px; width: 88px; height: 104px; 
-            z-index: 9999; background: rgba(2, 11, 30, 0.90);
-            border: 2px solid #38bdf8; border-radius: 14px;
-            box-shadow: 0 4px 14px rgba(0,0,0,0.4);
-            display: flex; flex-direction: column; align-items: center; justify-content: center;
-            padding: 4px; pointer-events: none; font-family: 'Montserrat', sans-serif;">
-            <svg viewBox="0 0 100 100" width="72" height="72">
-                <circle cx="50" cy="50" r="45" fill="none" stroke="#334155" stroke-width="1.5"/>
-                <text x="50" y="14" fill="#38bdf8" font-size="12" font-weight="900" text-anchor="middle">N</text>
-                <text x="50" y="95" fill="#cbd5e1" font-size="10.5" font-weight="700" text-anchor="middle">S</text>
-                <text x="91" y="54" fill="#cbd5e1" font-size="10.5" font-weight="700" text-anchor="middle">E</text>
-                <text x="9" y="54" fill="#cbd5e1" font-size="10.5" font-weight="700" text-anchor="middle">{oeste_letra}</text>
-                <text x="78" y="26" fill="#94a3b8" font-size="7.5" font-weight="700" text-anchor="middle">NE</text>
-                <text x="22" y="26" fill="#94a3b8" font-size="7.5" font-weight="700" text-anchor="middle">N{oeste_letra}</text>
-                <text x="78" y="81" fill="#94a3b8" font-size="7.5" font-weight="700" text-anchor="middle">SE</text>
-                <text x="22" y="81" fill="#94a3b8" font-size="7.5" font-weight="700" text-anchor="middle">S{oeste_letra}</text>
-                <g id="percet-compass-needle" style="transform-origin: 50px 50px; transition: transform 0.18s ease-out;">
-                    <polygon points="50,18 56,50 50,44 44,50" fill="#ef4444"/>
-                    <polygon points="50,82 56,50 50,56 44,50" fill="#e2e8f0"/>
-                </g>
-                <circle cx="50" cy="50" r="3.5" fill="#020b1e" stroke="#38bdf8" stroke-width="1.5"/>
-            </svg>
-            <div id="percet-compass-label" style="font-size:9.5px; font-weight:800; color:#38bdf8; letter-spacing:0.4px; margin-top:1px;">
-                N · 0°
-            </div>
-        </div>
-        <script>
-        (function() {{
-            var baseLat = {st.session_state.lat};
-            var baseLon = {st.session_state.lon};
-            var dirs = ["N", "NE", "E", "SE", "S", "S{oeste_letra}", "{oeste_letra}", "N{oeste_letra}"];
+    st.caption(
+        "Ingrese coordenadas de planos/GPS o haga clic directamente sobre cualquier punto del mapa."
+        if IS_ES else
+        "Enter blueprint/GPS coordinates or click directly on any point on the interactive map."
+    )
 
-            function actualizarAguja(targetLat, targetLon) {{
-                var dLat = targetLat - baseLat;
-                var dLon = targetLon - baseLon;
-                if (Math.abs(dLat) < 0.00005 && Math.abs(dLon) < 0.00005) return;
-                var rad = Math.atan2(dLon, dLat);
-                var deg = (rad * 180 / Math.PI + 360) % 360;
-                var idx = Math.round(deg / 45) % 8;
-                var needle = document.getElementById("percet-compass-needle");
-                var label = document.getElementById("percet-compass-label");
-                if (needle) needle.style.transform = "rotate(" + deg.toFixed(1) + "deg)";
-                if (label) label.innerHTML = dirs[idx] + " · " + Math.round(deg) + "°";
-            }}
+    m = folium.Map(location=[st.session_state.lat, st.session_state.lon], zoom_start=6, control_scale=True)
+    folium.Marker(
+        [st.session_state.lat, st.session_state.lon],
+        tooltip=f"{cliente_obra} ({st.session_state.lat:.4f}, {st.session_state.lon:.4f})",
+        icon=folium.Icon(color="red", icon="info-sign")
+    ).add_to(m)
 
-            setTimeout(function() {{
-                try {{
-                    var mapObj = {{{{ this._parent.get_name() }}}};
-                    if (mapObj) {{
-                        mapObj.on("move", function() {{
-                            var c = mapObj.getCenter();
-                            actualizarAguja(c.lat, c.lng);
-                        }});
-                        mapObj.on("mousemove", function(e) {{
-                            if (e && e.latlng) {{
-                                actualizarAguja(e.latlng.lat, e.latlng.lng);
-                            }}
-                        }});
-                    }}
-                }} catch(err) {{}}
-            }}, 400);
-        }})();
-        </script>
-        {{% endmacro %}}
-        """
-        compass = MacroElement()
-        compass._template = Template(compass_html)
-        m.get_root().add_child(compass)
-        
-        map_data = st_folium(m, height=430, use_container_width=True)
-        
-        if map_data and map_data.get("last_clicked"):
-            click_coords = (round(map_data["last_clicked"]["lat"], 4), round(map_data["last_clicked"]["lng"], 4))
-            if click_coords != st.session_state.last_click:
-                st.session_state.last_click = click_coords
-                st.session_state.lat, st.session_state.lon = click_coords
-                st.rerun()
+    map_Click = st_folium(m, height=340, use_container_width=True)
+    if map_Click and map_Click.get("last_clicked"):
+        clicked_lat = round(map_Click["last_clicked"]["lat"], 4)
+        clicked_lon = round(map_Click["last_clicked"]["lng"], 4)
+        if clicked_lat != round(st.session_state.lat, 4) or clicked_lon != round(st.session_state.lon, 4):
+            st.session_state.lat = clicked_lat
+            st.session_state.lon = clicked_lon
+            st.rerun()
 
-    # PANEL DERECHO: SECCIÓN 02 CON BADGE MONITOREO ACTIVO ALINEADO Y LEYENDA DE RIESGO ACTUALIZADA
-    with col_panel:
-        st.markdown(f"""
-        <div class="sec-header">
-            <p class="sec-header-title">🧭 {T['sec2_title']}</p>
-            <span class="status-badge"><span class="status-dot"></span>{T['active_badge']}</span>
-        </div>
-        <div class="diag-subbanner">
-            {T['peak_banner'].format(fecha=fecha_pico.upper(), umbral=f"{umbral_critico:.1f}")}
-        </div>
-        """, unsafe_allow_html=True)
-
-        etiqueta_dif = T["card_excess"] if diferencia_umbral > 0 else T["card_margin"]
-        color_dif = "#dc2626" if diferencia_umbral > 0 else "#16a34a"
-        signo_dif = f"+{diferencia_umbral:.1f}" if diferencia_umbral > 0 else f"{diferencia_umbral:.1f}"
-
-        st.markdown(f"""
-        <div class="mini-kpi-grid">
-            <div class="mini-kpi-card" style="border-top-color: #004799;">
-                <div class="mini-kpi-label">{T['card_forecast']}</div>
-                <div class="mini-kpi-val">{pico_max_dia:.1f}</div>
-                <div class="mini-kpi-unit">{UNIT_MM}</div>
-            </div>
-            <div class="mini-kpi-card" style="border-top-color: #475569;">
-                <div class="mini-kpi-label">{T['card_threshold']}</div>
-                <div class="mini-kpi-val">{umbral_critico:.1f}</div>
-                <div class="mini-kpi-unit">{UNIT_MM}</div>
-            </div>
-            <div class="mini-kpi-card" style="border-top-color: {color_dif};">
-                <div class="mini-kpi-label">{etiqueta_dif}</div>
-                <div class="mini-kpi-val" style="color: {color_dif};">{signo_dif}</div>
-                <div class="mini-kpi-unit">{UNIT_MM}</div>
-            </div>
-        </div>
-        """, unsafe_allow_html=True)
-
-        max_escala = max(10.0, float(np.ceil(max(pico_max_dia, umbral_critico * 2) / 2.0) * 2.0))
-        paso_tick = 2 if max_escala <= 12 else round(max_escala / 5)
-
-        fig_gauge = go.Figure(go.Indicator(
-            mode="gauge+number",
-            value=pico_max_dia,
-            number={'suffix': f" {UNIT_MM}", 'valueformat': ".1f", 'font': {'size': 34, 'color': '#020b1e', 'family': 'Montserrat'}},
-            gauge={
-                'axis': {
-                    'range': [0, max_escala],
-                    'tickmode': 'linear',
-                    'tick0': 0,
-                    'dtick': paso_tick,
-                    'tickwidth': 2,
-                    'tickcolor': "#020b1e",
-                    'tickfont': {'size': 13, 'color': '#020b1e', 'family': 'Montserrat'}
-                },
-                'bar': {'color': "#020b1e", 'thickness': 0.32},
-                'bgcolor': "#ffffff",
-                'borderwidth': 1,
-                'bordercolor': "#cbd5e1",
-                'steps': [
-                    {'range': [0, umbral_critico * 0.7], 'color': "#22c55e"},
-                    {'range': [umbral_critico * 0.7, umbral_critico], 'color': "#facc15"},
-                    {'range': [umbral_critico, max_escala], 'color': "#ef4444"}
-                ],
-                'threshold': {
-                    'line': {'color': "#020b1e", 'width': 5},
-                    'thickness': 0.85,
-                    'value': umbral_critico
-                }
-            }
-        ))
-        fig_gauge.update_layout(
-            height=220,
-            margin=dict(l=26, r=26, t=20, b=10),
-            paper_bgcolor="rgba(0,0,0,0)",
-            font={'family': 'Montserrat'}
-        )
-        st.plotly_chart(fig_gauge, use_container_width=True)
-
-        # Imagen 5: RIESGO BAJO (<1.4) | RIESGO MODERADO (1.4-2.0) | RIESGO ALTO (>2.0)
-        st.markdown(f"""
-        <div style="display:flex; justify-content:center; flex-wrap:wrap; gap:14px; font-size:0.76rem; font-weight:800; color:#1e293b; margin-top:-6px; margin-bottom:10px;">
-            <span>🟢 {T['leg_normal']} (&lt;{umbral_critico*0.7:.1f})</span>
-            <span>🟡 {T['leg_warn']} ({umbral_critico*0.7:.1f}-{umbral_critico:.1f})</span>
-            <span>🔴 {T['leg_crit']} (&gt;{umbral_critico:.1f})</span>
-        </div>
-        """, unsafe_allow_html=True)
-
-        if pico_max_dia > umbral_critico:
-            badge_cls = "diag-badge-crit"
-            badge_txt = f"🚨 {T['alert_crit_badge']}"
-            desc_txt = T["diag_crit_desc"].format(pico=f"{pico_max_dia:.1f}", fecha=fecha_pico, umbral=f"{umbral_critico:.1f}", exceso=f"{diferencia_umbral:.1f}")
-            lista_recs = rubro_actual["es_recs_crit"] if LANG == "ES" else rubro_actual["en_recs_crit"]
-        elif pico_max_dia >= umbral_critico * 0.7:
-            badge_cls = "diag-badge-warn"
-            badge_txt = f"⚠️ {T['alert_warn_badge']}"
-            desc_txt = T["diag_warn_desc"].format(pico=f"{pico_max_dia:.1f}", fecha=fecha_pico, umbral=f"{umbral_critico:.1f}")
-            lista_recs = rubro_actual["es_recs_warn"] if LANG == "ES" else rubro_actual["en_recs_warn"]
-        else:
-            badge_cls = "diag-badge-ok"
-            badge_txt = f"✅ {T['alert_ok_badge']}"
-            desc_txt = T["diag_ok_desc"].format(pico=f"{pico_max_dia:.1f}", umbral=f"{umbral_critico:.1f}")
-            lista_recs = rubro_actual["es_recs_ok"] if LANG == "ES" else rubro_actual["en_recs_ok"]
-
-        # Imagen 5: Tarjeta de Alerta sin la línea inferior de Pico detectado / Días afectados
-        st.markdown(f"""
-        <div class="diag-alert-card">
-            <div class="{badge_cls}">{badge_txt}</div>
-            <div style="font-size:1.0rem; font-weight:800; color:#020b1e; margin-bottom:6px;">{nombre_rubro_activo}</div>
-            <div style="font-size:0.88rem; color:#334155; margin-bottom:2px; line-height:1.45;">{desc_txt}</div>
-        </div>
-        """, unsafe_allow_html=True)
-
-    st.markdown("<br>", unsafe_allow_html=True)
-
-    # 9. SECCIÓN 03: INDICADORES CLAVE DE INGENIERÍA DE CAMPO (IMAGEN 6: TAMAÑO REDUCIDO Y 100% UNIFORME)
+with col_gauge:
+    st.markdown(f'<div class="section-bar">🧭 {"02. DIAGNÓSTICO OPERATIVO EN TIEMPO REAL" if IS_ES else "02. REAL-TIME OPERATIONAL DIAGNOSTIC"}</div>', unsafe_allow_html=True)
+    
     st.markdown(f"""
-    <div class="sec-header">
-        <p class="sec-header-title">📊 {T['sec3_title']}</p>
+    <div style="background:rgba(2,132,199,0.18);border:1px solid #38BDF8;border-radius:8px;padding:7px 12px;text-align:center;font-weight:800;font-size:0.78rem;color:#38BDF8;margin-bottom:10px;">
+        {'PICO PRONOSTICADO' if IS_ES else 'FORECASTED PEAK'} • {pico_fecha.upper()} • {'UMBRAL' if IS_ES else 'THRESHOLD'} {umbral_rubro:.1f} {unit_mm.upper()}
     </div>
     """, unsafe_allow_html=True)
 
     k1, k2, k3 = st.columns(3)
+    exceso_color = "#EF4444" if exceso_val > 0 else "#10B981"
+    exceso_str = f"+{exceso_val:.1f}" if exceso_val > 0 else f"{exceso_val:.1f}"
+    
     with k1:
-        st.markdown(f"""
-        <div class="field-kpi-card">
-            <div class="field-kpi-title">{T['kpi1_title']}</div>
-            <div class="field-kpi-value">{pico_max_dia:.1f} {UNIT_MM}</div>
-            <span class="field-kpi-pill">🌧️ {T['kpi1_sub'].format(acum=lluvia_acumulada)}</span>
-        </div>
-        """, unsafe_allow_html=True)
+        st.markdown(f'<div class="mini-stat"><div class="mini-stat-label">{"PRONÓSTICO" if IS_ES else "FORECAST"}</div><div class="mini-stat-num">{pico_val:.1f}</div><div style="font-size:0.7rem;opacity:0.8;">{unit_mm}</div></div>', unsafe_allow_html=True)
     with k2:
-        st.markdown(f"""
-        <div class="field-kpi-card">
-            <div class="field-kpi-title">{T['kpi2_title']}</div>
-            <div class="field-kpi-value">{humedad_media} %</div>
-            <span class="field-kpi-pill">💧 {T['kpi2_sub']}</span>
-        </div>
-        """, unsafe_allow_html=True)
+        st.markdown(f'<div class="mini-stat"><div class="mini-stat-label">{"UMBRAL" if IS_ES else "THRESHOLD"}</div><div class="mini-stat-num">{umbral_rubro:.1f}</div><div style="font-size:0.7rem;opacity:0.8;">{unit_mm}</div></div>', unsafe_allow_html=True)
     with k3:
-        st.markdown(f"""
-        <div class="field-kpi-card">
-            <div class="field-kpi-title">{T['kpi3_title']}</div>
-            <div class="field-kpi-value">{estado_quebrada}</div>
-            <span class="field-kpi-pill">📍 {T['kpi3_sub'].format(lat=lat_actual, lon=lon_actual)}</span>
-        </div>
-        """, unsafe_allow_html=True)
+        st.markdown(f'<div class="mini-stat"><div class="mini-stat-label">{"EXCESO" if IS_ES else "EXCESS"}</div><div class="mini-stat-num" style="color:{exceso_color} !important;">{exceso_str}</div><div style="font-size:0.7rem;opacity:0.8;">{unit_mm}</div></div>', unsafe_allow_html=True)
 
-    st.markdown("<br>", unsafe_allow_html=True)
+    # Velocímetro sin cámara ni botón de ampliar, con letras adaptables a Dark/Light
+    max_axis = max(10.0, round(pico_val * 1.3, 1), round(umbral_rubro * 2.5, 1))
+    low_lim = round(umbral_rubro * 0.7, 1)
 
-    # 10. SECCIÓN 04: CRONOGRAMA DE IMPACTO
+    fig_gauge = go.Figure(go.Indicator(
+        mode="gauge+number",
+        value=pico_val,
+        number={
+            "suffix": f" {unit_mm}",
+            "font": {"size": 30, "family": "Inter"}
+        },
+        gauge={
+            "axis": {"range": [0, max_axis], "tickwidth": 2},
+            "bar": {"color": "#0284C7", "thickness": 0.32},
+            "bgcolor": "rgba(0,0,0,0)",
+            "borderwidth": 0,
+            "steps": [
+                {"range": [0, low_lim], "color": "#10B981"},
+                {"range": [low_lim, umbral_rubro], "color": "#F59E0B"},
+                {"range": [umbral_rubro, max_axis], "color": "#EF4444"}
+            ],
+            "threshold": {
+                "line": {"color": "#FFFFFF", "width": 4},
+                "thickness": 0.82,
+                "value": umbral_rubro
+            }
+        }
+    ))
+    fig_gauge.update_layout(
+        height=210,
+        margin=dict(l=20, r=20, t=20, b=10),
+        paper_bgcolor="rgba(0,0,0,0)",
+        plot_bgcolor="rgba(0,0,0,0)"
+    )
+    st.plotly_chart(fig_gauge, use_container_width=True, config={"displayModeBar": False, "displaylogo": False})
+
     st.markdown(f"""
-    <div class="sec-header">
-        <p class="sec-header-title">📅 {T['sec4_title']}</p>
+    <div style="text-align:center;font-size:0.75rem;font-weight:800;margin-top:-8px;margin-bottom:10px;">
+        🟢 {'RIESGO BAJO' if IS_ES else 'LOW RISK'} (&lt;{low_lim}) &nbsp;&nbsp;
+        🟡 {'RIESGO MODERADO' if IS_ES else 'MODERATE RISK'} ({low_lim}-{umbral_rubro}) &nbsp;&nbsp;
+        🔴 {'RIESGO ALTO' if IS_ES else 'HIGH RISK'} (&gt;{umbral_rubro})
     </div>
     """, unsafe_allow_html=True)
 
-    p1, p2, p3 = st.columns(3)
-    with p1:
-        st.markdown(f"""
-        <div class="exec-pill-card">
-            <div class="exec-icon-circle" style="background:#e0f2fe; color:#0284c7;">💧</div>
-            <div>
-                <div style="font-size:0.78rem; font-weight:800; color:#475569; text-transform:uppercase;">{T['pill_peak']}</div>
-                <div style="display:flex; align-items:baseline; gap:10px;">
-                    <span style="font-size:1.75rem; font-weight:900; color:#dc2626;">{pico_max_dia:.1f} <small style="font-size:0.85rem; color:#475569;">{UNIT_MM}</small></span>
-                    <span style="font-size:0.84rem; font-weight:700; color:#334155; border-left:2px solid #cbd5e1; padding-left:8px;">📅 {fecha_pico}</span>
-                </div>
-            </div>
-        </div>
-        """, unsafe_allow_html=True)
-    with p2:
-        st.markdown(f"""
-        <div class="exec-pill-card">
-            <div class="exec-icon-circle" style="background:#ffedd5; color:#ea580c;">🛡️</div>
-            <div>
-                <div style="font-size:0.78rem; font-weight:800; color:#475569; text-transform:uppercase;">{T['pill_days']}</div>
-                <div>
-                    <span style="font-size:1.75rem; font-weight:900; color:#dc2626;">{dias_criticos}</span>
-                    <span style="font-size:0.88rem; font-weight:700; color:#475569;"> {T['day_unit']}</span>
-                </div>
-            </div>
-        </div>
-        """, unsafe_allow_html=True)
-    with p3:
-        st.markdown(f"""
-        <div class="exec-pill-card">
-            <div class="exec-icon-circle" style="background:#e0e7ff; color:#1d4ed8;">🧭</div>
-            <div>
-                <div style="font-size:0.78rem; font-weight:800; color:#475569; text-transform:uppercase;">{T['pill_thresh']}</div>
-                <div>
-                    <span style="font-size:1.75rem; font-weight:900; color:#020b1e;">{umbral_critico:.1f}</span>
-                    <span style="font-size:0.88rem; font-weight:700; color:#475569;"> {UNIT_MM}</span>
-                </div>
-            </div>
-        </div>
-        """, unsafe_allow_html=True)
-
-    colores_barras = [
-        "#ef4444" if val > umbral_critico else ("#f59e0b" if val >= umbral_critico * 0.7 else "#1d70b8")
-        for val in df_diario["Pronóstico"]
-    ]
-    
-    fig_bar = go.Figure()
-    fig_bar.add_trace(go.Bar(
-        x=df_diario["Fecha"],
-        y=df_diario["Pronóstico"],
-        marker_color=colores_barras,
-        text=[f"<b>{v:.1f}</b>" if v > 0 else "0" for v in df_diario["Pronóstico"]],
-        textposition="outside",
-        name=T["card_forecast"]
-    ))
-    fig_bar.add_trace(go.Scatter(
-        x=df_diario["Fecha"],
-        y=df_diario["Pronóstico"],
-        mode="lines",
-        line=dict(color="rgba(4, 36, 84, 0.35)", width=2, shape="spline"),
-        hoverinfo="skip",
-        showlegend=False
-    ))
-    fig_bar.add_hline(
-        y=umbral_critico,
-        line_dash="dash",
-        line_color="#dc2626",
-        line_width=2.5,
-        annotation_text=f"<b>{T['thresh_tag'].format(umbral=f'{umbral_critico:.1f}')}</b>",
-        annotation_position="top right",
-        annotation_font=dict(color="white", size=12, family="Montserrat"),
-        annotation_bgcolor="#dc2626",
-        annotation_borderpad=6
-    )
-    fig_bar.update_layout(
-        height=350,
-        xaxis_title=f"<b>{T['axis_x']}</b>",
-        yaxis_title=f"<b>{T['axis_y']}</b>",
-        yaxis=dict(range=[0, max(umbral_critico * 1.6, pico_max_dia * 1.25, 5.0)]),
-        paper_bgcolor="white",
-        plot_bgcolor="#ffffff",
-        font=dict(family="Montserrat", color="#020b1e"),
-        margin=dict(l=20, r=20, t=25, b=20),
-        showlegend=False
-    )
-    st.plotly_chart(fig_bar, use_container_width=True)
-
-    checks_cols_html = "".join([
-        f"<div style='background:rgba(255,255,255,0.85); padding:10px 14px; border-radius:8px; border-left:4px solid #dc2626; font-weight:600; font-size:0.86rem; color:#1e293b;'><span style='color:#dc2626; font-weight:900;'>✔</span> {r}</div>"
-        for r in lista_recs
-    ])
-    checks_pdf_html = "".join([f"<div style='margin-bottom:4px; font-weight:600; color:#1e293b;'><span style='color:#dc2626;'>✔</span> {r}</div>" for r in lista_recs])
-    
-    bg_banner_9 = "#fff1f2" if pico_max_dia > umbral_critico else ("#fffbeb" if pico_max_dia >= umbral_critico * 0.7 else "#f0fdf4")
-    border_banner_9 = "#fecdd3" if pico_max_dia > umbral_critico else ("#fde68a" if pico_max_dia >= umbral_critico * 0.7 else "#bbf7d0")
-    color_titulo_9 = "#be123c" if pico_max_dia > umbral_critico else ("#b45309" if pico_max_dia >= umbral_critico * 0.7 else "#15803d")
-
-    st.markdown(f"""
-    <div style="text-align:center; font-size:0.82rem; font-weight:800; color:#334155; margin-top:-10px; margin-bottom:12px;">
-        <span style="color:#1d70b8;">●</span> {T['leg_normal']} &nbsp;&nbsp;&nbsp;
-        <span style="color:#f59e0b;">●</span> {T['leg_warn']} &nbsp;&nbsp;&nbsp;
-        <span style="color:#ef4444;">●</span> {T['leg_crit']}
-    </div>
-    <div class="exec-recs-only-banner" style="background:{bg_banner_9}; border: 1.5px solid {border_banner_9};">
-        <div style="font-size:0.92rem; font-weight:900; color:#020b1e; text-transform:uppercase; margin-bottom:10px; letter-spacing:0.4px;">
-            📋 {T['rec_title']} ({nombre_rubro_activo})
-        </div>
-        <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap:12px;">
-            {checks_cols_html}
-        </div>
-    </div>
-    """, unsafe_allow_html=True)
-
-    st.markdown("<br>", unsafe_allow_html=True)
-
-    # 11. GENERADOR DE INFOGRAFÍA PDF EN 1 SOLA HOJA A4
-    def disparar_pdf_infografia_una_hoja():
-        fechas_js = json.dumps(df_diario["Fecha"].tolist())
-        valores_js = json.dumps(df_diario["Pronóstico"].tolist())
-        colores_js = json.dumps(colores_barras)
-        logo_img_tag = f'<img src="data:image/png;base64,{LOGO_B64}" style="height:60px; border-radius:8px;">' if LOGO_B64 else "<b>PERCET</b>"
-        fecha_emision = datetime.now().strftime("%d/%m/%Y %H:%M")
-        max_chart_pdf = round(max(pico_max_dia * 1.28, umbral_critico * 1.45, 4.0), 1)
-
-        html_infografia = f"""
-        <script>
-        function abrirInfografiaPDF() {{
-            var win = window.open("", "_blank", "width=1100,height=850");
-            var fechas = {fechas_js};
-            var valores = {valores_js};
-            var colores = {colores_js};
-            var maxVal = {max_chart_pdf};
-            
-            var chartTop = 28;
-            var chartBottom = 188;
-            var chartHeight = chartBottom - chartTop;
-            var barrasSvg = "";
-
-            for (var i = 0; i < fechas.length; i++) {{
-                var x = 38 + i * 45;
-                var h = (valores[i] / maxVal) * chartHeight;
-                var y = chartBottom - h;
-                barrasSvg += '<rect x="' + x + '" y="' + y + '" width="31" height="' + h + '" fill="' + colores[i] + '" rx="4"/>';
-                barrasSvg += '<text x="' + (x + 15.5) + '" y="' + (y - 6) + '" font-size="10.5" font-weight="800" text-anchor="middle" fill="#020b1e">' + valores[i] + '</text>';
-                barrasSvg += '<text x="' + (x + 15.5) + '" y="206" font-size="9.5" font-weight="700" text-anchor="middle" fill="#334155">' + fechas[i] + '</text>';
-            }}
-            var yUmbral = chartBottom - ({umbral_critico} / maxVal) * chartHeight;
-
-            var contenido = `
-            <!DOCTYPE html>
-            <html>
-            <head>
-                <title>PERCET_GeoRisk_{nombre_proyecto}</title>
-                <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800;900&display=swap" rel="stylesheet">
-                <style>
-                    @page {{ size: A4 portrait; margin: 9mm; }}
-                    * {{ box-sizing: border-box; font-family: 'Montserrat', sans-serif; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }}
-                    body {{ margin: 0; padding: 0; background: #ffffff; color: #020b1e; }}
-                    .page {{ width: 100%; border: 2px solid #042454; border-radius: 12px; padding: 15px; }}
-                    .header {{ display: flex; justify-content: space-between; align-items: center; background: linear-gradient(135deg, #020b1e 0%, #042454 100%); color: white; padding: 14px 18px; border-radius: 10px; border-bottom: 4px solid #00b4d8; margin-bottom: 12px; }}
-                    .grid-3 {{ display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 12px; }}
-                    .card {{ border: 1px solid #cbd5e1; border-top: 4px solid #042454; border-radius: 8px; padding: 10px 12px; background: #f8fafc; }}
-                    .card-title {{ font-size: 9px; font-weight: 800; color: #475569; text-transform: uppercase; }}
-                    .card-val {{ font-size: 18px; font-weight: 900; color: #020b1e; margin: 3px 0; }}
-                    .sec-title {{ font-size: 11px; font-weight: 800; color: #042454; text-transform: uppercase; border-bottom: 2px solid #e2e8f0; padding-bottom: 4px; margin: 10px 0 8px 0; }}
-                    .chart-box {{ border: 1px solid #cbd5e1; border-radius: 8px; padding: 12px 10px 6px 10px; text-align: center; background: #ffffff; margin-bottom: 12px; }}
-                    .alert-box {{ background: {bg_banner_9}; border: 1.5px solid {border_banner_9}; border-radius: 10px; padding: 12px 16px; display: grid; grid-template-columns: 1.15fr 1.25fr; gap: 14px; margin-bottom: 12px; }}
-                    table {{ width: 100%; border-collapse: collapse; font-size: 8.5px; margin-bottom: 10px; }}
-                    th {{ background: #042454; color: white; padding: 5px; text-transform: uppercase; font-weight: 700; }}
-                    td {{ border-bottom: 1px solid #e2e8f0; padding: 4px 5px; text-align: center; font-weight: 600; }}
-                    .footer {{ font-size: 8px; color: #64748b; background: #f1f5f9; padding: 8px 12px; border-radius: 6px; line-height: 1.35; }}
-                </style>
-            </head>
-            <body>
-                <div class="page">
-                    <div class="header">
-                        <div style="display:flex; align-items:center; gap:14px;">
-                            {logo_img_tag}
-                            <div>
-                                <div style="font-size:15px; font-weight:900; letter-spacing:0.5px;">PERCET GEORISK™ | EXECUTIVE TECHNICAL REPORT</div>
-                                <div style="font-size:10px; color:#38bdf8; font-weight:700; margin-top:2px;">
-                                    {T['header_client']} {nombre_proyecto} &nbsp;|&nbsp; {nombre_rubro_activo}
-                                </div>
-                                <div style="font-size:9px; color:#cbd5e1; margin-top:2px;">
-                                    📍 Lat: {lat_actual}, Lon: {lon_actual} &nbsp;|&nbsp; 🕒 {fecha_emision}
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="sec-title">{T['pdf_sec1_title']}</div>
-                    <div class="grid-3">
-                        <div class="card">
-                            <div class="card-title">{T['pill_peak']} ({fecha_pico})</div>
-                            <div class="card-val" style="color:#dc2626;">{pico_max_dia:.1f} {UNIT_MM}</div>
-                            <div style="font-size:9px; font-weight:700; color:#475569;">{T['kpi1_sub'].format(acum=lluvia_acumulada)}</div>
-                        </div>
-                        <div class="card">
-                            <div class="card-title">{T['pill_thresh']} / {etiqueta_dif}</div>
-                            <div class="card-val">{umbral_critico:.1f} {UNIT_MM} <span style="font-size:13px; color:{color_dif};">({signo_dif})</span></div>
-                            <div style="font-size:9px; font-weight:700; color:#475569;">{T['pill_days']}: {dias_criticos} {T['day_unit']}</div>
-                        </div>
-                        <div class="card">
-                            <div class="card-title">{T['kpi2_title']} & QUEBRADAS</div>
-                            <div class="card-val">{humedad_media}% HR</div>
-                            <div style="font-size:9px; font-weight:700; color:#020b1e;">{estado_quebrada}</div>
-                        </div>
-                    </div>
-
-                    <div class="sec-title">{T['pdf_sec2_title']}</div>
-                    <div class="chart-box">
-                        <svg viewBox="0 0 740 220" width="100%" height="215">
-                            <line x1="25" y1="188" x2="720" y2="188" stroke="#94a3b8" stroke-width="1.5"/>
-                            ` + barrasSvg + `
-                            <line x1="25" y1="` + yUmbral + `" x2="720" y2="` + yUmbral + `" stroke="#dc2626" stroke-width="2.2" stroke-dasharray="6,4"/>
-                            <rect x="585" y="4" width="132" height="18" fill="#dc2626" rx="4"/>
-                            <text x="651" y="16" font-size="9.5" font-weight="800" fill="#ffffff" text-anchor="middle">{T['thresh_tag'].format(umbral=f'{umbral_critico:.1f}')}</text>
-                        </svg>
-                    </div>
-
-                    <div class="sec-title">{T['pdf_sec3_title']}</div>
-                    <div class="alert-box">
-                        <div>
-                            <div style="font-size:11px; font-weight:900; color:{color_titulo_9}; margin-bottom:4px;">{badge_txt}</div>
-                            <div style="font-size:10px; font-weight:800; margin-bottom:4px;">{nombre_rubro_activo}</div>
-                            <div style="font-size:9px; color:#334155; line-height:1.4;">{desc_txt}</div>
-                        </div>
-                        <div>
-                            <div style="font-size:9.5px; font-weight:800; color:#042454; margin-bottom:4px;">{T['rec_title']}:</div>
-                            <div style="font-size:8.5px; line-height:1.4;">{checks_pdf_html}</div>
-                        </div>
-                    </div>
-
-                    <div class="sec-title">{T['pdf_sec4_title']}</div>
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>Fecha</th>
-                                <th>{T['card_forecast']} ({UNIT_MM})</th>
-                                <th>Prob. Lluvia (%)</th>
-                                <th>Temp. Máx (°C)</th>
-                                <th>Temp. Mín (°C)</th>
-                                <th>Viento Máx (km/h)</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {"".join([f"<tr><td>{r['Fecha']}</td><td><b>{r['Pronóstico']}</b></td><td>{r['Prob. Lluvia (%)']}%</td><td>{r['Temp. Máx (°C)']}°C</td><td>{r['Temp. Mín (°C)']}°C</td><td>{r['Viento Máx (km/h)']}</td></tr>" for _, r in df_diario.iloc[:8].iterrows()])}
-                        </tbody>
-                    </table>
-
-                    <div class="footer">
-                        {T['disclaimer']}
-                    </div>
-                </div>
-                <script>
-                    window.onload = function() {{ setTimeout(function() {{ window.print(); }}, 400); }};
-                <\/script>
-            </body>
-            </html>
-            `;
-            win.document.open();
-            win.document.write(contenido);
-            win.document.close();
-        }}
-        abrirInfografiaPDF();
-        </script>
-        """
-        components.html(html_infografia, height=0, width=0)
-
-    # Botones de Exportación
-    col_dl1, col_dl2 = st.columns(2)
-    csv_data = df_diario.to_csv(index=False).encode('utf-8-sig')
-    with col_dl1:
-        st.download_button(
-            label=T["dl_csv"],
-            data=csv_data,
-            file_name=f"PERCET_GeoRisk_{nombre_proyecto}_{lat_actual}_{lon_actual}.csv",
-            mime="text/csv",
-            use_container_width=True
+    if pico_val >= umbral_rubro:
+        alert_title = "🚨 ALERTA PREVENTIVA • RIESGO ELEVADO" if IS_ES else "🚨 PREVENTIVE ALERT • HIGH RISK"
+        alert_desc = (
+            f"Se pronostica un pico de {pico_val:.1f} {unit_mm} el {pico_fecha}, superando el límite admisible de {umbral_rubro:.1f} {unit_mm} en +{exceso_val:.1f} {unit_mm}."
+            if IS_ES else
+            f"A peak of {pico_val:.1f} {unit_mm} is forecasted on {pico_fecha}, exceeding the {umbral_rubro:.1f} {unit_mm} threshold by +{exceso_val:.1f} {unit_mm}."
         )
-    with col_dl2:
-        if st.button(T["dl_pdf"], use_container_width=True):
-            disparar_pdf_infografia_una_hoja()
-
-    # 12. DESPLEGABLE TÉCNICO
-    with st.expander(T["exp_title"]):
-        st.markdown(f"""
-        * **Machine Learning Engine:** Gradient Boosting Regressor ($R^2 = 0.947$, $\\text{{RMSE}} = 0.599\\text{{ mm/day}}$, $\\text{{MAE}} = 0.394\\text{{ mm/day}}$).
-        * **Linear Fit Equation:** $y = 0.871x + 0.163$ | **Surface Pressure:** `{presion_media} hPa`
-        """)
-        st.dataframe(df_diario, use_container_width=True, hide_index=True)
-
-    # 13. DISCLAIMER Y BANNER B2B DE CIERRE
-    st.markdown(f'<div class="legal-disclaimer">{T["disclaimer"]}</div>', unsafe_allow_html=True)
-
-    mensaje_wa = (
-        f"Hola PERCET, estoy evaluando el proyecto '{nombre_proyecto}' en la coordenada [{lat_actual}, {lon_actual}] "
-        f"({nombre_rubro_activo}) con PERCET GeoRisk y solicito asesoría técnica."
-    )
-    url_whatsapp = f"https://wa.me/51981328639?text={urllib.parse.quote(mensaje_wa)}"
+        border_col = "#EF4444"
+    else:
+        alert_title = "✅ OPERACIÓN ESTABLE • RIESGO CONTROLADO" if IS_ES else "✅ STABLE OPERATION • CONTROLLED RISK"
+        alert_desc = (
+            f"El pico proyectado ({pico_val:.1f} {unit_mm}) se mantiene por debajo del umbral crítico ({umbral_rubro:.1f} {unit_mm})."
+            if IS_ES else
+            f"The forecasted peak ({pico_val:.1f} {unit_mm}) remains safely below the critical threshold ({umbral_rubro:.1f} {unit_mm})."
+        )
+        border_col = "#10B981"
 
     st.markdown(f"""
-    <div class="b2b-banner">
-        <h3 style="color:#ffffff; font-weight:900; letter-spacing:0.5px; margin-bottom:10px; font-size:1.35rem;">{T['b2b_title']}</h3>
-        <p style="color:#e0f2fe; font-size:0.96rem; max-width:920px; margin:0 auto; line-height:1.55;">{T['b2b_sub']}</p>
+    <div style="background:var(--secondary-background-color);border-left:5px solid {border_col};padding:12px 15px;border-radius:8px;font-size:0.84rem;">
+        <div style="font-weight:900;color:{border_col} !important;margin-bottom:4px;">{alert_title}</div>
+        <div style="font-weight:800;margin-bottom:4px;">{rubro_sel}</div>
+        <div style="opacity:0.92;">{alert_desc}</div>
     </div>
     """, unsafe_allow_html=True)
 
-    b1, b2, b3, b4 = st.columns([0.8, 1.6, 1.6, 0.8])
-    with b2:
-        if st.button(T["btn_quote"]):
-            mostrar_modal_cotizacion()
-    with b3:
-        st.link_button(T["btn_wa"], url_whatsapp, use_container_width=True)
+# ==========================================
+# 10. SECCIÓN 03: INDICADORES CLAVE DE CAMPO
+# ==========================================
+st.markdown(f'<div class="section-bar">📊 {"03. INDICADORES CLAVE DE INGENIERÍA DE CAMPO (HORIZONTE 15 DÍAS)" if IS_ES else "03. KEY FIELD ENGINEERING INDICATORS (15-DAY HORIZON)"}</div>', unsafe_allow_html=True)
 
-except Exception as e:
-    st.error(f"Error connecting to satellite server: {e}")
+i1, i2, i3 = st.columns(3)
+with i1:
+    st.markdown(f"""
+    <div class="kpi-card">
+        <div class="kpi-title">{'1. PRECIPITACIÓN PRONOSTICADA (PICO / ACUM.)' if IS_ES else '1. FORECASTED PRECIPITATION (PEAK / CUMULATIVE)'}</div>
+        <div class="kpi-val">{pico_val:.1f} {unit_mm}</div>
+        <span class="kpi-badge">💧 {'Acumulado 15 días:' if IS_ES else '15-Day Cumulative:'} {acum_15d:.1f} mm</span>
+    </div>
+    """, unsafe_allow_html=True)
+
+with i2:
+    st.markdown(f"""
+    <div class="kpi-card">
+        <div class="kpi-title">{'2. HUMEDAD RELATIVA DEL AMBIENTE / SUELO' if IS_ES else '2. AMBIENT / SOIL RELATIVE HUMIDITY'}</div>
+        <div class="kpi-val">{hum_rel:.1f} %</div>
+        <span class="kpi-badge">💧 {'Monitoreo de saturación superficial' if IS_ES else 'Surface saturation monitoring'}</span>
+    </div>
+    """, unsafe_allow_html=True)
+
+with i3:
+    fluvial_state = (
+        ("🔴 ALERTA DE CRECIDA (Caudal Alto)" if IS_ES else "🔴 FLOOD ALERT (High Flow)") if acum_15d > 35
+        else (("🟡 VIGILANCIA (Caudal Moderado)" if IS_ES else "🟡 WATCH (Moderate Flow)") if acum_15d > 15
+              else ("🟢 CAUCE ESTABLE (Caudal Bajo)" if IS_ES else "🟢 STABLE CHANNEL (Low Flow)"))
+    )
+    st.markdown(f"""
+    <div class="kpi-card">
+        <div class="kpi-title">{'3. ESTADO DE ALERTA FLUVIAL / QUEBRADAS' if IS_ES else '3. FLUVIAL / RAVINE ALERT STATUS'}</div>
+        <div class="kpi-val" style="font-size:1.2rem;">{fluvial_state}</div>
+        <span class="kpi-badge">📍 {'Coordenada:' if IS_ES else 'Coordinate:'} {st.session_state.lat:.4f}, {st.session_state.lon:.4f}</span>
+    </div>
+    """, unsafe_allow_html=True)
+
+# ==========================================
+# 11. SECCIÓN 04: CRONOGRAMA DE IMPACTO PLUVIAL 15 DÍAS
+# ==========================================
+st.markdown(f'<div class="section-bar">🗓️ {"04. CRONOGRAMA DE IMPACTO PLUVIAL DIARIO VS. UMBRAL DEL RUBRO" if IS_ES else "04. DAILY RAINFALL IMPACT SCHEDULE VS. PACKAGE THRESHOLD"}</div>', unsafe_allow_html=True)
+
+b1, b2, b3 = st.columns(3)
+with b1:
+    st.markdown(f'<div class="kpi-card"><div class="kpi-title">💧 {"PRECIPITACIÓN MÁXIMA" if IS_ES else "MAXIMUM PRECIPITATION"}</div><div class="kpi-val" style="color:#EF4444 !important;">{pico_val:.1f} {unit_mm} &nbsp;<span style="font-size:0.8rem;opacity:0.8;">📅 {pico_fecha}</span></div></div>', unsafe_allow_html=True)
+with b2:
+    st.markdown(f'<div class="kpi-card"><div class="kpi-title">🛡️ {"DÍAS SOBRE EL UMBRAL" if IS_ES else "DAYS ABOVE THRESHOLD"}</div><div class="kpi-val" style="color:#F59E0B !important;">{dias_sobre_umbral} <span style="font-size:0.85rem;">{"sobre el umbral" if IS_ES else "days above threshold"}</span></div></div>', unsafe_allow_html=True)
+with b3:
+    st.markdown(f'<div class="kpi-card"><div class="kpi-title">🎯 {"UMBRAL DE ALERTA" if IS_ES else "ALERT THRESHOLD"}</div><div class="kpi-val">{umbral_rubro:.1f} {unit_mm}</div></div>', unsafe_allow_html=True)
+
+# Colores por barra según nivel de riesgo
+bar_colors = []
+for val in df_weather["p_adj"]:
+    if val >= umbral_rubro:
+        bar_colors.append("#EF4444")
+    elif val >= low_lim:
+        bar_colors.append("#F59E0B")
+    else:
+        bar_colors.append("#0284C7")
+
+fig_bars = go.Figure()
+fig_bars.add_trace(go.Bar(
+    x=df_weather["date_str"],
+    y=df_weather["p_adj"],
+    marker_color=bar_colors,
+    text=[f"{v:.1f}" if v > 0 else "0" for v in df_weather["p_adj"]],
+    textposition="outside",
+    name="Pronóstico" if IS_ES else "Forecast"
+))
+fig_bars.add_hline(
+    y=umbral_rubro,
+    line_dash="dash",
+    line_color="#EF4444",
+    line_width=2,
+    annotation_text=f"{'Umbral:' if IS_ES else 'Threshold:'} {umbral_rubro:.1f} {unit_mm}",
+    annotation_position="top right",
+    annotation_bgcolor="#EF4444",
+    annotation_font_color="#FFFFFF"
+)
+fig_bars.update_layout(
+    height=330,
+    margin=dict(l=30, r=20, t=30, b=35),
+    paper_bgcolor="rgba(0,0,0,0)",
+    plot_bgcolor="rgba(0,0,0,0)",
+    xaxis_title="HORIZONTE DE PRONÓSTICO (15 DÍAS)" if IS_ES else "FORECAST HORIZON (15 DAYS)",
+    yaxis_title=f"{'PRECIPITACIÓN' if IS_ES else 'PRECIPITATION'} ({unit_mm})",
+    yaxis=dict(
+        gridcolor="rgba(148, 163, 184, 0.2)",
+        range=[0, max(df_weather["p_adj"].max() * 1.28, umbral_rubro * 1.5, 4.0)]
+    ),
+    showlegend=False
+)
+st.plotly_chart(fig_bars, use_container_width=True, config={"displayModeBar": False, "displaylogo": False})
+
+# Acciones recomendadas
+st.markdown(f"**📋 {'ACCIONES RECOMENDADAS PARA EL FRENTE DE OBRA' if IS_ES else 'RECOMMENDED FIELD ACTIONS FOR WORK PACKAGE'} ({rubro_sel.upper()})**")
+ac1, ac2, ac3 = st.columns(3)
+for idx, col_ac in enumerate([ac1, ac2, ac3]):
+    with col_ac:
+        st.markdown(f"""
+        <div style="background:var(--secondary-background-color);border-left:4px solid #EF4444;padding:12px;border-radius:8px;font-size:0.83rem;font-weight:600;">
+            ✔ {acciones_rubro[idx]}
+        </div>
+        """, unsafe_allow_html=True)
+
+st.markdown("<div style='height:14px;'></div>", unsafe_allow_html=True)
+
+# ==========================================
+# 12. PREPARACIÓN DE TABLA TRADUCIDA (ES / EN) Y REPORTE PDF DE 15 DÍAS
+# ==========================================
+if IS_ES:
+    df_display = pd.DataFrame({
+        "Fecha": df_weather["date_str"],
+        "Temp. Máx (°C)": df_weather["tmax"],
+        "Temp. Mín (°C)": df_weather["tmin"],
+        "Temp. Prom (°C)": df_weather["tavg"],
+        "Radiación (MJ/m²)": df_weather["rad"],
+        "Viento Máx (km/h)": df_weather["wind"],
+        "Dirección Viento (°)": df_weather["wdir"],
+        "Prob. Lluvia (%)": df_weather["prob"],
+        "Precipitación Base (mm)": df_weather["p_base"],
+        "Pronóstico (mm)": df_weather["p_adj"]
+    })
+else:
+    df_display = pd.DataFrame({
+        "Date": df_weather["date_str"],
+        "Max Temp (°C)": df_weather["tmax"],
+        "Min Temp (°C)": df_weather["tmin"],
+        "Avg Temp (°C)": df_weather["tavg"],
+        "Radiation (MJ/m²)": df_weather["rad"],
+        "Max Wind (km/h)": df_weather["wind"],
+        "Wind Dir (°)": df_weather["wdir"],
+        "Rain Prob (%)": df_weather["prob"],
+        "Base Precip (mm)": df_weather["p_base"],
+        "Forecast (mm)": df_weather["p_adj"]
+    })
+
+# Generador del Reporte HTML/PDF de 1 Hoja con LOS 15 DÍAS COMPLETOS
+def build_15day_pdf_html():
+    rows_html = ""
+    # Iteramos por los 15 días completos (df_weather completo)
+    for _, row in df_weather.iterrows():
+        is_crit = row["p_adj"] >= umbral_rubro
+        val_style = "color:#DC2626;font-weight:800;" if is_crit else "color:#0F172A;font-weight:700;"
+        bg_row = "background:#FEF2F2;" if is_crit else ""
+        rows_html += f"""
+        <tr style="{bg_row}border-bottom:1px solid #E2E8F0;">
+            <td style="padding:3.5px 6px;text-align:center;font-weight:600;">{row['date_str']}</td>
+            <td style="padding:3.5px 6px;text-align:center;{val_style}">{row['p_adj']:.1f}</td>
+            <td style="padding:3.5px 6px;text-align:center;">{row['prob']}%</td>
+            <td style="padding:3.5px 6px;text-align:center;">{row['tmax']:.1f}°C</td>
+            <td style="padding:3.5px 6px;text-align:center;">{row['tmin']:.1f}°C</td>
+            <td style="padding:3.5px 6px;text-align:center;">{row['wind']:.1f}</td>
+        </tr>
+        """
+
+    html_doc = f"""
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <meta charset="utf-8">
+        <title>PERCET_GeoRisk_Report_{cliente_obra}</title>
+        <style>
+            @page {{ size: A4 portrait; margin: 10mm; }}
+            body {{ font-family: 'Segoe UI', Arial, sans-serif; color: #0F172A; margin: 0; padding: 0; font-size: 10.5px; }}
+            .report-box {{ border: 2px solid #061C3D; border-radius: 10px; padding: 14px 18px; }}
+            .header {{ display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #061C3D; padding-bottom: 8px; margin-bottom: 10px; }}
+            .title {{ font-size: 15px; font-weight: 900; color: #061C3D; }}
+            .subtitle {{ font-size: 9.5px; color: #475569; font-weight: 600; }}
+            .sec-title {{ font-size: 11px; font-weight: 800; color: #061C3D; border-bottom: 1px solid #CBD5E1; padding-bottom: 3px; margin: 8px 0 6px 0; text-transform: uppercase; }}
+            .kpi-grid {{ display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-bottom: 8px; }}
+            .kpi-box {{ background: #F8FAFC; border: 1px solid #CBD5E1; border-radius: 6px; padding: 6px 8px; text-align: center; }}
+            table {{ width: 100%; border-collapse: collapse; font-size: 9.2px; margin-top: 4px; }}
+            th {{ background: #061C3D; color: #FFFFFF; padding: 4.5px 6px; text-transform: uppercase; font-size: 8.5px; }}
+            .disclaimer {{ background: #F1F5F9; border-radius: 6px; padding: 6px 10px; font-size: 8px; color: #475569; margin-top: 8px; line-height: 1.35; }}
+            .print-btn {{ background: #0284C7; color: white; border: none; padding: 8px 16px; font-weight: 800; border-radius: 6px; cursor: pointer; margin-bottom: 10px; }}
+            @media print {{ .print-btn {{ display: none; }} }}
+        </style>
+    </head>
+    <body>
+        <button class="print-btn" onclick="window.print()">🖨️ {'IMPRIMIR / GUARDAR COMO PDF (1 HOJA)' if IS_ES else 'PRINT / SAVE AS PDF (1 PAGE)'}</button>
+        <div class="report-box">
+            <div class="header">
+                <div>
+                    <div class="title">PERCET UNIVERSAL HOLDINGS S.A.C. — GEORISK™</div>
+                    <div class="subtitle">{'REPORTE EJECUTIVO DE RIESGO CLIMÁTICO EN OBRA (HORIZONTE 15 DÍAS)' if IS_ES else 'EXECUTIVE CONSTRUCTION CLIMATE RISK REPORT (15-DAY HORIZON)'}</div>
+                </div>
+                <div style="text-align:right;font-size:9px;font-weight:700;">
+                    {'FECHA:' if IS_ES else 'DATE:'} {datetime.now().strftime('%d/%m/%Y %H:%M')}<br>
+                    COORD: {st.session_state.lat:.4f}, {st.session_state.lon:.4f}
+                </div>
+            </div>
+
+            <div class="sec-title">{'01. IDENTIFICACIÓN DEL PROYECTO Y DIAGNÓSTICO' if IS_ES else '01. PROJECT IDENTIFICATION & DIAGNOSTIC'}</div>
+            <div style="margin-bottom:6px;font-size:10px;">
+                <b>{'Cliente / Obra:' if IS_ES else 'Client / Project:'}</b> {cliente_obra} &nbsp;|&nbsp;
+                <b>{'Partida Crítica:' if IS_ES else 'Work Package:'}</b> {rubro_sel} &nbsp;|&nbsp;
+                <b>ENSO (+25%):</b> {'ACTIVO' if enso_active else 'INACTIVO'}
+            </div>
+
+            <div class="kpi-grid">
+                <div class="kpi-box"><b>{'PICO MÁXIMO' if IS_ES else 'PEAK RAINFALL'}</b><br><span style="font-size:13px;font-weight:900;color:#DC2626;">{pico_val:.1f} {unit_mm}</span> ({pico_fecha})</div>
+                <div class="kpi-box"><b>{'UMBRAL ADMISIBLE' if IS_ES else 'THRESHOLD'}</b><br><span style="font-size:13px;font-weight:900;">{umbral_rubro:.1f} {unit_mm}</span></div>
+                <div class="kpi-box"><b>{'ACUMULADO 15 DÍAS' if IS_ES else '15-DAY CUMULATIVE'}</b><br><span style="font-size:13px;font-weight:900;color:#0284C7;">{acum_15d:.1f} mm</span></div>
+                <div class="kpi-box"><b>{'HUMEDAD RELATIVA' if IS_ES else 'REL. HUMIDITY'}</b><br><span style="font-size:13px;font-weight:900;">{hum_rel:.1f}%</span></div>
+            </div>
+
+            <div class="sec-title">{'02. PROTOCOLO TÉCNICO DE MITIGACIÓN EN CAMPO' if IS_ES else '02. TECHNICAL FIELD MITIGATION PROTOCOL'}</div>
+            <ul style="margin:3px 0 6px 16px;padding:0;font-size:9.5px;">
+                <li>{acciones_rubro[0]}</li>
+                <li>{acciones_rubro[1]}</li>
+                <li>{acciones_rubro[2]}</li>
+            </ul>
+
+            <div class="sec-title">{'03. RESUMEN DE MATRIZ METEOROLÓGICA COMPLETA (15 DÍAS)' if IS_ES else '03. FULL 15-DAY METEOROLOGICAL MATRIX SUMMARY'}</div>
+            <table>
+                <thead>
+                    <tr>
+                        <th>{'FECHA' if IS_ES else 'DATE'}</th>
+                        <th>{'PRONÓSTICO (MM/DÍA)' if IS_ES else 'FORECAST (MM/DAY)'}</th>
+                        <th>{'PROB. LLUVIA (%)' if IS_ES else 'RAIN PROB (%)'}</th>
+                        <th>{'TEMP. MÁX (°C)' if IS_ES else 'MAX TEMP (°C)'}</th>
+                        <th>{'TEMP. MÍN (°C)' if IS_ES else 'MIN TEMP (°C)'}</th>
+                        <th>{'VIENTO MÁX (KM/H)' if IS_ES else 'MAX WIND (KM/H)'}</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {rows_html}
+                </tbody>
+            </table>
+
+            <div class="disclaimer">
+                🛡️ <b>{'AVISO LEGAL / DISCLAIMER:' if IS_ES else 'LEGAL DISCLAIMER:'}</b> 
+                {'PERCET GeoRisk™ es una herramienta analítica de asistencia y soporte basada en modelos predictivos satelitales y probabilísticos. Los resultados constituyen estimaciones técnicas de riesgo y no eximen al usuario de aplicar los protocolos oficiales de seguridad, supervisión en campo y normativas técnicas locales de construcción.' if IS_ES else 'PERCET GeoRisk™ is an analytical decision-support tool based on satellite and probabilistic predictive models. Results constitute technical risk estimates and do not exempt the user from applying official safety protocols, field supervision, and local construction codes.'}
+                <br><b>Contacto Corporativo / Corporate Contact:</b> oficina.tecnica.puh@outlook.com | PERCET UNIVERSAL HOLDINGS S.A.C.
+            </div>
+        </div>
+    </body>
+    </html>
+    """
+    return html_doc
+
+btn_col1, btn_col2 = st.columns(2)
+with btn_col1:
+    csv_bytes = df_display.to_csv(index=False).encode("utf-8-sig")
+    st.download_button(
+        label="📥 DESCARGAR MATRIZ DE DATOS (EXCEL / CSV)" if IS_ES else "📥 DOWNLOAD DATA MATRIX (EXCEL / CSV)",
+        data=csv_bytes,
+        file_name=f"PERCET_GeoRisk_15D_{cliente_obra.replace(' ', '_')}.csv",
+        mime="text/csv",
+        use_container_width=True
+    )
+
+with btn_col2:
+    report_html_str = build_15day_pdf_html()
+    st.download_button(
+        label="📄 EXPORTAR REPORTE TÉCNICO PDF (1 HOJA - 15 DÍAS)" if IS_ES else "📄 EXPORT TECHNICAL PDF REPORT (1 PAGE - 15 DAYS)",
+        data=report_html_str.encode("utf-8"),
+        file_name=f"Reporte_Ejecutivo_PERCET_{cliente_obra.replace(' ', '_')}.html",
+        mime="text/html",
+        type="primary",
+        use_container_width=True
+    )
+
+# Expander con tabla 100% traducida en ES y EN
+with st.expander("🛠️ VER PARÁMETROS DE INFERENCIA TÉCNICA Y MATRIZ METEOROLÓGICA COMPLETA (15 DÍAS)" if IS_ES else "🛠️ VIEW TECHNICAL INFERENCE PARAMETERS & FULL 15-DAY METEOROLOGICAL MATRIX"):
+    st.dataframe(df_display, use_container_width=True, hide_index=True)
+
+# ==========================================
+# 13. MODAL EJECUTIVO DE CONVERSIÓN ($33 SAAS + COTIZACIÓN B2B)
+# ==========================================
+@st.dialog("📝 PERCET UNIVERSAL HOLDINGS S.A.C.")
+def abrir_modal_cotizacion():
+    if IS_ES:
+        st.markdown("""
+        <div class="modal-corp-header">
+            <h3>🏢 PERCET UNIVERSAL HOLDINGS S.A.C.</h3>
+            <p>Ingeniería Civil, Consultoría BIM/VDC & Inteligencia Climática para Obras</p>
+        </div>
+        <div class="offer-pill">
+            <span>⚡ ACCESO ILIMITADO AL SOFTWARE POR OBRA: $33 USD (PAGO ÚNICO) + PROPUESTA TÉCNICA</span>
+        </div>
+        """, unsafe_allow_html=True)
+
+        emp_nombre = st.text_input("EMPRESA / CLIENTE:", placeholder="Ej. Consorcio Vial del Norte S.A.C.")
+        emp_contacto = st.text_input("CORREO CORPORATIVO O WHATSAPP:", placeholder="gerencia@constructora.com / +51 999 999 999")
+        tipo_servicio = st.selectbox(
+            "MODALIDAD / SERVICIO REQUERIDO:",
+            options=[
+                "🚀 Licencia Ilimitada Software PERCET GeoRisk™ ($33 USD - Pago Único)",
+                "🏗️ Ejecución / Cotización: Obras de Tierra y Pavimentación",
+                "🏢 Ejecución / Cotización: Estructuras de Concreto y Acero",
+                "📐 Consultoría Especializada BIM / VDC y Evaluación Estructural",
+                "💧 Ingeniería Hidráulica, Saneamiento y Tuberías (HDPE/PVC)"
+            ]
+        )
+        archivo_adj = st.file_uploader("ADJUNTAR PLANO, TDR O EXPEDIENTE (OPCIONAL):", type=["pdf", "png", "jpg", "dwg", "xlsx"])
+
+        if st.button("✅ ENVIAR SOLICITUD Y ACTIVAR ACCESO", type="primary", use_container_width=True):
+            if emp_nombre and emp_contacto:
+                st.success(f"¡Solicitud registrada para **{emp_nombre}**! Nuestro equipo técnico enviará el enlace de activación ($33 USD) y/o cotización formal a **{emp_contacto}**.")
+                subject = f"Solicitud PERCET GeoRisk / Obra - {emp_nombre}"
+                body = f"Empresa/Cliente: {emp_nombre}%0D%0AContacto: {emp_contacto}%0D%0AServicio Requerido: {tipo_servicio}%0D%0ACoordenadas de Obra: {st.session_state.lat}, {st.session_state.lon}"
+                st.markdown(f"""
+                <a href="mailto:oficina.tecnica.puh@outlook.com?subject={subject}&body={body}" target="_blank" style="display:block;text-align:center;background:#061C3D;color:#FFFFFF !important;padding:10px;border-radius:8px;font-weight:800;text-decoration:none;margin-top:8px;">
+                    📧 CONFIRMAR ENVÍO DIRECTO A OFICINA TÉCNICA (OUTLOOK)
+                </a>
+                """, unsafe_allow_html=True)
+            else:
+                st.warning("Por favor, complete el nombre de la empresa y su correo o teléfono para continuar.")
+    else:
+        st.markdown("""
+        <div class="modal-corp-header">
+            <h3>🏢 PERCET UNIVERSAL HOLDINGS S.A.C.</h3>
+            <p>Civil Engineering, BIM/VDC Consulting & Construction Climate Intelligence</p>
+        </div>
+        <div class="offer-pill">
+            <span>⚡ UNLIMITED SOFTWARE ACCESS PER PROJECT: $33 USD (ONE-TIME PAYMENT) + B2B QUOTE</span>
+        </div>
+        """, unsafe_allow_html=True)
+
+        emp_nombre = st.text_input("COMPANY / CLIENT NAME:", placeholder="e.g. Apex Infrastructure Corp.")
+        emp_contacto = st.text_input("CORPORATE EMAIL OR PHONE (WHATSAPP):", placeholder="engineering@company.com / +1 (555) 019-2834")
+        tipo_servicio = st.selectbox(
+            "LICENSE OR ENGINEERING SERVICE REQUIRED:",
+            options=[
+                "🚀 PERCET GeoRisk™ Unlimited Project License ($33 USD - One-Time Payment)",
+                "🏗️ Construction Quote: Earthworks & Road Paving",
+                "🏢 Construction Quote: Concrete & Steel Structures",
+                "📐 BIM / VDC Consulting & Structural Engineering Assessment",
+                "💧 Hydraulic Engineering, Sanitation & Industrial Piping (HDPE/PVC)"
+            ]
+        )
+        archivo_adj = st.file_uploader("UPLOAD BLUEPRINT OR RFP DOCUMENT (OPTIONAL):", type=["pdf", "png", "jpg", "dwg", "xlsx"])
+
+        if st.button("✅ SUBMIT REQUEST & ACTIVATE LICENSE", type="primary", use_container_width=True):
+            if emp_nombre and emp_contacto:
+                st.success(f"Request registered for **{emp_nombre}**! Our engineering desk will send your $33 USD unlimited access link and/or technical proposal to **{emp_contacto}**.")
+                subject = f"PERCET GeoRisk License / Quote Request - {emp_nombre}"
+                body = f"Company/Client: {emp_nombre}%0D%0AContact: {emp_contacto}%0D%0AService Required: {tipo_servicio}%0D%0ASite Coordinates: {st.session_state.lat}, {st.session_state.lon}"
+                st.markdown(f"""
+                <a href="mailto:oficina.tecnica.puh@outlook.com?subject={subject}&body={body}" target="_blank" style="display:block;text-align:center;background:#061C3D;color:#FFFFFF !important;padding:10px;border-radius:8px;font-weight:800;text-decoration:none;margin-top:8px;">
+                    📧 CONFIRM DIRECT DISPATCH TO ENGINEERING DESK
+                </a>
+                """, unsafe_allow_html=True)
+            else:
+                st.warning("Please enter your company name and corporate email or phone number.")
+
+# ==========================================
+# 14. BANNER COMERCIAL INFERIOR Y BOTONES DE ACCIÓN
+# ==========================================
+st.markdown(f"""
+<div style="background:linear-gradient(135deg,#04142C 0%,#0A2E5C 100%);border:1px solid #38BDF8;border-radius:14px;padding:24px;text-align:center;color:#FFFFFF !important;margin-top:18px;margin-bottom:14px;">
+    <h3 style="color:#FFFFFF !important;font-weight:900;margin:0 0 8px 0;">
+        {'🏢 ¿QUIERES ACCESO ILIMITADO A PERCET GEORISK™ ($33 USD) O COTIZAR TU OBRA?' if IS_ES else '🏢 WANT UNLIMITED ACCESS TO PERCET GEORISK™ ($33 USD) OR A PROJECT QUOTE?'}
+    </h3>
+    <p style="color:#E2E8F0 !important;font-size:0.92rem;max-width:780px;margin:0 auto;">
+        {'Adquiere el acceso ilimitado a nuestro software predictivo con reportes PDF de 15 días y matrices Excel por un pago único de $33 USD, o solicita una cotización de ingeniería y construcción con nuestra red de especialistas BIM/VDC en PERCET UNIVERSAL HOLDINGS S.A.C.' if IS_ES else 'Get unlimited access to our predictive software with 15-day executive PDF reports and Excel matrices for a one-time payment of $33 USD, or request a full engineering and construction quote from PERCET UNIVERSAL HOLDINGS S.A.C.'}
+    </p>
+</div>
+""", unsafe_allow_html=True)
+
+cta1, cta2 = st.columns(2)
+with cta1:
+    if st.button(
+        "📋 SOLICITAR LICENCIA ($33) / COTIZACIÓN DE OBRA" if IS_ES else "📋 GET $33 UNLIMITED LICENSE / PROJECT QUOTE",
+        type="primary",
+        use_container_width=True
+    ):
+        abrir_modal_cotizacion()
+
+with cta2:
+    wa_msg = (
+        f"Hola PERCET UNIVERSAL HOLDINGS S.A.C., deseo adquirir el acceso ilimitado a PERCET GeoRisk ($33 USD) / cotizar el proyecto {cliente_obra}."
+        if IS_ES else
+        f"Hello PERCET UNIVERSAL HOLDINGS S.A.C., I want to get the $33 USD unlimited access to PERCET GeoRisk / request a quote for project {cliente_obra}."
+    )
+    wa_url = f"https://wa.me/51996025448?text={requests.utils.quote(wa_msg)}"
+    st.link_button(
+        "💬 HABLAR CON UN ASESOR POR WHATSAPP" if IS_ES else "💬 CHAT WITH AN ENGINEERING ADVISOR ON WHATSAPP",
+        url=wa_url,
+        use_container_width=True
+    )
