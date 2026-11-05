@@ -29,6 +29,7 @@ if "last_click" not in st.session_state:
 
 LOGO_FILE = "logo.png"
 CORREO_CORPORATIVO = "oficina.tecnica.puh@outlook.com"
+WHATSAPP_NUMERO = "51981328639"  # +51 981328639
 
 def obtener_logo_base64(ruta):
     if os.path.exists(ruta):
@@ -38,11 +39,20 @@ def obtener_logo_base64(ruta):
 
 LOGO_B64 = obtener_logo_base64(LOGO_FILE)
 
-# 2. DICCIONARIO BILINGÜE COMPLETO (ESPAÑOL & ENGLISH)
+# 2. DICCIONARIO DE REGIONES Y PLANTILLAS INTELIGENTES (PERÚ / LATAM SAAS / GLOBAL EN)
+REGIONES_CONFIG = {
+    "🇵🇪 Perú (Español - Software & Obras)": {"lang": "ES", "mode": "PE", "country": "Perú"},
+    "🇲🇽 México (Español - Licencia SaaS)": {"lang": "ES", "mode": "LATAM", "country": "México"},
+    "🇨🇴 Colombia (Español - Licencia SaaS)": {"lang": "ES", "mode": "LATAM", "country": "Colombia"},
+    "🇨🇱 Chile (Español - Licencia SaaS)": {"lang": "ES", "mode": "LATAM", "country": "Chile"},
+    "🌎 Resto de Latinoamérica (Español - SaaS)": {"lang": "ES", "mode": "LATAM", "country": "Latinoamérica"},
+    "🌐 Global (English - SaaS Platform)": {"lang": "EN", "mode": "GLOBAL", "country": "Global"}
+}
+
 TEXTOS = {
     "ES": {
         "unit_mm": "mm/día",
-        "lang_label": "🌐 MERCADO / IDIOMA:",
+        "lang_label": "🌐 PAÍS / REGIÓN OPERATIVA:",
         "params_header": "⚙️ PARÁMETROS DEL PROYECTO",
         "client_label": "NOMBRE DEL CLIENTE / OBRA:",
         "rubro_label": "PARTIDA CRÍTICA EN EJECUCIÓN (RUBROS MACRO):",
@@ -103,9 +113,14 @@ TEXTOS = {
         "dl_pdf": "📄 EXPORTAR REPORTE TÉCNICO PDF (1 HOJA)",
         "exp_title": "🛠️ VER PARÁMETROS DE INFERENCIA TÉCNICA Y MATRIZ METEOROLÓGICA COMPLETA",
         "disclaimer": "<b>🛡️ AVISO LEGAL / DISCLAIMER:</b> PERCET GeoRisk™ es una herramienta analítica de asistencia y soporte basada en modelos predictivos satelitales y probabilísticos. Los resultados constituyen estimaciones técnicas de riesgo y no eximen al usuario de aplicar los protocolos oficiales de seguridad, supervisión en campo y normativas técnicas locales de construcción.",
-        "b2b_title": "🏢 LICENCIA CORPORATIVA POR PROYECTO ($33 USD PAGO ÚNICO) & EJECUCIÓN DE OBRAS",
-        "b2b_sub": "Obtén <b>acceso ilimitado a PERCET GeoRisk™</b> para tu obra (Monitoreo satelital 24/7, Reporte Ejecutivo PDF en 1 hoja y Matriz CSV) por un único pago de <b>$33 USD</b>, o solicita una cotización con nuestra red de ingenieros y especialistas BIM/VDC en <b>PERCET UNIVERSAL HOLDINGS S.A.C.</b>",
-        "btn_quote": "📝 ACTIVAR LICENCIA ($33 USD) / COTIZAR OBRA",
+        # Plantilla A: Perú (Software + Ejecución de Obras)
+        "b2b_title_pe": "🏢 LICENCIA POR PROYECTO ($33 USD PAGO ÚNICO) & EJECUCIÓN DE OBRAS EN PERÚ",
+        "b2b_sub_pe": "Obtén <b>acceso ilimitado a PERCET GeoRisk™</b> para tu obra (Monitoreo satelital 24/7, Reporte Ejecutivo PDF en 1 hoja y Matriz CSV) por un único pago de <b>$33 USD</b>, o solicita una cotización de ejecución de obra en el Perú con la red de ingenieros y especialistas BIM/VDC de <b>PERCET UNIVERSAL HOLDINGS S.A.C.</b>",
+        "btn_quote_pe": "📝 ACTIVAR LICENCIA ($33 USD) / COTIZAR OBRA",
+        # Plantilla B: Latinoamérica SaaS (Solo Software Digital + Aclaración Geográfica)
+        "b2b_title_latam": "🌎 INTELIGENCIA CLIMÁTICA Y REPORTES DE PROYECTO ($33 USD PAGO ÚNICO)",
+        "b2b_sub_latam": "Obtén <b>acceso ilimitado a PERCET GeoRisk™</b> para tu ubicación en <b>{pais}</b> por un único pago de <b>$33 USD</b>, incluyendo el Reporte Ejecutivo PDF (1 hoja) y la Matriz de Datos CSV. <i>(Nota: La ejecución física de obras y subcontratación en campo se circunscribe por el momento al territorio peruano; soporte digital SaaS y consultoría remota disponibles en toda Latinoamérica).</i>",
+        "btn_quote_latam": "💎 ACTIVAR LICENCIA SAAS ($33 USD) / REPORTE",
         "btn_wa": "💬 HABLAR CON UN ASESOR POR WHATSAPP",
         "col_date": "Fecha",
         "col_tmax": "Temp. Máx (°C)",
@@ -121,7 +136,7 @@ TEXTOS = {
     },
     "EN": {
         "unit_mm": "mm/day",
-        "lang_label": "🌎 MARKET / LANGUAGE:",
+        "lang_label": "🌎 COUNTRY / OPERATING REGION:",
         "params_header": "⚙️ PROJECT PARAMETERS",
         "client_label": "CLIENT / PROJECT NAME:",
         "rubro_label": "CRITICAL WORK PACKAGE (MACRO SECTORS):",
@@ -182,9 +197,10 @@ TEXTOS = {
         "dl_pdf": "📄 EXPORT TECHNICAL PDF REPORT (1 PAGE)",
         "exp_title": "🛠️ VIEW TECHNICAL INFERENCE PARAMETERS & FULL METEOROLOGICAL MATRIX",
         "disclaimer": "<b>🛡️ LEGAL DISCLAIMER:</b> PERCET GeoRisk™ is an analytical support tool based on satellite and probabilistic predictive models. Results constitute technical risk estimates and do not exempt the user from applying official safety protocols, field supervision, and local construction codes.",
-        "b2b_title": "🌎 CLIMATE INTELLIGENCE & INFRASTRUCTURE SOLUTIONS ($33 USD ONE-TIME PROJECT LICENSE)",
-        "b2b_sub": "At <b>PERCET UNIVERSAL HOLDINGS S.A.C.</b>, we drive intelligent climate risk management through unlimited project software access (<b>$33 USD one-time payment</b> including 1-page Executive PDF Report & CSV Matrix), specialized hydrological calibration, and a network of qualified engineering professionals. We integrate technology, science, and technical expertise to develop safer, more resilient, and sustainable infrastructure projects.",
-        "btn_quote": "📝 GET UNLIMITED ACCESS ($33 USD) / QUOTE",
+        # Plantilla C: Global (English SaaS)
+        "b2b_title_global": "🌎 CLIMATE INTELLIGENCE & INFRASTRUCTURE SOLUTIONS ($33 USD ONE-TIME PROJECT LICENSE)",
+        "b2b_sub_global": "At <b>PERCET UNIVERSAL HOLDINGS S.A.C.</b>, we drive intelligent climate risk management through unlimited project software access (<b>$33 USD one-time payment</b> including 1-page Executive PDF Report & CSV Matrix) and specialized hydrological calibration. <i>(On-site civil works execution is currently exclusive to Peru; SaaS licensing and remote BIM/hydrological consulting available globally).</i>",
+        "btn_quote_global": "💎 ACTIVATE SAAS LICENSE ($33 USD) / ACCESS",
         "btn_wa": "💬 CONTACT SALES ENGINEERING (WHATSAPP)",
         "col_date": "Date",
         "col_tmax": "Max Temp (°C)",
@@ -327,7 +343,7 @@ RUBROS_DATA = [
     }
 ]
 
-# 3. SISTEMA DE ESTILOS ADAPTATIVO (LIGHT & DARK MODE CORPORATIVO + MODAL INVERTIDO)
+# 3. SISTEMA DE ESTILOS ADAPTATIVO (LIGHT & DARK MODE + CENTRADO DE KPIs + MODAL CORPORATIVO CON LOGO)
 def aplicar_estilo_corporativo():
     st.markdown("""
     <style>
@@ -345,14 +361,12 @@ def aplicar_estilo_corporativo():
         text-transform: none !important;
     }
 
-    /* Eliminar botón Deploy, barra de cámara Plotly y botón de ampliar a pantalla completa (Imagen 5) */
     .stAppDeployButton, .modebar, .modebar-container,
     button[data-testid="StyledFullScreenButton"],
     div[data-testid="stElementToolbar"] {
         display: none !important;
     }
 
-    /* Variables dinámicas para Modo Claro (por defecto) y Modo Oscuro */
     :root, body[data-percet-theme="light"] {
         --p-bg-main: #f0f4f8;
         --p-bg-sidebar: #f8fafc;
@@ -408,7 +422,6 @@ def aplicar_estilo_corporativo():
         color: var(--p-text-primary) !important;
     }
 
-    /* Forzar textos claros en todos los controles cuando está en Modo Oscuro */
     body[data-percet-theme="dark"] label p,
     body[data-percet-theme="dark"] .stCaption,
     body[data-percet-theme="dark"] div[data-testid="stCaptionContainer"] p,
@@ -418,7 +431,6 @@ def aplicar_estilo_corporativo():
         color: #f8fafc !important;
     }
 
-    /* En Modo Oscuro: Números del Velocímetro y del Gráfico de Barras 100% Blancos */
     body[data-percet-theme="dark"] .js-plotly-plot .plotly .main-svg text {
         fill: #f8fafc !important;
     }
@@ -512,7 +524,6 @@ def aplicar_estilo_corporativo():
         box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.25);
     }
 
-    /* Latitud y Longitud alineadas */
     div[data-testid="stNumberInput"] label p {
         font-size: 0.76rem !important;
         font-weight: 800 !important;
@@ -536,7 +547,6 @@ def aplicar_estilo_corporativo():
         display: block !important;
     }
 
-    /* Botones ejecutivos sin cortes */
     .stButton > button, .stDownloadButton > button, a[data-testid="stBaseLinkButton-secondary"] {
         background: linear-gradient(90deg, #020b1e 0%, #004799 100%) !important;
         color: #ffffff !important;
@@ -556,7 +566,6 @@ def aplicar_estilo_corporativo():
         box-shadow: 0 4px 12px rgba(0, 180, 216, 0.4) !important;
     }
 
-    /* Tarjetas del Diagnóstico Operativo */
     .diag-subbanner {
         background: linear-gradient(90deg, #042454 0%, #004799 100%);
         color: #ffffff !important;
@@ -662,7 +671,7 @@ def aplicar_estilo_corporativo():
         color: #15803d;
     }
 
-    /* Punto 03: Tarjetas KPI 100% uniformes y claras en Dark/Light */
+    /* IMAGEN 3: Punto 03 con contenido 100% CENTRADO y uniforme */
     .field-kpi-card {
         background: var(--p-bg-card);
         border-radius: 12px;
@@ -673,7 +682,9 @@ def aplicar_estilo_corporativo():
         height: 100%;
         display: flex;
         flex-direction: column;
-        justify-content: space-between;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
     }
     .field-kpi-title {
         font-size: 0.78rem !important;
@@ -683,6 +694,7 @@ def aplicar_estilo_corporativo():
         letter-spacing: 0.3px;
         margin-bottom: 8px;
         line-height: 1.3;
+        text-align: center;
     }
     .field-kpi-value {
         font-size: 1.32rem !important;
@@ -690,17 +702,19 @@ def aplicar_estilo_corporativo():
         color: var(--p-text-primary) !important;
         margin-bottom: 10px;
         line-height: 1.2 !important;
+        text-align: center;
     }
     .field-kpi-pill {
         display: inline-block;
         font-size: 0.76rem !important;
         font-weight: 700 !important;
-        padding: 4px 12px;
+        padding: 4px 14px;
         border-radius: 20px;
         background-color: var(--p-badge-bg);
         color: var(--p-badge-text);
         border: 1px solid var(--p-badge-border);
         width: fit-content;
+        margin: 0 auto;
     }
 
     /* Punto 04: Píldoras Ejecutivas y Bloque de Acciones */
@@ -767,10 +781,35 @@ def aplicar_estilo_corporativo():
     }
 
     /* =========================================================================
-       IMÁGENES 6 Y 8: MODAL DE COTIZACIÓN INVERTIDO Y EJECUTIVO
-       - Si la página está en LIGHT -> Modal con fondo AZUL OSCURO del logo y letras blancas gruesas
-       - Si la página está en DARK  -> Modal con fondo BLANCO CLARO y letras azul oscuro gruesas
+       IMAGEN 5: MODAL EJECUTIVO CON LOGO Y TÍTULO CENTRADO (LIGHT & DARK)
        ========================================================================= */
+    .modal-brand-header {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 18px;
+        padding: 6px 10px 14px 10px;
+        margin-bottom: 10px;
+        border-bottom: 2px solid rgba(0, 180, 216, 0.35);
+    }
+    .modal-brand-logo {
+        width: 72px;
+        height: 72px;
+        object-fit: contain;
+        border-radius: 12px;
+        box-shadow: 0 4px 14px rgba(0, 0, 0, 0.3);
+        flex-shrink: 0;
+    }
+    .modal-brand-title {
+        font-size: 1.42rem !important;
+        font-weight: 800 !important;
+        letter-spacing: 1px !important;
+        line-height: 1.2 !important;
+        text-align: center;
+        text-transform: uppercase;
+        margin: 0 !important;
+    }
+
     body[data-percet-theme="light"] div[role="dialog"] {
         background: linear-gradient(145deg, #020b1e 0%, #042454 65%, #00357a 100%) !important;
         border: 2px solid #00b4d8 !important;
@@ -783,6 +822,7 @@ def aplicar_estilo_corporativo():
     body[data-percet-theme="light"] div[role="dialog"] p,
     body[data-percet-theme="light"] div[role="dialog"] label p,
     body[data-percet-theme="light"] div[role="dialog"] span,
+    body[data-percet-theme="light"] div[role="dialog"] .modal-brand-title,
     body[data-percet-theme="light"] div[role="dialog"] button[aria-label="Close"] {
         color: #ffffff !important;
         font-weight: 800 !important;
@@ -804,7 +844,6 @@ def aplicar_estilo_corporativo():
         border: 1.5px dashed #38bdf8 !important;
     }
 
-    /* Cuando la app está en DARK -> Modal con fondo BLANCO CLARO y letras oscuras gruesas */
     body[data-percet-theme="dark"] div[role="dialog"] {
         background: #ffffff !important;
         border: 3px solid #004799 !important;
@@ -817,6 +856,7 @@ def aplicar_estilo_corporativo():
     body[data-percet-theme="dark"] div[role="dialog"] p,
     body[data-percet-theme="dark"] div[role="dialog"] label p,
     body[data-percet-theme="dark"] div[role="dialog"] span,
+    body[data-percet-theme="dark"] div[role="dialog"] .modal-brand-title,
     body[data-percet-theme="dark"] div[role="dialog"] button[aria-label="Close"] {
         color: #020b1e !important;
         font-weight: 800 !important;
@@ -840,7 +880,6 @@ def aplicar_estilo_corporativo():
     </style>
     """, unsafe_allow_html=True)
 
-    # Sincronizador automático en tiempo real del Modo Claro / Modo Oscuro de Streamlit
     components.html("""
     <script>
     (function() {
@@ -874,24 +913,36 @@ def aplicar_estilo_corporativo():
 
 aplicar_estilo_corporativo()
 
-# 4. BARRA LATERAL 100% BILINGÜE
+# 4. BARRA LATERAL CON SELECTOR DE PAÍSES / REGIONES INTELIGENTE
 with st.sidebar:
     if os.path.exists(LOGO_FILE):
         st.image(LOGO_FILE, use_container_width=True)
     
     st.markdown("<hr style='margin: 0.6rem 0;'>", unsafe_allow_html=True)
     
-    lang_prev = st.session_state.get("idioma_radio", "🇵🇪 Español (Construcción & Obras)")
-    etiqueta_radio_idioma = "🌐 MERCADO / IDIOMA:" if "Español" in lang_prev else "🌎 MARKET / LANGUAGE:"
+    reg_prev = st.session_state.get("region_select", "🇵🇪 Perú (Español - Software & Obras)")
+    es_ingles_prev = "Global" in reg_prev
+    etiqueta_selector_pais = "🌎 COUNTRY / OPERATING REGION:" if es_ingles_prev else "🌐 PAÍS / REGIÓN OPERATIVA:"
     
-    idioma_sel = st.radio(
-        etiqueta_radio_idioma,
-        ["🇵🇪 Español (Construcción & Obras)", "🌎 English (Global SaaS)"],
-        key="idioma_radio"
+    region_sel = st.selectbox(
+        etiqueta_selector_pais,
+        list(REGIONES_CONFIG.keys()),
+        key="region_select"
     )
-    LANG = "ES" if "Español" in idioma_sel else "EN"
+    
+    CFG_REGION = REGIONES_CONFIG[region_sel]
+    LANG = CFG_REGION["lang"]
+    MODO_PAIS = CFG_REGION["mode"]      # "PE", "LATAM", o "GLOBAL"
+    NOMBRE_PAIS = CFG_REGION["country"] # "Perú", "México", "Colombia", "Chile", etc.
     T = TEXTOS[LANG]
     UNIT_MM = T["unit_mm"]
+    
+    if MODO_PAIS == "PE":
+        st.caption("✅ **Perú:** Licencia SaaS ($33 USD) + Ejecución y cotización de obras habilitadas.")
+    elif MODO_PAIS == "LATAM":
+        st.caption(f"💻 **{NOMBRE_PAIS}:** Modalidad Licencia Digital SaaS ($33 USD). Ejecución física de obras exclusiva en Perú.")
+    else:
+        st.caption("🌎 **Global:** Digital SaaS License ($33 USD) & Remote Consulting. Physical works exclusive to Peru.")
     
     st.markdown("<hr style='margin: 0.6rem 0;'>", unsafe_allow_html=True)
     st.markdown(f"<p style='font-weight:800; font-size:0.90rem; letter-spacing:0.5px;'>{T['params_header']}</p>", unsafe_allow_html=True)
@@ -914,35 +965,79 @@ with st.sidebar:
     
     modo_enso = st.toggle(T["enso_label"], value=True, help=T["enso_help"])
 
-# 5. MODAL DE LICENCIA ($33 USD PAGO ÚNICO) Y COTIZACIÓN DE OBRA CON CAPTURA DE CORREO (IMÁGENES 6 Y 8)
-@st.dialog("📝 PERCET UNIVERSAL HOLDINGS S.A.C.")
+# 5. MODAL DE SOLICITUD MEJORADO CON LOGO, TÍTULO CENTRADO Y OPCIONES CORTAS (IMÁGENES 4 Y 5)
+@st.dialog("🏢 REGISTRO CORPORATIVO PERCET")
 def mostrar_modal_cotizacion():
-    if LANG == "ES":
+    logo_html = f'<img src="data:image/png;base64,{LOGO_B64}" class="modal-brand-logo">' if LOGO_B64 else ""
+    st.markdown(f"""
+    <div class="modal-brand-header">
+        {logo_html}
+        <div class="modal-brand-title">PERCET UNIVERSAL<br>HOLDINGS S.A.C.</div>
+    </div>
+    """, unsafe_allow_html=True)
+
+    if MODO_PAIS == "PE":
         st.markdown("""
-        <div style="background: rgba(0, 180, 216, 0.18); border-left: 5px solid #00b4d8; padding: 10px 14px; border-radius: 8px; margin-bottom: 12px;">
-            <div style="font-size: 0.85rem; font-weight: 900; text-transform: uppercase; letter-spacing: 0.4px;">
-                💎 ACCESO ILIMITADO POR PROYECTO ($33 USD PAGO ÚNICO) & SERVICIOS DE INGENIERÍA
+        <div style="background: rgba(0, 180, 216, 0.20); border-left: 5px solid #00b4d8; padding: 10px 14px; border-radius: 8px; margin-bottom: 12px;">
+            <div style="font-size: 0.84rem; font-weight: 900; text-transform: uppercase; letter-spacing: 0.4px;">
+                💎 ACCESO ILIMITADO POR PROYECTO ($33 USD PAGO ÚNICO) & OBRAS EN PERÚ
             </div>
-            <div style="font-size: 0.78rem; font-weight: 700; margin-top: 3px;">
-                Incluye monitoreo satelital 24/7, Reporte Ejecutivo PDF en 1 hoja, Matriz CSV y soporte técnico para tu obra.
+            <div style="font-size: 0.77rem; font-weight: 700; margin-top: 3px;">
+                Incluye monitoreo satelital 24/7, Reporte Ejecutivo PDF (1 hoja), Matriz CSV y soporte de ingeniería.
             </div>
         </div>
         """, unsafe_allow_html=True)
+        opciones_servicio = [
+            "💎 Licencia GeoRisk™ ($33 USD - Acceso Ilimitado)",
+            "🏗️ Licencia ($33 USD) + Mitigación en Campo",
+            "📐 Ejecución de Obra Civil / Drenaje Pluvial",
+            "🏢 Ingeniería Integral / Supervisión BIM-VDC"
+        ]
+    elif MODO_PAIS == "LATAM":
+        st.markdown(f"""
+        <div style="background: rgba(0, 180, 216, 0.20); border-left: 5px solid #00b4d8; padding: 10px 14px; border-radius: 8px; margin-bottom: 12px;">
+            <div style="font-size: 0.84rem; font-weight: 900; text-transform: uppercase; letter-spacing: 0.4px;">
+                🌎 LICENCIA DIGITAL SAAS PARA {NOMBRE_PAIS.upper()} ($33 USD PAGO ÚNICO)
+            </div>
+            <div style="font-size: 0.77rem; font-weight: 700; margin-top: 3px;">
+                Acceso ilimitado al software, Reporte PDF (1 hoja) y Matriz CSV. (Ejecución física de obras exclusiva en Perú).
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
+        opciones_servicio = [
+            "💎 Licencia GeoRisk™ ($33 USD - Acceso Ilimitado)",
+            "📊 Reporte Ejecutivo PDF + Matriz CSV ($33 USD)",
+            "💻 Consultoría Remota Hidrológica / BIM-VDC"
+        ]
+    else:
+        st.markdown("""
+        <div style="background: rgba(0, 180, 216, 0.20); border-left: 5px solid #00b4d8; padding: 10px 14px; border-radius: 8px; margin-bottom: 12px;">
+            <div style="font-size: 0.84rem; font-weight: 900; text-transform: uppercase; letter-spacing: 0.4px;">
+                🌎 UNLIMITED PROJECT SAAS LICENSE ($33 USD ONE-TIME PAYMENT)
+            </div>
+            <div style="font-size: 0.77rem; font-weight: 700; margin-top: 3px;">
+                Includes 24/7 satellite monitoring, 1-page Executive PDF Report, full CSV Matrix & remote technical support.
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
+        opciones_servicio = [
+            "💎 GeoRisk™ License ($33 USD - Unlimited Access)",
+            "📊 Executive PDF Report + CSV Matrix ($33 USD)",
+            "💻 Remote Hydrological / BIM-VDC Consulting"
+        ]
+
+    if LANG == "ES":
         emp = st.text_input("EMPRESA / CONSTRUCTORA O CLIENTE:")
-        correo_cli = st.text_input("CORREO CORPORATIVO (OBLIGATORIO PARA ENVÍO DE ACCESO / PROPUESTA):")
+        correo_cli = st.text_input("CORREO CORPORATIVO (OBLIGATORIO PARA ENVÍO DE ACCESO):")
         tel_cli = st.text_input("TELÉFONO / WHATSAPP DE CONTACTO:")
-        t_proy = st.selectbox("MODALIDAD / SERVICIO REQUERIDO:", [
-            "💎 Licencia PERCET GeoRisk™ ($33 USD Pago Único - Acceso Ilimitado por Obra)",
-            "🏗️ Licencia GeoRisk™ ($33 USD) + Consultoría de Mitigación en Campo",
-            "📐 Ejecución de Obra Civil, Estructuras o Drenaje Pluvial",
-            "🏢 Cotización Integral de Ingeniería / Supervisión BIM-VDC"
-        ])
+        t_proy = st.selectbox("MODALIDAD / SERVICIO REQUERIDO:", opciones_servicio)
         archivo = st.file_uploader("ADJUNTAR PLANO, EXPEDIENTE O COMPROBANTE (OPCIONAL):", type=["pdf", "png", "jpg"])
-        if st.button("🚀 REGISTRAR Y ENVIAR SOLICITUD", type="primary"):
+        if st.button("🚀 REGISTRAR Y ENVIAR SOLICITUD", type="primary", use_container_width=True):
             if emp and correo_cli:
                 nombre_arch = archivo.name if archivo else "No adjuntado"
-                asunto = f"Licencia/Cotización GeoRisk ($33 USD) - {emp} ({nombre_proyecto})"
+                asunto = f"[{NOMBRE_PAIS}] Solicitud GeoRisk ($33 USD) - {emp} ({nombre_proyecto})"
                 cuerpo = (
+                    f"País / Región: {NOMBRE_PAIS}\n"
                     f"Empresa / Cliente: {emp}\n"
                     f"Correo del Cliente: {correo_cli}\n"
                     f"Teléfono / WhatsApp: {tel_cli}\n"
@@ -956,6 +1051,7 @@ def mostrar_modal_cotizacion():
                     requests.post(
                         f"https://formsubmit.co/ajax/{CORREO_CORPORATIVO}",
                         data={
+                            "Pais": NOMBRE_PAIS,
                             "Empresa": emp,
                             "Correo_Cliente": correo_cli,
                             "Telefono": tel_cli,
@@ -971,45 +1067,31 @@ def mostrar_modal_cotizacion():
                 except Exception:
                     pass
                 mailto_url = f"mailto:{CORREO_CORPORATIVO}?subject={urllib.parse.quote(asunto)}&body={urllib.parse.quote(cuerpo)}"
-                st.success(f"✅ Solicitud registrada con el correo **{correo_cli}** y derivada a **{CORREO_CORPORATIVO}**.")
+                st.success(f"✅ Solicitud registrada con el correo **{correo_cli}** y enviada a **{CORREO_CORPORATIVO}**.")
                 st.markdown(
-                    f'<a href="{mailto_url}" target="_blank" style="display:inline-block; margin-top:6px; font-size:0.82rem; font-weight:900; text-decoration:underline;">📧 Confirmar envío directo desde mi cliente de correo ({CORREO_CORPORATIVO})</a>',
+                    f'<a href="{mailto_url}" target="_blank" style="display:inline-block; margin-top:6px; font-size:0.82rem; font-weight:900; text-decoration:underline;">📧 Confirmar copia directa en mi cliente de correo ({CORREO_CORPORATIVO})</a>',
                     unsafe_allow_html=True
                 )
             else:
-                st.warning("⚠️ Por favor, complete el nombre de la Empresa y su Correo Corporativo.")
+                st.warning("⚠️ Complete el nombre de la Empresa y su Correo Corporativo.")
     else:
-        st.markdown("""
-        <div style="background: rgba(0, 180, 216, 0.18); border-left: 5px solid #00b4d8; padding: 10px 14px; border-radius: 8px; margin-bottom: 12px;">
-            <div style="font-size: 0.85rem; font-weight: 900; text-transform: uppercase; letter-spacing: 0.4px;">
-                💎 UNLIMITED PROJECT ACCESS ($33 USD ONE-TIME PAYMENT) & ENGINEERING SERVICES
-            </div>
-            <div style="font-size: 0.78rem; font-weight: 700; margin-top: 3px;">
-                Includes 24/7 satellite monitoring, 1-page Executive PDF Report, full CSV Matrix, and technical support.
-            </div>
-        </div>
-        """, unsafe_allow_html=True)
         emp = st.text_input("COMPANY / CONTRACTOR OR CLIENT NAME:")
-        correo_cli = st.text_input("CORPORATE EMAIL (REQUIRED FOR ACCESS & PROPOSAL DELIVERY):")
+        correo_cli = st.text_input("CORPORATE EMAIL (REQUIRED FOR ACCESS DELIVERY):")
         tel_cli = st.text_input("CONTACT PHONE / WHATSAPP:")
-        t_proy = st.selectbox("LICENSING PLAN / SERVICE REQUIRED:", [
-            "💎 PERCET GeoRisk™ Project License ($33 USD One-Time Payment - Unlimited Access)",
-            "🏗️ GeoRisk™ License ($33 USD) + Field Mitigation Engineering Consulting",
-            "📐 Civil Works Execution, Structural & Drainage Engineering",
-            "🌎 Custom Basin ML Calibration & Enterprise BIM-VDC Supervision"
-        ])
+        t_proy = st.selectbox("LICENSING PLAN / SERVICE REQUIRED:", opciones_servicio)
         archivo = st.file_uploader("UPLOAD BLUEPRINT, RFP OR RECEIPT (OPTIONAL):", type=["pdf", "png", "jpg"])
-        if st.button("🚀 REGISTER & SUBMIT REQUEST", type="primary"):
+        if st.button("🚀 REGISTER & SUBMIT REQUEST", type="primary", use_container_width=True):
             if emp and correo_cli:
                 nombre_arch = archivo.name if archivo else "Not attached"
-                asunto = f"GeoRisk Project License ($33 USD) / Quote - {emp} ({nombre_proyecto})"
+                asunto = f"[GLOBAL] GeoRisk License ($33 USD) - {emp} ({nombre_proyecto})"
                 cuerpo = (
+                    f"Region: {NOMBRE_PAIS}\n"
                     f"Company / Client: {emp}\n"
                     f"Client Email: {correo_cli}\n"
                     f"Phone / WhatsApp: {tel_cli}\n"
                     f"Evaluated Project: {nombre_proyecto}\n"
                     f"Sector: {nombre_rubro_activo}\n"
-                    f"Selected Plan / Service: {t_proy}\n"
+                    f"Selected Plan: {t_proy}\n"
                     f"Coordinates: Lat {st.session_state.lat}, Lon {st.session_state.lon}\n"
                     f"Reference File: {nombre_arch}"
                 )
@@ -1017,6 +1099,7 @@ def mostrar_modal_cotizacion():
                     requests.post(
                         f"https://formsubmit.co/ajax/{CORREO_CORPORATIVO}",
                         data={
+                            "Region": NOMBRE_PAIS,
                             "Company": emp,
                             "Client_Email": correo_cli,
                             "Phone": tel_cli,
@@ -1084,7 +1167,6 @@ try:
     factor_seguridad = 1.25 if modo_enso else 1.0
     df_diario["Pronóstico"] = (df_diario["Precipitación Base (mm)"] * factor_seguridad).round(1)
     
-    # Matriz traducida dinámicamente para visualización y exportación (Imagen 7)
     df_mostrar = pd.DataFrame({
         T["col_date"]: df_diario["Fecha"],
         T["col_tmax"]: df_diario["Temp. Máx (°C)"],
@@ -1111,7 +1193,7 @@ try:
     else:
         estado_quebrada = f"🟢 {T['q_green']}"
 
-    # 8. SECCIÓN 01 (MAPA) Y SECCIÓN 02 (DIAGNÓSTICO)
+    # 8. SECCIÓN 01 (MAPA CON NORTE SIN FONDO ARRIBA A LA DERECHA) Y SECCIÓN 02 (DIAGNÓSTICO)
     col_mapa, col_panel = st.columns([1.22, 1], gap="large")
 
     with col_mapa:
@@ -1146,75 +1228,32 @@ try:
         ).add_to(m)
         folium.LatLngPopup().add_to(m)
 
-        oeste_letra = "O" if LANG == "ES" else "W"
-        compass_html = f"""
-        {{% macro html(this, kwargs) %}}
+        # IMÁGENES 1 Y 2: Flecha de Norte técnica azul sin fondo (transparente) en la esquina superior derecha
+        compass_html = """
+        {% macro html(this, kwargs) %}
         <div style="
-            position: fixed; 
-            bottom: 18px; left: 18px; width: 88px; height: 104px; 
-            z-index: 9999; background: rgba(2, 11, 30, 0.90);
-            border: 2px solid #38bdf8; border-radius: 14px;
-            box-shadow: 0 4px 14px rgba(0,0,0,0.4);
-            display: flex; flex-direction: column; align-items: center; justify-content: center;
-            padding: 4px; pointer-events: none; font-family: 'Montserrat', sans-serif;">
-            <svg viewBox="0 0 100 100" width="72" height="72">
-                <circle cx="50" cy="50" r="45" fill="none" stroke="#334155" stroke-width="1.5"/>
-                <text x="50" y="14" fill="#38bdf8" font-size="12" font-weight="900" text-anchor="middle">N</text>
-                <text x="50" y="95" fill="#cbd5e1" font-size="10.5" font-weight="700" text-anchor="middle">S</text>
-                <text x="91" y="54" fill="#cbd5e1" font-size="10.5" font-weight="700" text-anchor="middle">E</text>
-                <text x="9" y="54" fill="#cbd5e1" font-size="10.5" font-weight="700" text-anchor="middle">{oeste_letra}</text>
-                <text x="78" y="26" fill="#94a3b8" font-size="7.5" font-weight="700" text-anchor="middle">NE</text>
-                <text x="22" y="26" fill="#94a3b8" font-size="7.5" font-weight="700" text-anchor="middle">N{oeste_letra}</text>
-                <text x="78" y="81" fill="#94a3b8" font-size="7.5" font-weight="700" text-anchor="middle">SE</text>
-                <text x="22" y="81" fill="#94a3b8" font-size="7.5" font-weight="700" text-anchor="middle">S{oeste_letra}</text>
-                <g id="percet-compass-needle" style="transform-origin: 50px 50px; transition: transform 0.18s ease-out;">
-                    <polygon points="50,18 56,50 50,44 44,50" fill="#ef4444"/>
-                    <polygon points="50,82 56,50 50,56 44,50" fill="#e2e8f0"/>
+            position: fixed;
+            top: 14px; right: 14px;
+            width: 66px; height: 74px;
+            z-index: 9999;
+            background: transparent !important;
+            border: none !important;
+            box-shadow: none !important;
+            pointer-events: none;
+            display: flex; align-items: center; justify-content: center;
+            filter: drop-shadow(0px 1px 3px rgba(255, 255, 255, 0.92));">
+            <svg viewBox="0 0 100 112" width="64" height="72">
+                <g id="percet-north-arrow" style="transform-origin: 50px 52px; transition: transform 0.18s ease-out;">
+                    <!-- Ala izquierda delineada en azul marino -->
+                    <polygon points="50,6 12,84 50,55" fill="rgba(255,255,255,0.25)" stroke="#00205b" stroke-width="4" stroke-linejoin="miter"/>
+                    <!-- Ala derecha sólida en azul marino -->
+                    <polygon points="50,6 88,84 50,55" fill="#00205b" stroke="#00205b" stroke-width="4" stroke-linejoin="miter"/>
                 </g>
-                <circle cx="50" cy="50" r="3.5" fill="#020b1e" stroke="#38bdf8" stroke-width="1.5"/>
+                <!-- Letra N clásica en azul marino -->
+                <text x="50" y="106" fill="#00205b" font-family="Georgia, 'Times New Roman', serif" font-size="38" font-weight="900" text-anchor="middle">N</text>
             </svg>
-            <div id="percet-compass-label" style="font-size:9.5px; font-weight:800; color:#38bdf8; letter-spacing:0.4px; margin-top:1px;">
-                N · 0°
-            </div>
         </div>
-        <script>
-        (function() {{
-            var baseLat = {st.session_state.lat};
-            var baseLon = {st.session_state.lon};
-            var dirs = ["N", "NE", "E", "SE", "S", "S{oeste_letra}", "{oeste_letra}", "N{oeste_letra}"];
-
-            function actualizarAguja(targetLat, targetLon) {{
-                var dLat = targetLat - baseLat;
-                var dLon = targetLon - baseLon;
-                if (Math.abs(dLat) < 0.00005 && Math.abs(dLon) < 0.00005) return;
-                var rad = Math.atan2(dLon, dLat);
-                var deg = (rad * 180 / Math.PI + 360) % 360;
-                var idx = Math.round(deg / 45) % 8;
-                var needle = document.getElementById("percet-compass-needle");
-                var label = document.getElementById("percet-compass-label");
-                if (needle) needle.style.transform = "rotate(" + deg.toFixed(1) + "deg)";
-                if (label) label.innerHTML = dirs[idx] + " · " + Math.round(deg) + "°";
-            }}
-
-            setTimeout(function() {{
-                try {{
-                    var mapObj = {{{{ this._parent.get_name() }}}};
-                    if (mapObj) {{
-                        mapObj.on("move", function() {{
-                            var c = mapObj.getCenter();
-                            actualizarAguja(c.lat, c.lng);
-                        }});
-                        mapObj.on("mousemove", function(e) {{
-                            if (e && e.latlng) {{
-                                actualizarAguja(e.latlng.lat, e.latlng.lng);
-                            }}
-                        }});
-                    }}
-                }} catch(err) {{}}
-            }}, 400);
-        }})();
-        </script>
-        {{% endmacro %}}
+        {% endmacro %}
         """
         compass = MacroElement()
         compass._template = Template(compass_html)
@@ -1304,7 +1343,6 @@ try:
             paper_bgcolor="rgba(0,0,0,0)",
             font={'family': 'Montserrat'}
         )
-        # Imagen 5: displayModeBar=False elimina la cámara y los controles superpuestos
         st.plotly_chart(fig_gauge, use_container_width=True, config={'displayModeBar': False})
 
         st.markdown(f"""
@@ -1341,7 +1379,7 @@ try:
 
     st.markdown("<br>", unsafe_allow_html=True)
 
-    # 9. SECCIÓN 03: INDICADORES CLAVE DE INGENIERÍA DE CAMPO
+    # 9. SECCIÓN 03: INDICADORES CLAVE DE INGENIERÍA DE CAMPO CENTRADOS (IMAGEN 3)
     st.markdown(f"""
     <div class="sec-header">
         <p class="sec-header-title">📊 {T['sec3_title']}</p>
@@ -1501,7 +1539,7 @@ try:
 
     st.markdown("<br>", unsafe_allow_html=True)
 
-    # 11. GENERADOR DE INFOGRAFÍA PDF EN 1 SOLA HOJA A4 CON LOS 15 DÍAS COMPLETOS (IMAGEN 6)
+    # 11. GENERADOR DE INFOGRAFÍA PDF EN 1 SOLA HOJA A4 CON LOS 15 DÍAS COMPLETOS
     def disparar_pdf_infografia_una_hoja():
         fechas_js = json.dumps(df_diario["Fecha"].tolist())
         valores_js = json.dumps(df_diario["Pronóstico"].tolist())
@@ -1553,7 +1591,7 @@ try:
                     .page {{ width: 100%; border: 2px solid #042454; border-radius: 10px; padding: 12px 14px; }}
                     .header {{ display: flex; justify-content: space-between; align-items: center; background: linear-gradient(135deg, #020b1e 0%, #042454 100%); color: white; padding: 10px 16px; border-radius: 8px; border-bottom: 4px solid #00b4d8; margin-bottom: 8px; }}
                     .grid-3 {{ display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 8px; }}
-                    .card {{ border: 1px solid #cbd5e1; border-top: 3.5px solid #042454; border-radius: 7px; padding: 7px 10px; background: #f8fafc; }}
+                    .card {{ border: 1px solid #cbd5e1; border-top: 3.5px solid #042454; border-radius: 7px; padding: 7px 10px; background: #f8fafc; text-align: center; }}
                     .card-title {{ font-size: 8.5px; font-weight: 800; color: #475569; text-transform: uppercase; }}
                     .card-val {{ font-size: 16px; font-weight: 900; color: #020b1e; margin: 2px 0; }}
                     .sec-title {{ font-size: 10px; font-weight: 800; color: #042454; text-transform: uppercase; border-bottom: 1.5px solid #e2e8f0; padding-bottom: 3px; margin: 7px 0 6px 0; }}
@@ -1576,7 +1614,7 @@ try:
                                     {T['header_client']} {nombre_proyecto} &nbsp;|&nbsp; {nombre_rubro_activo}
                                 </div>
                                 <div style="font-size:8.5px; color:#cbd5e1; margin-top:2px;">
-                                    📍 Lat: {lat_actual}, Lon: {lon_actual} &nbsp;|&nbsp; 🕒 {fecha_emision}
+                                    📍 Lat: {lat_actual}, Lon: {lon_actual} ({NOMBRE_PAIS}) &nbsp;|&nbsp; 🕒 {fecha_emision}
                                 </div>
                             </div>
                         </div>
@@ -1676,7 +1714,7 @@ try:
         if st.button(T["dl_pdf"], use_container_width=True):
             disparar_pdf_infografia_una_hoja()
 
-    # 12. DESPLEGABLE TÉCNICO CON MATRIZ TRADUCIDA AL IDIOMA ACTIVO (IMAGEN 7)
+    # 12. DESPLEGABLE TÉCNICO
     with st.expander(T["exp_title"]):
         st.markdown(f"""
         * **Machine Learning Engine:** Gradient Boosting Regressor ($R^2 = 0.947$, $\\text{{RMSE}} = 0.599\\text{{ mm/day}}$, $\\text{{MAE}} = 0.394\\text{{ mm/day}}$).
@@ -1684,25 +1722,46 @@ try:
         """)
         st.dataframe(df_mostrar, use_container_width=True, hide_index=True)
 
-    # 13. DISCLAIMER Y BANNER B2B DE CIERRE
+    # 13. DISCLAIMER Y BANNER B2B INTELIGENTE POR REGIÓN + WHATSAPP CORTO (+51 981328639)
     st.markdown(f'<div class="legal-disclaimer">{T["disclaimer"]}</div>', unsafe_allow_html=True)
 
-    mensaje_wa = (
-        f"Hola PERCET, deseo adquirir la licencia ilimitada ($33 USD) / cotizar el proyecto '{nombre_proyecto}' "
-        f"en la coordenada [{lat_actual}, {lon_actual}] ({nombre_rubro_activo}) con PERCET GeoRisk."
-    )
-    url_whatsapp = f"https://wa.me/51999999999?text={urllib.parse.quote(mensaje_wa)}"
+    if MODO_PAIS == "PE":
+        b2b_titulo = T["b2b_title_pe"]
+        b2b_subtitulo = T["b2b_sub_pe"]
+        texto_boton_modal = T["btn_quote_pe"]
+        mensaje_wa = (
+            f"👋 Hola PERCET, solicito activar la Licencia GeoRisk ($33 USD) / cotizar obra para "
+            f"*{nombre_proyecto}* 📍[{lat_actual}, {lon_actual}] (🏗️ {nombre_rubro_activo})."
+        )
+    elif MODO_PAIS == "LATAM":
+        b2b_titulo = T["b2b_title_latam"]
+        b2b_subtitulo = T["b2b_sub_latam"].format(pais=NOMBRE_PAIS)
+        texto_boton_modal = T["btn_quote_latam"]
+        mensaje_wa = (
+            f"👋 Hola PERCET, solicito activar la Licencia SaaS GeoRisk ($33 USD) desde {NOMBRE_PAIS} "
+            f"para *{nombre_proyecto}* 📍[{lat_actual}, {lon_actual}] (🏗️ {nombre_rubro_activo})."
+        )
+    else:
+        b2b_titulo = T["b2b_title_global"]
+        b2b_subtitulo = T["b2b_sub_global"]
+        texto_boton_modal = T["btn_quote_global"]
+        mensaje_wa = (
+            f"👋 Hello PERCET, I'd like to activate the GeoRisk SaaS License ($33 USD) for "
+            f"*{nombre_proyecto}* 📍[{lat_actual}, {lon_actual}] (🏗️ {nombre_rubro_activo})."
+        )
+
+    url_whatsapp = f"https://wa.me/{WHATSAPP_NUMERO}?text={urllib.parse.quote(mensaje_wa)}"
 
     st.markdown(f"""
     <div class="b2b-banner">
-        <h3 style="color:#ffffff; font-weight:900; letter-spacing:0.5px; margin-bottom:10px; font-size:1.30rem;">{T['b2b_title']}</h3>
-        <p style="color:#e0f2fe; font-size:0.95rem; max-width:940px; margin:0 auto; line-height:1.55;">{T['b2b_sub']}</p>
+        <h3 style="color:#ffffff; font-weight:900; letter-spacing:0.5px; margin-bottom:10px; font-size:1.28rem;">{b2b_titulo}</h3>
+        <p style="color:#e0f2fe; font-size:0.94rem; max-width:940px; margin:0 auto; line-height:1.55;">{b2b_subtitulo}</p>
     </div>
     """, unsafe_allow_html=True)
 
     b1, b2, b3, b4 = st.columns([0.3, 2.2, 2.2, 0.3])
     with b2:
-        if st.button(T["btn_quote"], use_container_width=True):
+        if st.button(texto_boton_modal, use_container_width=True):
             mostrar_modal_cotizacion()
     with b3:
         st.link_button(T["btn_wa"], url_whatsapp, use_container_width=True)
