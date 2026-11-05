@@ -29,7 +29,7 @@ if "last_click" not in st.session_state:
 
 LOGO_FILE = "logo.png"
 CORREO_CORPORATIVO = "oficina.tecnica.puh@outlook.com"
-WHATSAPP_NUMERO = "51981328639"  # +51 981328639
+WHATSAPP_NUMERO = "51981328639"
 
 def obtener_logo_base64(ruta):
     if os.path.exists(ruta):
@@ -39,16 +39,7 @@ def obtener_logo_base64(ruta):
 
 LOGO_B64 = obtener_logo_base64(LOGO_FILE)
 
-# 2. DICCIONARIO DE REGIONES Y PLANTILLAS INTELIGENTES (PERÚ / LATAM SAAS / GLOBAL EN)
-REGIONES_CONFIG = {
-    "🇵🇪 Perú (Español - Software & Obras)": {"lang": "ES", "mode": "PE", "country": "Perú"},
-    "🇲🇽 México (Español - Licencia SaaS)": {"lang": "ES", "mode": "LATAM", "country": "México"},
-    "🇨🇴 Colombia (Español - Licencia SaaS)": {"lang": "ES", "mode": "LATAM", "country": "Colombia"},
-    "🇨🇱 Chile (Español - Licencia SaaS)": {"lang": "ES", "mode": "LATAM", "country": "Chile"},
-    "🌎 Resto de Latinoamérica (Español - SaaS)": {"lang": "ES", "mode": "LATAM", "country": "Latinoamérica"},
-    "🌐 Global (English - SaaS Platform)": {"lang": "EN", "mode": "GLOBAL", "country": "Global"}
-}
-
+# 2. DICCIONARIO BILINGÜE (ESPAÑOL LATAM/PERÚ & ENGLISH GLOBAL)
 TEXTOS = {
     "ES": {
         "unit_mm": "mm/día",
@@ -113,14 +104,9 @@ TEXTOS = {
         "dl_pdf": "📄 EXPORTAR REPORTE TÉCNICO PDF (1 HOJA)",
         "exp_title": "🛠️ VER PARÁMETROS DE INFERENCIA TÉCNICA Y MATRIZ METEOROLÓGICA COMPLETA",
         "disclaimer": "<b>🛡️ AVISO LEGAL / DISCLAIMER:</b> PERCET GeoRisk™ es una herramienta analítica de asistencia y soporte basada en modelos predictivos satelitales y probabilísticos. Los resultados constituyen estimaciones técnicas de riesgo y no eximen al usuario de aplicar los protocolos oficiales de seguridad, supervisión en campo y normativas técnicas locales de construcción.",
-        # Plantilla A: Perú (Software + Ejecución de Obras)
-        "b2b_title_pe": "🏢 LICENCIA POR PROYECTO ($33 USD PAGO ÚNICO) & EJECUCIÓN DE OBRAS EN PERÚ",
-        "b2b_sub_pe": "Obtén <b>acceso ilimitado a PERCET GeoRisk™</b> para tu obra (Monitoreo satelital 24/7, Reporte Ejecutivo PDF en 1 hoja y Matriz CSV) por un único pago de <b>$33 USD</b>, o solicita una cotización de ejecución de obra en el Perú con la red de ingenieros y especialistas BIM/VDC de <b>PERCET UNIVERSAL HOLDINGS S.A.C.</b>",
-        "btn_quote_pe": "📝 ACTIVAR LICENCIA ($33 USD) / COTIZAR OBRA",
-        # Plantilla B: Latinoamérica SaaS (Solo Software Digital + Aclaración Geográfica)
-        "b2b_title_latam": "🌎 INTELIGENCIA CLIMÁTICA Y REPORTES DE PROYECTO ($33 USD PAGO ÚNICO)",
-        "b2b_sub_latam": "Obtén <b>acceso ilimitado a PERCET GeoRisk™</b> para tu ubicación en <b>{pais}</b> por un único pago de <b>$33 USD</b>, incluyendo el Reporte Ejecutivo PDF (1 hoja) y la Matriz de Datos CSV. <i>(Nota: La ejecución física de obras y subcontratación en campo se circunscribe por el momento al territorio peruano; soporte digital SaaS y consultoría remota disponibles en toda Latinoamérica).</i>",
-        "btn_quote_latam": "💎 ACTIVAR LICENCIA SAAS ($33 USD) / REPORTE",
+        "b2b_title": "🏢 PERCET UNIVERSAL HOLDINGS S.A.C. | EJECUCIÓN DE OBRAS Y CONSULTORÍA",
+        "b2b_sub": "Si tu proyecto se encuentra en <b>Perú</b>, aprovecha nuestra red de especialistas para cotizar la ejecución física de obras civiles, estructuras, remodelaciones y supervisión BIM/VDC. Para el resto de <b>Latinoamérica</b>, ofrecemos servicios de consultoría técnica remota.",
+        "btn_quote": "📝 SOLICITAR COTIZACIÓN DE OBRA / CONSULTORÍA",
         "btn_wa": "💬 HABLAR CON UN ASESOR POR WHATSAPP",
         "col_date": "Fecha",
         "col_tmax": "Temp. Máx (°C)",
@@ -136,7 +122,7 @@ TEXTOS = {
     },
     "EN": {
         "unit_mm": "mm/day",
-        "lang_label": "🌎 COUNTRY / OPERATING REGION:",
+        "lang_label": "🌎 MARKET / LANGUAGE:",
         "params_header": "⚙️ PROJECT PARAMETERS",
         "client_label": "CLIENT / PROJECT NAME:",
         "rubro_label": "CRITICAL WORK PACKAGE (MACRO SECTORS):",
@@ -197,11 +183,10 @@ TEXTOS = {
         "dl_pdf": "📄 EXPORT TECHNICAL PDF REPORT (1 PAGE)",
         "exp_title": "🛠️ VIEW TECHNICAL INFERENCE PARAMETERS & FULL METEOROLOGICAL MATRIX",
         "disclaimer": "<b>🛡️ LEGAL DISCLAIMER:</b> PERCET GeoRisk™ is an analytical support tool based on satellite and probabilistic predictive models. Results constitute technical risk estimates and do not exempt the user from applying official safety protocols, field supervision, and local construction codes.",
-        # Plantilla C: Global (English SaaS)
-        "b2b_title_global": "🌎 CLIMATE INTELLIGENCE & INFRASTRUCTURE SOLUTIONS ($33 USD ONE-TIME PROJECT LICENSE)",
-        "b2b_sub_global": "At <b>PERCET UNIVERSAL HOLDINGS S.A.C.</b>, we drive intelligent climate risk management through unlimited project software access (<b>$33 USD one-time payment</b> including 1-page Executive PDF Report & CSV Matrix) and specialized hydrological calibration. <i>(On-site civil works execution is currently exclusive to Peru; SaaS licensing and remote BIM/hydrological consulting available globally).</i>",
-        "btn_quote_global": "💎 ACTIVATE SAAS LICENSE ($33 USD) / ACCESS",
-        "btn_wa": "💬 CONTACT SALES ENGINEERING (WHATSAPP)",
+        "b2b_title": "🌎 GLOBAL CLIMATE INTELLIGENCE & ENGINEERING SUPPORT",
+        "b2b_sub": "Maximize the value of your GeoRisk™ data. We offer remote hydrological consulting and BIM/VDC supervision for international projects. <i>(Note: Physical construction services are currently exclusive to Peru).</i>",
+        "btn_quote": "📝 REQUEST TECHNICAL CONSULTING",
+        "btn_wa": "💬 CONTACT ENGINEERING SUPPORT (WHATSAPP)",
         "col_date": "Date",
         "col_tmax": "Max Temp (°C)",
         "col_tmin": "Min Temp (°C)",
@@ -343,7 +328,7 @@ RUBROS_DATA = [
     }
 ]
 
-# 3. SISTEMA DE ESTILOS ADAPTATIVO (LIGHT & DARK MODE + CENTRADO DE KPIs + MODAL CORPORATIVO CON LOGO)
+# 3. SISTEMA DE ESTILOS ADAPTATIVO
 def aplicar_estilo_corporativo():
     st.markdown("""
     <style>
@@ -438,7 +423,6 @@ def aplicar_estilo_corporativo():
         stroke: rgba(255, 255, 255, 0.12) !important;
     }
 
-    /* Encabezado Superior Derecho */
     .corporate-header {
         background: linear-gradient(135deg, #020b1e 0%, #042454 55%, #004799 100%);
         padding: 1.35rem 2rem;
@@ -477,7 +461,6 @@ def aplicar_estilo_corporativo():
         text-overflow: ellipsis;
     }
 
-    /* Títulos de sección y badge MONITOREO ACTIVO */
     .sec-header {
         display: flex;
         align-items: center;
@@ -671,7 +654,6 @@ def aplicar_estilo_corporativo():
         color: #15803d;
     }
 
-    /* IMAGEN 3: Punto 03 con contenido 100% CENTRADO y uniforme */
     .field-kpi-card {
         background: var(--p-bg-card);
         border-radius: 12px;
@@ -717,7 +699,6 @@ def aplicar_estilo_corporativo():
         margin: 0 auto;
     }
 
-    /* Punto 04: Píldoras Ejecutivas y Bloque de Acciones */
     .exec-pill-card {
         background: var(--p-bg-card);
         border-radius: 12px;
@@ -780,9 +761,7 @@ def aplicar_estilo_corporativo():
         line-height: 1.5;
     }
 
-    /* =========================================================================
-       IMAGEN 5: MODAL EJECUTIVO CON LOGO Y TÍTULO CENTRADO (LIGHT & DARK)
-       ========================================================================= */
+    /* Modal Styling */
     .modal-brand-header {
         display: flex;
         align-items: center;
@@ -828,16 +807,12 @@ def aplicar_estilo_corporativo():
         font-weight: 800 !important;
     }
     body[data-percet-theme="light"] div[role="dialog"] input,
-    body[data-percet-theme="light"] div[role="dialog"] div[data-baseweb="select"] > div {
+    body[data-percet-theme="light"] div[role="dialog"] textarea {
         background-color: #ffffff !important;
         color: #020b1e !important;
         font-weight: 700 !important;
         border: 2px solid #38bdf8 !important;
         border-radius: 8px !important;
-    }
-    body[data-percet-theme="light"] div[role="dialog"] div[data-baseweb="select"] span {
-        color: #020b1e !important;
-        font-weight: 700 !important;
     }
     body[data-percet-theme="light"] div[role="dialog"] section[data-testid="stFileUploaderDropzone"] {
         background-color: rgba(255, 255, 255, 0.12) !important;
@@ -862,7 +837,7 @@ def aplicar_estilo_corporativo():
         font-weight: 800 !important;
     }
     body[data-percet-theme="dark"] div[role="dialog"] input,
-    body[data-percet-theme="dark"] div[role="dialog"] div[data-baseweb="select"] > div {
+    body[data-percet-theme="dark"] div[role="dialog"] textarea {
         background-color: #f1f5f9 !important;
         color: #020b1e !important;
         font-weight: 700 !important;
@@ -913,36 +888,22 @@ def aplicar_estilo_corporativo():
 
 aplicar_estilo_corporativo()
 
-# 4. BARRA LATERAL CON SELECTOR DE PAÍSES / REGIONES INTELIGENTE
+# 4. BARRA LATERAL (SOLO 2 IDIOMAS)
 with st.sidebar:
     if os.path.exists(LOGO_FILE):
         st.image(LOGO_FILE, use_container_width=True)
     
     st.markdown("<hr style='margin: 0.6rem 0;'>", unsafe_allow_html=True)
     
-    reg_prev = st.session_state.get("region_select", "🇵🇪 Perú (Español - Software & Obras)")
-    es_ingles_prev = "Global" in reg_prev
-    etiqueta_selector_pais = "🌎 COUNTRY / OPERATING REGION:" if es_ingles_prev else "🌐 PAÍS / REGIÓN OPERATIVA:"
-    
-    region_sel = st.selectbox(
-        etiqueta_selector_pais,
-        list(REGIONES_CONFIG.keys()),
-        key="region_select"
+    region_sel = st.radio(
+        "🌐 REGIÓN / IDIOMA (REGION / LANGUAGE):",
+        ["🌎 Español (Latinoamérica / Perú)", "🌐 English (Global SaaS)"],
+        index=0
     )
     
-    CFG_REGION = REGIONES_CONFIG[region_sel]
-    LANG = CFG_REGION["lang"]
-    MODO_PAIS = CFG_REGION["mode"]      # "PE", "LATAM", o "GLOBAL"
-    NOMBRE_PAIS = CFG_REGION["country"] # "Perú", "México", "Colombia", "Chile", etc.
+    LANG = "ES" if "Español" in region_sel else "EN"
     T = TEXTOS[LANG]
     UNIT_MM = T["unit_mm"]
-    
-    if MODO_PAIS == "PE":
-        st.caption("✅ **Perú:** Licencia SaaS ($33 USD) + Ejecución y cotización de obras habilitadas.")
-    elif MODO_PAIS == "LATAM":
-        st.caption(f"💻 **{NOMBRE_PAIS}:** Modalidad Licencia Digital SaaS ($33 USD). Ejecución física de obras exclusiva en Perú.")
-    else:
-        st.caption("🌎 **Global:** Digital SaaS License ($33 USD) & Remote Consulting. Physical works exclusive to Peru.")
     
     st.markdown("<hr style='margin: 0.6rem 0;'>", unsafe_allow_html=True)
     st.markdown(f"<p style='font-weight:800; font-size:0.90rem; letter-spacing:0.5px;'>{T['params_header']}</p>", unsafe_allow_html=True)
@@ -965,7 +926,7 @@ with st.sidebar:
     
     modo_enso = st.toggle(T["enso_label"], value=True, help=T["enso_help"])
 
-# 5. MODAL DE SOLICITUD MEJORADO CON LOGO, TÍTULO CENTRADO Y OPCIONES CORTAS (IMÁGENES 4 Y 5)
+# 5. MODAL DE SOLICITUD DE COTIZACIÓN (TEXT AREA LIBRE)
 @st.dialog("🏢 REGISTRO CORPORATIVO PERCET")
 def mostrar_modal_cotizacion():
     logo_html = f'<img src="data:image/png;base64,{LOGO_B64}" class="modal-brand-logo">' if LOGO_B64 else ""
@@ -976,74 +937,34 @@ def mostrar_modal_cotizacion():
     </div>
     """, unsafe_allow_html=True)
 
-    if MODO_PAIS == "PE":
-        st.markdown("""
-        <div style="background: rgba(0, 180, 216, 0.20); border-left: 5px solid #00b4d8; padding: 10px 14px; border-radius: 8px; margin-bottom: 12px;">
-            <div style="font-size: 0.84rem; font-weight: 900; text-transform: uppercase; letter-spacing: 0.4px;">
-                💎 ACCESO ILIMITADO POR PROYECTO ($33 USD PAGO ÚNICO) & OBRAS EN PERÚ
-            </div>
-            <div style="font-size: 0.77rem; font-weight: 700; margin-top: 3px;">
-                Incluye monitoreo satelital 24/7, Reporte Ejecutivo PDF (1 hoja), Matriz CSV y soporte de ingeniería.
-            </div>
-        </div>
-        """, unsafe_allow_html=True)
-        opciones_servicio = [
-            "💎 Licencia GeoRisk™ ($33 USD - Acceso Ilimitado)",
-            "🏗️ Licencia ($33 USD) + Mitigación en Campo",
-            "📐 Ejecución de Obra Civil / Drenaje Pluvial",
-            "🏢 Ingeniería Integral / Supervisión BIM-VDC"
-        ]
-    elif MODO_PAIS == "LATAM":
-        st.markdown(f"""
-        <div style="background: rgba(0, 180, 216, 0.20); border-left: 5px solid #00b4d8; padding: 10px 14px; border-radius: 8px; margin-bottom: 12px;">
-            <div style="font-size: 0.84rem; font-weight: 900; text-transform: uppercase; letter-spacing: 0.4px;">
-                🌎 LICENCIA DIGITAL SAAS PARA {NOMBRE_PAIS.upper()} ($33 USD PAGO ÚNICO)
-            </div>
-            <div style="font-size: 0.77rem; font-weight: 700; margin-top: 3px;">
-                Acceso ilimitado al software, Reporte PDF (1 hoja) y Matriz CSV. (Ejecución física de obras exclusiva en Perú).
-            </div>
-        </div>
-        """, unsafe_allow_html=True)
-        opciones_servicio = [
-            "💎 Licencia GeoRisk™ ($33 USD - Acceso Ilimitado)",
-            "📊 Reporte Ejecutivo PDF + Matriz CSV ($33 USD)",
-            "💻 Consultoría Remota Hidrológica / BIM-VDC"
-        ]
-    else:
-        st.markdown("""
-        <div style="background: rgba(0, 180, 216, 0.20); border-left: 5px solid #00b4d8; padding: 10px 14px; border-radius: 8px; margin-bottom: 12px;">
-            <div style="font-size: 0.84rem; font-weight: 900; text-transform: uppercase; letter-spacing: 0.4px;">
-                🌎 UNLIMITED PROJECT SAAS LICENSE ($33 USD ONE-TIME PAYMENT)
-            </div>
-            <div style="font-size: 0.77rem; font-weight: 700; margin-top: 3px;">
-                Includes 24/7 satellite monitoring, 1-page Executive PDF Report, full CSV Matrix & remote technical support.
-            </div>
-        </div>
-        """, unsafe_allow_html=True)
-        opciones_servicio = [
-            "💎 GeoRisk™ License ($33 USD - Unlimited Access)",
-            "📊 Executive PDF Report + CSV Matrix ($33 USD)",
-            "💻 Remote Hydrological / BIM-VDC Consulting"
-        ]
-
     if LANG == "ES":
+        st.markdown("""
+        <div style="background: rgba(0, 180, 216, 0.20); border-left: 5px solid #00b4d8; padding: 10px 14px; border-radius: 8px; margin-bottom: 12px;">
+            <div style="font-size: 0.84rem; font-weight: 900; text-transform: uppercase; letter-spacing: 0.4px;">
+                📐 COTIZACIÓN DE OBRAS Y CONSULTORÍA
+            </div>
+            <div style="font-size: 0.77rem; font-weight: 700; margin-top: 3px;">
+                Detalla tu proyecto. Ejecución de obras exclusiva para Perú. Consultoría remota disponible para toda Latinoamérica.
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
         emp = st.text_input("EMPRESA / CONSTRUCTORA O CLIENTE:")
-        correo_cli = st.text_input("CORREO CORPORATIVO (OBLIGATORIO PARA ENVÍO DE ACCESO):")
+        correo_cli = st.text_input("CORREO CORPORATIVO:")
         tel_cli = st.text_input("TELÉFONO / WHATSAPP DE CONTACTO:")
-        t_proy = st.selectbox("MODALIDAD / SERVICIO REQUERIDO:", opciones_servicio)
+        detalle_req = st.text_area("DETALLE SU REQUERIMIENTO O CONSULTA (Ej. Cotizar estructura metálica, remodelación, soporte):", height=100)
         archivo = st.file_uploader("ADJUNTAR PLANO, EXPEDIENTE O COMPROBANTE (OPCIONAL):", type=["pdf", "png", "jpg"])
-        if st.button("🚀 REGISTRAR Y ENVIAR SOLICITUD", type="primary", use_container_width=True):
-            if emp and correo_cli:
+        
+        if st.button("🚀 ENVIAR SOLICITUD DE COTIZACIÓN", type="primary", use_container_width=True):
+            if emp and correo_cli and detalle_req:
                 nombre_arch = archivo.name if archivo else "No adjuntado"
-                asunto = f"[{NOMBRE_PAIS}] Solicitud GeoRisk ($33 USD) - {emp} ({nombre_proyecto})"
+                asunto = f"Cotización / Soporte GeoRisk - {emp} ({nombre_proyecto})"
                 cuerpo = (
-                    f"País / Región: {NOMBRE_PAIS}\n"
                     f"Empresa / Cliente: {emp}\n"
                     f"Correo del Cliente: {correo_cli}\n"
                     f"Teléfono / WhatsApp: {tel_cli}\n"
                     f"Proyecto Evaluado: {nombre_proyecto}\n"
                     f"Rubro: {nombre_rubro_activo}\n"
-                    f"Modalidad / Servicio: {t_proy}\n"
+                    f"Requerimiento del Cliente:\n{detalle_req}\n\n"
                     f"Coordenadas: Lat {st.session_state.lat}, Lon {st.session_state.lon}\n"
                     f"Archivo referencial: {nombre_arch}"
                 )
@@ -1051,13 +972,12 @@ def mostrar_modal_cotizacion():
                     requests.post(
                         f"https://formsubmit.co/ajax/{CORREO_CORPORATIVO}",
                         data={
-                            "Pais": NOMBRE_PAIS,
                             "Empresa": emp,
                             "Correo_Cliente": correo_cli,
                             "Telefono": tel_cli,
                             "Proyecto": nombre_proyecto,
                             "Rubro": nombre_rubro_activo,
-                            "Modalidad_Servicio": t_proy,
+                            "Requerimiento": detalle_req,
                             "Coordenadas": f"{st.session_state.lat}, {st.session_state.lon}",
                             "Archivo": nombre_arch,
                             "_subject": asunto
@@ -1067,31 +987,38 @@ def mostrar_modal_cotizacion():
                 except Exception:
                     pass
                 mailto_url = f"mailto:{CORREO_CORPORATIVO}?subject={urllib.parse.quote(asunto)}&body={urllib.parse.quote(cuerpo)}"
-                st.success(f"✅ Solicitud registrada con el correo **{correo_cli}** y enviada a **{CORREO_CORPORATIVO}**.")
-                st.markdown(
-                    f'<a href="{mailto_url}" target="_blank" style="display:inline-block; margin-top:6px; font-size:0.82rem; font-weight:900; text-decoration:underline;">📧 Confirmar copia directa en mi cliente de correo ({CORREO_CORPORATIVO})</a>',
-                    unsafe_allow_html=True
-                )
+                st.success(f"✅ Solicitud de cotización enviada a **{CORREO_CORPORATIVO}**.")
+                st.markdown(f'<a href="{mailto_url}" target="_blank" style="display:inline-block; margin-top:6px; font-size:0.82rem; font-weight:900; text-decoration:underline;">📧 Confirmar copia directa en mi cliente de correo</a>', unsafe_allow_html=True)
             else:
-                st.warning("⚠️ Complete el nombre de la Empresa y su Correo Corporativo.")
+                st.warning("⚠️ Complete Empresa, Correo y Detalle del Requerimiento.")
     else:
+        st.markdown("""
+        <div style="background: rgba(0, 180, 216, 0.20); border-left: 5px solid #00b4d8; padding: 10px 14px; border-radius: 8px; margin-bottom: 12px;">
+            <div style="font-size: 0.84rem; font-weight: 900; text-transform: uppercase; letter-spacing: 0.4px;">
+                💻 TECHNICAL CONSULTING & SUPPORT
+            </div>
+            <div style="font-size: 0.77rem; font-weight: 700; margin-top: 3px;">
+                Please detail your technical request. Remote consulting available globally.
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
         emp = st.text_input("COMPANY / CONTRACTOR OR CLIENT NAME:")
-        correo_cli = st.text_input("CORPORATE EMAIL (REQUIRED FOR ACCESS DELIVERY):")
+        correo_cli = st.text_input("CORPORATE EMAIL:")
         tel_cli = st.text_input("CONTACT PHONE / WHATSAPP:")
-        t_proy = st.selectbox("LICENSING PLAN / SERVICE REQUIRED:", opciones_servicio)
+        detalle_req = st.text_area("PLEASE DETAIL YOUR REQUEST (e.g., Remote consulting, technical support):", height=100)
         archivo = st.file_uploader("UPLOAD BLUEPRINT, RFP OR RECEIPT (OPTIONAL):", type=["pdf", "png", "jpg"])
-        if st.button("🚀 REGISTER & SUBMIT REQUEST", type="primary", use_container_width=True):
-            if emp and correo_cli:
+        
+        if st.button("🚀 SUBMIT REQUEST", type="primary", use_container_width=True):
+            if emp and correo_cli and detalle_req:
                 nombre_arch = archivo.name if archivo else "Not attached"
-                asunto = f"[GLOBAL] GeoRisk License ($33 USD) - {emp} ({nombre_proyecto})"
+                asunto = f"GeoRisk Consulting Request - {emp} ({nombre_proyecto})"
                 cuerpo = (
-                    f"Region: {NOMBRE_PAIS}\n"
                     f"Company / Client: {emp}\n"
                     f"Client Email: {correo_cli}\n"
                     f"Phone / WhatsApp: {tel_cli}\n"
                     f"Evaluated Project: {nombre_proyecto}\n"
                     f"Sector: {nombre_rubro_activo}\n"
-                    f"Selected Plan: {t_proy}\n"
+                    f"Client Request:\n{detalle_req}\n\n"
                     f"Coordinates: Lat {st.session_state.lat}, Lon {st.session_state.lon}\n"
                     f"Reference File: {nombre_arch}"
                 )
@@ -1099,13 +1026,12 @@ def mostrar_modal_cotizacion():
                     requests.post(
                         f"https://formsubmit.co/ajax/{CORREO_CORPORATIVO}",
                         data={
-                            "Region": NOMBRE_PAIS,
                             "Company": emp,
                             "Client_Email": correo_cli,
                             "Phone": tel_cli,
                             "Project": nombre_proyecto,
                             "Sector": nombre_rubro_activo,
-                            "Plan_Service": t_proy,
+                            "Request": detalle_req,
                             "Coordinates": f"{st.session_state.lat}, {st.session_state.lon}",
                             "File": nombre_arch,
                             "_subject": asunto
@@ -1115,13 +1041,10 @@ def mostrar_modal_cotizacion():
                 except Exception:
                     pass
                 mailto_url = f"mailto:{CORREO_CORPORATIVO}?subject={urllib.parse.quote(asunto)}&body={urllib.parse.quote(cuerpo)}"
-                st.success(f"✅ Request registered with email **{correo_cli}** and routed to **{CORREO_CORPORATIVO}**.")
-                st.markdown(
-                    f'<a href="{mailto_url}" target="_blank" style="display:inline-block; margin-top:6px; font-size:0.82rem; font-weight:900; text-decoration:underline;">📧 Confirm direct copy in email client ({CORREO_CORPORATIVO})</a>',
-                    unsafe_allow_html=True
-                )
+                st.success(f"✅ Request submitted to **{CORREO_CORPORATIVO}**.")
+                st.markdown(f'<a href="{mailto_url}" target="_blank" style="display:inline-block; margin-top:6px; font-size:0.82rem; font-weight:900; text-decoration:underline;">📧 Confirm direct copy in email client</a>', unsafe_allow_html=True)
             else:
-                st.warning("⚠️ Please complete the Company Name and Corporate Email.")
+                st.warning("⚠️ Please complete Company, Email and Request Detail.")
 
 # 6. ENCABEZADO SUPERIOR
 st.markdown(f"""
@@ -1193,7 +1116,7 @@ try:
     else:
         estado_quebrada = f"🟢 {T['q_green']}"
 
-    # 8. SECCIÓN 01 (MAPA CON NORTE SIN FONDO ARRIBA A LA DERECHA) Y SECCIÓN 02 (DIAGNÓSTICO)
+    # 8. SECCIÓN 01 (MAPA CON NORTE) Y SECCIÓN 02 (DIAGNÓSTICO)
     col_mapa, col_panel = st.columns([1.22, 1], gap="large")
 
     with col_mapa:
@@ -1228,7 +1151,6 @@ try:
         ).add_to(m)
         folium.LatLngPopup().add_to(m)
 
-        # IMÁGENES 1 Y 2: Flecha de Norte técnica azul sin fondo (transparente) en la esquina superior derecha
         compass_html = """
         {% macro html(this, kwargs) %}
         <div style="
@@ -1244,12 +1166,9 @@ try:
             filter: drop-shadow(0px 1px 3px rgba(255, 255, 255, 0.92));">
             <svg viewBox="0 0 100 112" width="64" height="72">
                 <g id="percet-north-arrow" style="transform-origin: 50px 52px; transition: transform 0.18s ease-out;">
-                    <!-- Ala izquierda delineada en azul marino -->
                     <polygon points="50,6 12,84 50,55" fill="rgba(255,255,255,0.25)" stroke="#00205b" stroke-width="4" stroke-linejoin="miter"/>
-                    <!-- Ala derecha sólida en azul marino -->
                     <polygon points="50,6 88,84 50,55" fill="#00205b" stroke="#00205b" stroke-width="4" stroke-linejoin="miter"/>
                 </g>
-                <!-- Letra N clásica en azul marino -->
                 <text x="50" y="106" fill="#00205b" font-family="Georgia, 'Times New Roman', serif" font-size="38" font-weight="900" text-anchor="middle">N</text>
             </svg>
         </div>
@@ -1379,7 +1298,7 @@ try:
 
     st.markdown("<br>", unsafe_allow_html=True)
 
-    # 9. SECCIÓN 03: INDICADORES CLAVE DE INGENIERÍA DE CAMPO CENTRADOS (IMAGEN 3)
+    # 9. SECCIÓN 03: INDICADORES CLAVE
     st.markdown(f"""
     <div class="sec-header">
         <p class="sec-header-title">📊 {T['sec3_title']}</p>
@@ -1614,7 +1533,7 @@ try:
                                     {T['header_client']} {nombre_proyecto} &nbsp;|&nbsp; {nombre_rubro_activo}
                                 </div>
                                 <div style="font-size:8.5px; color:#cbd5e1; margin-top:2px;">
-                                    📍 Lat: {lat_actual}, Lon: {lon_actual} ({NOMBRE_PAIS}) &nbsp;|&nbsp; 🕒 {fecha_emision}
+                                    📍 Lat: {lat_actual}, Lon: {lon_actual} &nbsp;|&nbsp; 🕒 {fecha_emision}
                                 </div>
                             </div>
                         </div>
@@ -1722,31 +1641,17 @@ try:
         """)
         st.dataframe(df_mostrar, use_container_width=True, hide_index=True)
 
-    # 13. DISCLAIMER Y BANNER B2B INTELIGENTE POR REGIÓN + WHATSAPP CORTO (+51 981328639)
+    # 13. DISCLAIMER Y BANNER B2B ESTRATÉGICO
     st.markdown(f'<div class="legal-disclaimer">{T["disclaimer"]}</div>', unsafe_allow_html=True)
 
-    if MODO_PAIS == "PE":
-        b2b_titulo = T["b2b_title_pe"]
-        b2b_subtitulo = T["b2b_sub_pe"]
-        texto_boton_modal = T["btn_quote_pe"]
+    if LANG == "ES":
         mensaje_wa = (
-            f"👋 Hola PERCET, solicito activar la Licencia GeoRisk ($33 USD) / cotizar obra para "
+            f"👋 Hola PERCET, solicito cotización / asesoría para el proyecto "
             f"*{nombre_proyecto}* 📍[{lat_actual}, {lon_actual}] (🏗️ {nombre_rubro_activo})."
         )
-    elif MODO_PAIS == "LATAM":
-        b2b_titulo = T["b2b_title_latam"]
-        b2b_subtitulo = T["b2b_sub_latam"].format(pais=NOMBRE_PAIS)
-        texto_boton_modal = T["btn_quote_latam"]
-        mensaje_wa = (
-            f"👋 Hola PERCET, solicito activar la Licencia SaaS GeoRisk ($33 USD) desde {NOMBRE_PAIS} "
-            f"para *{nombre_proyecto}* 📍[{lat_actual}, {lon_actual}] (🏗️ {nombre_rubro_activo})."
-        )
     else:
-        b2b_titulo = T["b2b_title_global"]
-        b2b_subtitulo = T["b2b_sub_global"]
-        texto_boton_modal = T["btn_quote_global"]
         mensaje_wa = (
-            f"👋 Hello PERCET, I'd like to activate the GeoRisk SaaS License ($33 USD) for "
+            f"👋 Hello PERCET, I'd like to request technical consulting for the project "
             f"*{nombre_proyecto}* 📍[{lat_actual}, {lon_actual}] (🏗️ {nombre_rubro_activo})."
         )
 
@@ -1754,14 +1659,14 @@ try:
 
     st.markdown(f"""
     <div class="b2b-banner">
-        <h3 style="color:#ffffff; font-weight:900; letter-spacing:0.5px; margin-bottom:10px; font-size:1.28rem;">{b2b_titulo}</h3>
-        <p style="color:#e0f2fe; font-size:0.94rem; max-width:940px; margin:0 auto; line-height:1.55;">{b2b_subtitulo}</p>
+        <h3 style="color:#ffffff; font-weight:900; letter-spacing:0.5px; margin-bottom:10px; font-size:1.28rem;">{T['b2b_title']}</h3>
+        <p style="color:#e0f2fe; font-size:0.94rem; max-width:940px; margin:0 auto; line-height:1.55;">{T['b2b_sub']}</p>
     </div>
     """, unsafe_allow_html=True)
 
     b1, b2, b3, b4 = st.columns([0.3, 2.2, 2.2, 0.3])
     with b2:
-        if st.button(texto_boton_modal, use_container_width=True):
+        if st.button(T['btn_quote'], use_container_width=True):
             mostrar_modal_cotizacion()
     with b3:
         st.link_button(T["btn_wa"], url_whatsapp, use_container_width=True)
