@@ -393,7 +393,6 @@ def obtener_datos_satelitales_30d(lat_val, lon_val):
         prob_base = limpiar_lista(daily.get("precipitation_probability_max", []), 15, es_entero=True)
         prec_base = limpiar_lista(daily.get("precipitation_sum", []), 0.0)
 
-        # Filtrar valores None en series horarias (Causa del error en móviles)
         hum_validos = [float(x) for x in hourly.get("relative_humidity_2m", []) if x is not None and not np.isnan(float(x))]
         pres_validos = [float(x) for x in hourly.get("surface_pressure", []) if x is not None and not np.isnan(float(x))]
 
@@ -401,7 +400,6 @@ def obtener_datos_satelitales_30d(lat_val, lon_val):
         presion_media = round(float(np.mean(pres_validos)), 1) if pres_validos else 1011.2
 
     except Exception:
-        # Respaldo de continuidad operativa 24/7 si el servidor satelital externo demora
         hoy = datetime.now()
         fechas_base = pd.date_range(hoy, periods=16, freq="D")
         tmax_base = [round(25.0 + rng.uniform(-2.0, 2.5), 1) for _ in range(16)]
@@ -415,7 +413,6 @@ def obtener_datos_satelitales_30d(lat_val, lon_val):
         humedad_media = 75.2
         presion_media = 1010.8
 
-    # Extensión determinística hasta completar los 30 días
     n_actual = len(fechas_base)
     dias_faltantes = max(0, 30 - n_actual)
     ultima_fecha = fechas_base[-1]
@@ -464,7 +461,7 @@ def obtener_datos_satelitales_30d(lat_val, lon_val):
 
     return df_res, humedad_media, presion_media
 
-# 4. SISTEMA DE ESTILOS ADAPTATIVO (LIGHT & DARK MODE DE ALTO CONTRASTE + OPTIMIZACIÓN MÓVIL)
+# 4. SISTEMA DE ESTILOS ADAPTATIVO + OCULTAMIENTO DE CORONA ROJA Y MANAGE APP
 def aplicar_estilo_corporativo():
     st.markdown("""
     <style>
@@ -482,10 +479,21 @@ def aplicar_estilo_corporativo():
         text-transform: none !important;
     }
 
+    /* Ocultar barra de herramientas externa, Fork, GitHub, Manage App y Corona Roja de Streamlit */
     .stAppDeployButton, .modebar, .modebar-container,
     button[data-testid="StyledFullScreenButton"],
-    div[data-testid="stElementToolbar"] {
+    div[data-testid="stElementToolbar"],
+    [data-testid="manage-app-button"],
+    button[data-testid="manage-app-button"],
+    [data-testid="stToolbarActions"],
+    [data-testid="stActionButton"],
+    [data-testid="stStatusWidget"],
+    a[href*="streamlit.io/cloud"],
+    a[href*="streamlit.io"][class*="viewerBadge"],
+    [class*="viewerBadge"] > svg,
+    footer {
         display: none !important;
+        visibility: hidden !important;
     }
 
     :root, body[data-percet-theme="light"] {
@@ -814,7 +822,6 @@ def aplicar_estilo_corporativo():
         color: #15803d;
     }
 
-    /* SECCIÓN 03 SIN NÚMEROS Y TODO 100% CENTRADO */
     .field-kpi-card {
         background: var(--p-bg-card);
         border-radius: 12px;
@@ -1050,7 +1057,7 @@ def aplicar_estilo_corporativo():
     </style>
     """, unsafe_allow_html=True)
 
-    # Sincronizador Light/Dark Mode + Pulso Keep-Alive 24/7
+    # Sincronizador Light/Dark + Eliminador de Corona Roja y Manage App en ventana raíz (window.top)
     components.html("""
     <script>
     (function() {
@@ -1063,6 +1070,60 @@ def aplicar_estilo_corporativo():
                 return (r * 299 + g * 587 + b * 114) / 1000;
             }
             return null;
+        }
+
+        function ocultarCoronaYManageApp() {
+            var docs = [];
+            try { if (window.parent && window.parent.document) docs.push(window.parent.document); } catch (e) {}
+            try { if (window.top && window.top.document && window.top.document !== window.parent.document) docs.push(window.top.document); } catch (e) {}
+
+            for (var d = 0; d < docs.length; d++) {
+                var doc = docs[d];
+                try {
+                    // 1. Inyectar hoja de estilo en la ventana contenedora si aún no existe
+                    if (doc.head && !doc.getElementById('percet-clean-ui-style')) {
+                        var st = doc.createElement('style');
+                        st.id = 'percet-clean-ui-style';
+                        st.innerHTML = `
+                            [data-testid="manage-app-button"],
+                            button[data-testid="manage-app-button"],
+                            [data-testid="stToolbarActions"],
+                            [data-testid="stActionButton"],
+                            .stAppDeployButton,
+                            a[href*="streamlit.io/cloud"],
+                            a[href*="streamlit.io"][class*="viewerBadge"] {
+                                display: none !important;
+                                visibility: hidden !important;
+                                width: 0 !important;
+                                height: 0 !important;
+                                opacity: 0 !important;
+                                pointer-events: none !important;
+                            }
+                        `;
+                        doc.head.appendChild(st);
+                    }
+
+                    // 2. Ocultar el botón "< Manage app" en laptop
+                    var btns = doc.querySelectorAll('button, [data-testid="manage-app-button"]');
+                    for (var i = 0; i < btns.length; i++) {
+                        var txt = (btns[i].innerText || btns[i].textContent || '').trim();
+                        if (txt.indexOf('Manage app') !== -1 || btns[i].getAttribute('data-testid') === 'manage-app-button') {
+                            btns[i].style.setProperty('display', 'none', 'important');
+                        }
+                    }
+
+                    // 3. Ocultar la corona roja de Streamlit en celular/laptop conservando el logo circular de PERCET (img)
+                    var links = doc.querySelectorAll('a[href*="streamlit.io"], [class*="viewerBadge"]');
+                    for (var j = 0; j < links.length; j++) {
+                        var el = links[j];
+                        var tieneLogoImg = el.querySelector('img');
+                        if (!tieneLogoImg) {
+                            el.style.setProperty('display', 'none', 'important');
+                            el.style.setProperty('visibility', 'hidden', 'important');
+                        }
+                    }
+                } catch (err) {}
+            }
         }
 
         function syncPercetTheme() {
@@ -1091,23 +1152,6 @@ def aplicar_estilo_corporativo():
 
                 var textColor = isDark ? '#ffffff' : '#020b1e';
                 var svgTexts = pDoc.querySelectorAll('.js-plotly-plot svg text');
-                for (var i = 0; i; i < svgTexts.length, i++) {
-                    var t = svgTexts[i];
-                    if (t.closest('.annotation-text-g')) {
-                        t.style.setProperty('fill', '#ffffff', 'important');
-                    } else {
-                        t.style.setProperty('fill', textColor, 'important');
-                    }
-                }
-            } catch (e) {}
-        }
-
-        function updatePlotlyColors() {
-            try {
-                var pDoc = window.parent.document;
-                var isDark = pDoc.body.getAttribute('data-percet-theme') === 'dark';
-                var textColor = isDark ? '#ffffff' : '#020b1e';
-                var svgTexts = pDoc.querySelectorAll('.js-plotly-plot svg text');
                 for (var i = 0; i < svgTexts.length; i++) {
                     var t = svgTexts[i];
                     if (t.closest('.annotation-text-g')) {
@@ -1120,10 +1164,10 @@ def aplicar_estilo_corporativo():
         }
 
         syncPercetTheme();
-        updatePlotlyColors();
+        ocultarCoronaYManageApp();
         setInterval(function() {
             syncPercetTheme();
-            updatePlotlyColors();
+            ocultarCoronaYManageApp();
         }, 250);
 
         // Pulso Keep-Alive cada 5 minutos para mantener sesiones activas 24/7
