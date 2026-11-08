@@ -8,14 +8,30 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# 2. ESCUDO INVISIBLE INSTANTÁNEO (REDUCE 10 MILLONES DE VECES LOGO, CORONA Y MANAGE APP AL CARGAR)
+# 2. ESCUDO INVISIBLE PERMANENTE 24/7 + SUBIDA DEL BANNER AZUL + LIMPIEZA DE MENÚ
 st.markdown("""
 <style>
+/* Subir el banner azul para eliminar el espacio blanco superior (Imagen 1 -> Imagen 4) */
+.block-container,
+[data-testid="stMainBlockContainer"],
+.stMainBlockContainer {
+    padding-top: 1.15rem !important;
+    padding-bottom: 2rem !important;
+}
+
+header[data-testid="stHeader"] {
+    background: transparent !important;
+    height: 2.2rem !important;
+    min-height: 2.2rem !important;
+}
+
+/* Reducir 10 millones de veces insignias, Manage App, Corona y opciones extras del menú */
 [data-testid="manage-app-button"],
 button[data-testid="manage-app-button"],
 [data-testid="stToolbarActions"],
 [data-testid="stActionButton"],
 [data-testid="stStatusWidget"],
+[data-testid="stMainMenuDivider"],
 .stAppDeployButton,
 a[href*="streamlit.io"],
 a[href*="github.com"],
@@ -48,12 +64,23 @@ footer {
 components.html("""
 <script>
 (function() {
+    var WA_REDIRECT = "https://wa.me/51981328639?text=Hola%20PERCET%2C%20solicito%20informaci%C3%B3n%20sobre%20PERCET%20GeoRisk";
+
     var REGLA_MICROSCOPICA = `
+        .block-container, [data-testid="stMainBlockContainer"], .stMainBlockContainer {
+            padding-top: 1.15rem !important;
+        }
+        header[data-testid="stHeader"] {
+            background: transparent !important;
+            height: 2.2rem !important;
+            min-height: 2.2rem !important;
+        }
         [data-testid="manage-app-button"],
         button[data-testid="manage-app-button"],
         [data-testid="stToolbarActions"],
         [data-testid="stActionButton"],
         [data-testid="stStatusWidget"],
+        [data-testid="stMainMenuDivider"],
         .stAppDeployButton,
         a[href*="streamlit.io"],
         [class*="viewerBadge"],
@@ -70,9 +97,10 @@ components.html("""
             min-width: 0px !important;
             min-height: 0px !important;
             font-size: 0px !important;
+            margin: 0px !important;
+            padding: 0px !important;
             opacity: 0 !important;
             visibility: hidden !important;
-            pointer-events: none !important;
             position: fixed !important;
             bottom: -99999px !important;
             right: -99999px !important;
@@ -82,21 +110,90 @@ components.html("""
         }
     `;
 
-    function encogerUnMillonDeVeces(el) {
+    function encogerYRedirigirWhatsApp(el) {
         if (!el || !el.style) return;
+        try {
+            if (el.tagName === 'A') {
+                el.setAttribute('href', WA_REDIRECT);
+                el.setAttribute('target', '_blank');
+            }
+            el.onclick = function(e) {
+                if (e) { e.preventDefault(); e.stopPropagation(); }
+                window.open(WA_REDIRECT, '_blank');
+                return false;
+            };
+        } catch (err) {}
         el.style.setProperty('transform', 'scale(0.0000001)', 'important');
         el.style.setProperty('zoom', '0.0000001', 'important');
         el.style.setProperty('width', '0px', 'important');
         el.style.setProperty('height', '0px', 'important');
         el.style.setProperty('max-width', '0px', 'important');
         el.style.setProperty('max-height', '0px', 'important');
+        el.style.setProperty('min-height', '0px', 'important');
+        el.style.setProperty('margin', '0px', 'important');
+        el.style.setProperty('padding', '0px', 'important');
+        el.style.setProperty('border', 'none', 'important');
         el.style.setProperty('opacity', '0', 'important');
         el.style.setProperty('visibility', 'hidden', 'important');
-        el.style.setProperty('pointer-events', 'none', 'important');
         el.style.setProperty('position', 'fixed', 'important');
         el.style.setProperty('bottom', '-99999px', 'important');
         el.style.setProperty('right', '-99999px', 'important');
         el.style.setProperty('display', 'none', 'important');
+    }
+
+    function limpiarMenuTresPuntos(doc) {
+        try {
+            var popovers = doc.querySelectorAll('[data-testid="stMainMenuPopover"], [data-baseweb="popover"], ul[role="menu"], [data-testid="stMainMenuList"]');
+            for (var p = 0; p < popovers.length; p++) {
+                var pop = popovers[p];
+                // Ocultar líneas divisorias dentro del menú de 3 puntos
+                var Lineas = pop.querySelectorAll('hr, [role="separator"], [data-testid="stMainMenuDivider"]');
+                for (var l = 0; l < Lineas.length; l++) {
+                    encogerYRedirigirWhatsApp(Lineas[l]);
+                }
+                // Analizar todos los elementos del menú para dejar SOLO System, Light y Dark (Imagen 2)
+                var items = pop.querySelectorAll('li, a, button, div, span, footer');
+                for (var k = 0; k < items.length; k++) {
+                    var item = items[k];
+                    var texto = (item.innerText || item.textContent || '').trim().toLowerCase();
+                    if (!texto) continue;
+
+                    // Si el elemento contiene System, Light o Dark, NO tocarlo
+                    if (texto === 'system' || texto === 'light' || texto === 'dark') {
+                        continue;
+                    }
+
+                    // Si es Print, Record screen, Made with Streamlit v1.67.0, Rerun, Clear cache, etc. -> Encoger 1 millón de veces
+                    var esProhibido = (
+                        texto === 'print' ||
+                        texto === 'record screen' ||
+                        texto.indexOf('made with streamlit') !== -1 ||
+                        texto.indexOf('streamlit v') !== -1 ||
+                        texto === 'rerun' ||
+                        texto.indexOf('rerun') === 0 ||
+                        texto === 'clear cache' ||
+                        texto.indexOf('clear cache') === 0 ||
+                        texto === 'developer options' ||
+                        texto === 'about' ||
+                        texto === 'get help' ||
+                        texto === 'report a bug'
+                    );
+
+                    if (esProhibido) {
+                        var contenedorItem = item.closest('li') || item.closest('button') || item.closest('a') || item;
+                        if (contenedorItem && !contenedorItem.querySelector('button[aria-label*="Light"], button[aria-label*="Dark"]')) {
+                            encogerYRedirigirWhatsApp(contenedorItem);
+                        }
+                        if (texto.indexOf('made with streamlit') !== -1 || texto.indexOf('streamlit v') !== -1) {
+                            encogerYRedirigirWhatsApp(item);
+                            if (item.parentElement && (item.parentElement.innerText || '').toLowerCase().indexOf('system') === -1) {
+                                encogerYRedirigirWhatsApp(item.parentElement);
+                            }
+                        }
+                    }
+                }
+            }
+        } catch (e) {}
     }
 
     function limpiarDocumento(doc) {
@@ -122,26 +219,32 @@ components.html("""
             ];
             var nodos = doc.querySelectorAll(selectores.join(','));
             for (var i = 0; i < nodos.length; i++) {
-                encogerUnMillonDeVeces(nodos[i]);
+                encogerYRedirigirWhatsApp(nodos[i]);
                 if (nodos[i].parentElement && (
                     String(nodos[i].parentElement.className).indexOf('viewerBadge') !== -1 ||
                     String(nodos[i].parentElement.className).indexOf('profile') !== -1
                 )) {
-                    encogerUnMillonDeVeces(nodos[i].parentElement);
+                    encogerYRedirigirWhatsApp(nodos[i].parentElement);
                 }
             }
-            var botones = doc.querySelectorAll('button, a, div');
+            var botones = doc.querySelectorAll('button, a, div, span');
             for (var j = 0; j < botones.length; j++) {
                 var b = botones[j];
                 var txt = (b.innerText || b.textContent || '').trim();
-                if (txt === 'Manage app' || txt === 'Hosted with Streamlit' || txt.indexOf('Created by') === 0) {
-                    encogerUnMillonDeVeces(b);
+                if (
+                    txt === 'Manage app' ||
+                    txt === 'Hosted with Streamlit' ||
+                    txt.indexOf('Created by') === 0 ||
+                    txt.indexOf('Made with Streamlit') === 0
+                ) {
+                    encogerYRedirigirWhatsApp(b);
                 }
             }
+            limpiarMenuTresPuntos(doc);
         } catch (e) {}
     }
 
-    function activarVigilanciaInstantanea() {
+    function activarVigilanciaInfinita() {
         var docs = [];
         try { if (window.parent && window.parent.document) docs.push(window.parent.document); } catch (e) {}
         try { if (window.top && window.top.document && window.top.document !== window.parent.document) docs.push(window.top.document); } catch (e) {}
@@ -155,14 +258,14 @@ components.html("""
                     var obs = new MutationObserver(function() {
                         limpiarDocumento(doc);
                     });
-                    obs.observe(doc.documentElement, { childList: true, subtree: true });
+                    obs.observe(doc.documentElement, { childList: true, subtree: true, attributes: true });
                 }
             } catch (e) {}
         }
     }
 
-    activarVigilanciaInstantanea();
-    setInterval(activarVigilanciaInstantanea, 100);
+    activarVigilanciaInfinita();
+    setInterval(activarVigilanciaInfinita, 50);
 })();
 </script>
 """, height=0, width=0)
@@ -266,6 +369,7 @@ TEXTOS = {
         "ml_bullet_1": "* **Motor de Machine Learning:** Regresor Gradient Boosting ($R^2 = 0.947$, $\\text{{RMSE}} = 0.599\\text{{ mm/día}}$, $\\text{{MAE}} = 0.394\\text{{ mm/día}}$).",
         "ml_bullet_2": "* **Ecuación de Ajuste Lineal:** $y = 0.871x + 0.163$ | **Presión Superficial:** `{presion} hPa`",
         "disclaimer": "<b>🛡️ AVISO LEGAL / DISCLAIMER:</b> PERCET GeoRisk™ es una herramienta analítica de asistencia y soporte basada en modelos predictivos satelitales y probabilísticos. Los resultados constituyen estimaciones técnicas de riesgo y no eximen al usuario de aplicar los protocolos oficiales de seguridad, supervisión en campo y normativas técnicas locales de construcción.",
+        "pdf_audit_stamp": "🕒 <b>EVIDENCIA OFICIAL DE EMISIÓN E IMPRESIÓN:</b> {fecha_hora} hrs (UTC-5) &nbsp;|&nbsp; 📍 <b>COORDENADA AUDITADA:</b> [{lat}, {lon}] &nbsp;|&nbsp; 🏢 <b>PERCET UNIVERSAL HOLDINGS S.A.C. (RUC: 20614633345)</b>",
         "b2b_title": "🏢 PERCET UNIVERSAL HOLDINGS S.A.C. | INGENIERÍA, OBRAS Y CONSULTORÍA",
         "b2b_sub": "Respaldamos tus proyectos de infraestructura con soluciones de alto nivel técnico:<br>🇵🇪 <b>Operaciones en Perú:</b> Cotización y ejecución física de obras civiles, estructuras metálicas, remodelaciones y supervisión BIM/VDC en campo.<br>🌎 <b>Cobertura en Latinoamérica:</b> Consultoría especializada en mitigación hidrológica, modelamiento BIM/VDC y soporte técnico remoto.",
         "btn_quote": "📝 SOLICITAR COTIZACIÓN DE OBRA / CONSULTORÍA",
@@ -355,6 +459,7 @@ TEXTOS = {
         "ml_bullet_1": "* **Machine Learning Engine:** Gradient Boosting Regressor ($R^2 = 0.947$, $\\text{{RMSE}} = 0.599\\text{{ mm/day}}$, $\\text{{MAE}} = 0.394\\text{{ mm/day}}$).",
         "ml_bullet_2": "* **Linear Fit Equation:** $y = 0.871x + 0.163$ | **Surface Pressure:** `{presion} hPa`",
         "disclaimer": "<b>🛡️ LEGAL DISCLAIMER:</b> PERCET GeoRisk™ is an analytical support tool based on satellite and probabilistic predictive models. Results constitute technical risk estimates and do not exempt the user from applying official safety protocols, field supervision, and local construction codes.",
+        "pdf_audit_stamp": "🕒 <b>OFFICIAL ISSUANCE & PRINTING TIMESTAMP:</b> {fecha_hora} hrs (UTC-5) &nbsp;|&nbsp; 📍 <b>AUDITED COORDINATE:</b> [{lat}, {lon}] &nbsp;|&nbsp; 🏢 <b>PERCET UNIVERSAL HOLDINGS S.A.C. (TAX ID: 20614633345)</b>",
         "b2b_title": "🌎 PERCET UNIVERSAL HOLDINGS S.A.C. | ENGINEERING & INFRASTRUCTURE SUPPORT",
         "b2b_sub": "We support your infrastructure projects with high-level engineering solutions:<br>🌐 <b>International Coverage:</b> Remote hydrological risk consulting, climate modeling, and BIM/VDC digital supervision worldwide.<br>🇵🇪 <b>Operations in Peru:</b> Full on-site civil works execution, structural steel, remodeling, and field engineering.",
         "btn_quote": "📝 REQUEST ENGINEERING CONSULTING / QUOTE",
@@ -687,7 +792,7 @@ def aplicar_estilo_corporativo():
     }
 
     section[data-testid="stSidebar"] > div {
-        padding-top: 1rem !important;
+        padding-top: 0.85rem !important;
         background-color: var(--p-bg-sidebar) !important;
         border-right: 1px solid var(--p-border-card) !important;
     }
@@ -728,13 +833,15 @@ def aplicar_estilo_corporativo():
         stroke: rgba(255, 255, 255, 0.14) !important;
     }
 
+    /* Banner Azul alineado arriba como en la Imagen 4 */
     .corporate-header {
         background: linear-gradient(135deg, #020b1e 0%, #042454 55%, #004799 100%);
-        padding: 1.35rem 2rem;
+        padding: 1.30rem 2rem;
         border-radius: 14px;
         color: white;
         box-shadow: 0 10px 25px rgba(2, 11, 30, 0.35);
-        margin-bottom: 1.4rem;
+        margin-top: 0rem !important;
+        margin-bottom: 1.15rem !important;
         border-bottom: 4px solid #00b4d8;
         border-left: 6px solid #38bdf8;
     }
@@ -1430,7 +1537,7 @@ def mostrar_modal_cotizacion():
             else:
                 st.warning("⚠️ Please complete Company, Email and Request Detail.")
 
-# 8. ENCABEZADO SUPERIOR
+# 8. ENCABEZADO SUPERIOR (ALINEADO ARRIBA COMO EN IMAGEN 4)
 st.markdown(f"""
 <div class="corporate-header">
     <p class="corporate-title">{T['header_title']}</p>
@@ -1819,13 +1926,18 @@ st.markdown(f"""
 
 st.markdown("<br>", unsafe_allow_html=True)
 
-# 13. GENERADOR DE INFOGRAFÍA PDF EN 1 SOLA HOJA A4 CON UNIDADES EN PRONÓSTICO Y VIENTO
+# 13. GENERADOR DE INFOGRAFÍA PDF EN 1 SOLA HOJA A4 CON SELLO DE FECHA Y HORA EN LA PARTE INFERIOR (IMAGEN 3)
 def disparar_pdf_infografia_una_hoja():
     fechas_js = json.dumps(df_diario["Fecha"].tolist())
     valores_js = json.dumps(df_diario["Pronóstico"].tolist())
     colores_js = json.dumps(colores_barras)
-    logo_img_tag = f'<img src="data:image/png;base64,{LOGO_B64}" style="height:54px; border-radius:8px;">' if LOGO_B64 else "<b>PERCET</b>"
-    fecha_emision = datetime.now().strftime("%d/%m/%Y %H:%M")
+    logo_img_tag = f'<img src="data:image/png;base64,{LOGO_B64}" style="height:52px; border-radius:8px;">' if LOGO_B64 else "<b>PERCET</b>"
+    
+    # Hora oficial de Perú (UTC-5) para evidencia real de impresión
+    hora_peru = datetime.utcnow() - timedelta(hours=5)
+    fecha_emision = hora_peru.strftime("%d/%m/%Y — %H:%M:%S")
+    sello_inferior_pdf = T["pdf_audit_stamp"].format(fecha_hora=fecha_emision, lat=lat_actual, lon=lon_actual)
+    
     max_chart_pdf = round(max(pico_max_dia * 1.28, umbral_critico * 1.45, 4.0), 1)
     color_dif_pdf = "#dc2626" if diferencia_umbral > 0 else "#16a34a"
 
@@ -1847,8 +1959,8 @@ def disparar_pdf_infografia_una_hoja():
         var colores = {colores_js};
         var maxVal = {max_chart_pdf};
         
-        var chartTop = 22;
-        var chartBottom = 148;
+        var chartTop = 20;
+        var chartBottom = 142;
         var chartHeight = chartBottom - chartTop;
         var barrasSvg = "";
 
@@ -1858,7 +1970,7 @@ def disparar_pdf_infografia_una_hoja():
             var y = chartBottom - h;
             barrasSvg += '<rect x="' + x + '" y="' + y + '" width="15.5" height="' + h + '" fill="' + colores[i] + '" rx="2"/>';
             barrasSvg += '<text x="' + (x + 7.75) + '" y="' + (y - 4) + '" font-size="7.2" font-weight="800" text-anchor="middle" fill="#020b1e">' + valores[i] + '</text>';
-            barrasSvg += '<text x="' + (x + 7.75) + '" y="162" font-size="6.8" font-weight="700" text-anchor="middle" fill="#334155" transform="rotate(-35 ' + (x + 7.75) + ',162)">' + fechas[i] + '</text>';
+            barrasSvg += '<text x="' + (x + 7.75) + '" y="156" font-size="6.8" font-weight="700" text-anchor="middle" fill="#334155" transform="rotate(-35 ' + (x + 7.75) + ',156)">' + fechas[i] + '</text>';
         }}
         var yUmbral = chartBottom - ({umbral_critico} / maxVal) * chartHeight;
 
@@ -1869,24 +1981,25 @@ def disparar_pdf_infografia_una_hoja():
             <title>PERCET_GeoRisk_30D_{nombre_proyecto}</title>
             <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800;900&display=swap" rel="stylesheet">
             <style>
-                @page {{ size: A4 portrait; margin: 6.5mm; }}
+                @page {{ size: A4 portrait; margin: 6mm; }}
                 * {{ box-sizing: border-box; font-family: 'Montserrat', sans-serif; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }}
                 body {{ margin: 0; padding: 0; background: #ffffff; color: #020b1e; }}
-                .page {{ width: 100%; border: 2px solid #042454; border-radius: 10px; padding: 10px 12px; }}
-                .header {{ display: flex; justify-content: space-between; align-items: center; background: linear-gradient(135deg, #020b1e 0%, #042454 100%); color: white; padding: 9px 14px; border-radius: 8px; border-bottom: 4px solid #00b4d8; margin-bottom: 7px; }}
-                .grid-3 {{ display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 7px; }}
-                .card {{ border: 1px solid #cbd5e1; border-top: 3.5px solid #042454; border-radius: 7px; padding: 6px 9px; background: #f8fafc; text-align: center; }}
-                .card-title {{ font-size: 8px; font-weight: 800; color: #475569; text-transform: uppercase; text-align: center; }}
-                .card-val {{ font-size: 15px; font-weight: 900; color: #020b1e; margin: 2px 0; }}
-                .sec-title {{ font-size: 9.5px; font-weight: 800; color: #042454; text-transform: uppercase; border-bottom: 1.5px solid #e2e8f0; padding-bottom: 2px; margin: 6px 0 5px 0; }}
-                .chart-box {{ border: 1px solid #cbd5e1; border-radius: 7px; padding: 6px 6px 2px 6px; text-align: center; background: #ffffff; margin-bottom: 7px; }}
-                .alert-box {{ background: {bg_banner_pdf}; border: 1.5px solid {border_banner_pdf}; border-radius: 8px; padding: 8px 12px; display: grid; grid-template-columns: 1.15fr 1.25fr; gap: 10px; margin-bottom: 7px; }}
-                .tables-2col {{ display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 6px; }}
-                table {{ width: 100%; border-collapse: collapse; font-size: 7.1px; }}
-                th {{ background: #042454; color: white; padding: 3px 2px; text-transform: uppercase; font-weight: 700; font-size: 6.4px; }}
-                td {{ border-bottom: 1px solid #e2e8f0; padding: 2.1px 2px; text-align: center; font-weight: 600; }}
-                .sub-tbl-hdr {{ background: #e0f2fe; color: #0369a1; font-size: 7.5px; font-weight: 800; text-align: center; padding: 2px; border-radius: 4px 4px 0 0; border: 1px solid #bae6fd; border-bottom: none; }}
-                .footer {{ font-size: 7.2px; color: #64748b; background: #f1f5f9; padding: 5px 9px; border-radius: 5px; line-height: 1.28; }}
+                .page {{ width: 100%; border: 2px solid #042454; border-radius: 10px; padding: 9px 12px; }}
+                .header {{ display: flex; justify-content: space-between; align-items: center; background: linear-gradient(135deg, #020b1e 0%, #042454 100%); color: white; padding: 8px 14px; border-radius: 8px; border-bottom: 4px solid #00b4d8; margin-bottom: 6px; }}
+                .grid-3 {{ display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 6px; }}
+                .card {{ border: 1px solid #cbd5e1; border-top: 3.5px solid #042454; border-radius: 7px; padding: 5px 9px; background: #f8fafc; text-align: center; }}
+                .card-title {{ font-size: 7.8px; font-weight: 800; color: #475569; text-transform: uppercase; text-align: center; }}
+                .card-val {{ font-size: 14.5px; font-weight: 900; color: #020b1e; margin: 2px 0; }}
+                .sec-title {{ font-size: 9.2px; font-weight: 800; color: #042454; text-transform: uppercase; border-bottom: 1.5px solid #e2e8f0; padding-bottom: 2px; margin: 5px 0 4px 0; }}
+                .chart-box {{ border: 1px solid #cbd5e1; border-radius: 7px; padding: 5px 6px 2px 6px; text-align: center; background: #ffffff; margin-bottom: 6px; }}
+                .alert-box {{ background: {bg_banner_pdf}; border: 1.5px solid {border_banner_pdf}; border-radius: 8px; padding: 7px 12px; display: grid; grid-template-columns: 1.15fr 1.25fr; gap: 10px; margin-bottom: 6px; }}
+                .tables-2col {{ display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 5px; }}
+                table {{ width: 100%; border-collapse: collapse; font-size: 7px; }}
+                th {{ background: #042454; color: white; padding: 2.8px 2px; text-transform: uppercase; font-weight: 700; font-size: 6.3px; }}
+                td {{ border-bottom: 1px solid #e2e8f0; padding: 1.9px 2px; text-align: center; font-weight: 600; }}
+                .sub-tbl-hdr {{ background: #e0f2fe; color: #0369a1; font-size: 7.3px; font-weight: 800; text-align: center; padding: 2px; border-radius: 4px 4px 0 0; border: 1px solid #bae6fd; border-bottom: none; }}
+                .footer {{ font-size: 6.9px; color: #64748b; background: #f1f5f9; padding: 5px 9px; border-radius: 5px 5px 0 0; line-height: 1.25; border: 1px solid #cbd5e1; border-bottom: none; }}
+                .audit-bar {{ background: #020b1e; color: #ffffff; font-size: 7.2px; padding: 5px 10px; border-radius: 0 0 5px 5px; text-align: center; letter-spacing: 0.3px; border-top: 2px solid #00b4d8; }}
             </style>
         </head>
         <body>
@@ -1900,7 +2013,7 @@ def disparar_pdf_infografia_una_hoja():
                                 {T['header_client']} {nombre_proyecto} &nbsp;|&nbsp; {nombre_rubro_activo}
                             </div>
                             <div style="font-size:8px; color:#cbd5e1; margin-top:2px;">
-                                📍 Lat: {lat_actual}, Lon: {lon_actual} &nbsp;|&nbsp; 🕒 {fecha_emision}
+                                📍 Lat: {lat_actual}, Lon: {lon_actual} &nbsp;|&nbsp; 🕒 {fecha_emision} hrs (UTC-5)
                             </div>
                         </div>
                     </div>
@@ -1911,24 +2024,24 @@ def disparar_pdf_infografia_una_hoja():
                     <div class="card">
                         <div class="card-title">{T['pill_peak']} ({fecha_pico})</div>
                         <div class="card-val" style="color:#dc2626;">{pico_max_dia:.1f} {UNIT_MM}</div>
-                        <div style="font-size:8px; font-weight:700; color:#475569;">{T['kpi1_sub'].format(acum=lluvia_acumulada)}</div>
+                        <div style="font-size:7.8px; font-weight:700; color:#475569;">{T['kpi1_sub'].format(acum=lluvia_acumulada)}</div>
                     </div>
                     <div class="card">
                         <div class="card-title">{T['pill_thresh']} / {etiqueta_dif}</div>
-                        <div class="card-val">{umbral_critico:.1f} {UNIT_MM} <span style="font-size:11.5px; color:{color_dif_pdf};">({signo_dif})</span></div>
-                        <div style="font-size:8px; font-weight:700; color:#475569;">{T['pill_days']}: {dias_criticos} {T['day_unit']}</div>
+                        <div class="card-val">{umbral_critico:.1f} {UNIT_MM} <span style="font-size:11px; color:{color_dif_pdf};">({signo_dif})</span></div>
+                        <div style="font-size:7.8px; font-weight:700; color:#475569;">{T['pill_days']}: {dias_criticos} {T['day_unit']}</div>
                     </div>
                     <div class="card">
                         <div class="card-title">{T['kpi2_title']} & {T['pdf_quebradas']}</div>
                         <div class="card-val">{humedad_media}% HR</div>
-                        <div style="font-size:8px; font-weight:700; color:#020b1e;">{estado_quebrada}</div>
+                        <div style="font-size:7.8px; font-weight:700; color:#020b1e;">{estado_quebrada}</div>
                     </div>
                 </div>
 
                 <div class="sec-title">{T['pdf_sec2_title']}</div>
                 <div class="chart-box">
-                    <svg viewBox="0 0 740 176" width="100%" height="158">
-                        <line x1="22" y1="148" x2="725" y2="148" stroke="#94a3b8" stroke-width="1.5"/>
+                    <svg viewBox="0 0 740 168" width="100%" height="150">
+                        <line x1="22" y1="142" x2="725" y2="142" stroke="#94a3b8" stroke-width="1.5"/>
                         ` + barrasSvg + `
                         <line x1="22" y1="` + yUmbral + `" x2="725" y2="` + yUmbral + `" stroke="#dc2626" stroke-width="2" stroke-dasharray="6,4"/>
                         <rect x="588" y="2" width="132" height="15" fill="#dc2626" rx="3"/>
@@ -1939,13 +2052,13 @@ def disparar_pdf_infografia_una_hoja():
                 <div class="sec-title">{T['pdf_sec3_title']}</div>
                 <div class="alert-box">
                     <div>
-                        <div style="font-size:9.5px; font-weight:900; color:{color_titulo_pdf}; margin-bottom:2px;">{badge_txt}</div>
-                        <div style="font-size:9px; font-weight:800; margin-bottom:2px;">{nombre_rubro_activo}</div>
-                        <div style="font-size:8px; color:#334155; line-height:1.32;">{desc_txt}</div>
+                        <div style="font-size:9.2px; font-weight:900; color:{color_titulo_pdf}; margin-bottom:2px;">{badge_txt}</div>
+                        <div style="font-size:8.8px; font-weight:800; margin-bottom:2px;">{nombre_rubro_activo}</div>
+                        <div style="font-size:7.8px; color:#334155; line-height:1.3;">{desc_txt}</div>
                     </div>
                     <div>
-                        <div style="font-size:8.5px; font-weight:800; color:#042454; margin-bottom:2px;">{T['rec_title']}:</div>
-                        <div style="font-size:7.8px; line-height:1.32;">{checks_pdf_html}</div>
+                        <div style="font-size:8.3px; font-weight:800; color:#042454; margin-bottom:2px;">{T['rec_title']}:</div>
+                        <div style="font-size:7.6px; line-height:1.3;">{checks_pdf_html}</div>
                     </div>
                 </div>
 
@@ -1991,6 +2104,9 @@ def disparar_pdf_infografia_una_hoja():
 
                 <div class="footer">
                     {T['disclaimer']}
+                </div>
+                <div class="audit-bar">
+                    {sello_inferior_pdf}
                 </div>
             </div>
             <script>
