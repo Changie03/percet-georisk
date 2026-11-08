@@ -464,7 +464,7 @@ def obtener_datos_satelitales_30d(lat_val, lon_val):
 
     return df_res, humedad_media, presion_media
 
-# 4. SISTEMA DE ESTILOS ADAPTATIVO (SIN BLOQUEOS Y CON MENÚ DE 3 PUNTOS LIMPIO)
+# 4. SISTEMA DE ESTILOS ADAPTATIVO (MENÚ DE 3 PUNTOS ESTABLE SIN PARPADEO)
 def aplicar_estilo_corporativo():
     st.markdown("""
     <style>
@@ -482,7 +482,7 @@ def aplicar_estilo_corporativo():
         text-transform: none !important;
     }
 
-    /* Subir el banner azul para eliminar el espacio superior (Imagen 4) */
+    /* Subir el banner azul para eliminar el espacio superior */
     .block-container,
     [data-testid="stMainBlockContainer"],
     .stMainBlockContainer {
@@ -505,7 +505,14 @@ def aplicar_estilo_corporativo():
         opacity: 1 !important;
     }
 
-    /* Reducir 10 millones de veces elementos externos sin afectar la carga de la app */
+    /* En el menú de 3 puntitos: ocultar separadores sin tocar el contenedor del menú */
+    [data-testid="stMainMenuDivider"],
+    [data-testid="stMainMenuPopover"] hr,
+    [data-testid="stMainMenuPopover"] [role="separator"] {
+        display: none !important;
+    }
+
+    /* Reducir 10 millones de veces elementos externos (Corona, Manage App, GitHub) */
     .modebar, .modebar-container,
     button[data-testid="StyledFullScreenButton"],
     div[data-testid="stElementToolbar"],
@@ -515,7 +522,6 @@ def aplicar_estilo_corporativo():
     [data-testid="stToolbarActions"],
     [data-testid="stActionButton"],
     [data-testid="stStatusWidget"],
-    [data-testid="stMainMenuDivider"],
     a[href*="streamlit.io"],
     a[href*="github.com"],
     [class*="viewerBadge"],
@@ -1099,7 +1105,7 @@ def aplicar_estilo_corporativo():
     </style>
     """, unsafe_allow_html=True)
 
-    # UN ÚNICO SCRIPT LIGERO Y RÁPIDO (SIN MUTATIONOBSERVER NI BUCLES QUE CONGELEN LA PÁGINA)
+    # SCRIPT ESTABLE: PROTEGE EL MENÚ DE 3 PUNTITOS PARA QUE NUNCA PARPADEE NI SE CIERRE SOLO
     components.html("""
     <script>
     (function() {
@@ -1112,6 +1118,8 @@ def aplicar_estilo_corporativo():
             [data-testid="stActionButton"],
             [data-testid="stStatusWidget"],
             [data-testid="stMainMenuDivider"],
+            [data-testid="stMainMenuPopover"] hr,
+            [data-testid="stMainMenuPopover"] [role="separator"],
             .stAppDeployButton,
             a[href*="streamlit.io"],
             a[href*="github.com"],
@@ -1145,8 +1153,10 @@ def aplicar_estilo_corporativo():
             return null;
         }
 
-        function ocultarElementoMicro(el) {
+        function ocultarInsigniaExterna(el) {
             if (!el || el.dataset.percetHidden === "1") return;
+            // Jamás ocultar nada que esté dentro del menú de 3 puntitos con esta función
+            if (el.closest('[data-testid="stMainMenuPopover"], [data-baseweb="popover"], [data-testid="stMainMenu"]')) return;
             el.dataset.percetHidden = "1";
             try {
                 if (el.tagName === "A") el.href = WA_URL;
@@ -1165,12 +1175,49 @@ def aplicar_estilo_corporativo():
             el.style.setProperty("display", "none", "important");
         }
 
+        function limpiarItemsMenuSinCerrar(pDoc) {
+            var pop = pDoc.querySelector('[data-testid="stMainMenuPopover"]');
+            if (!pop) return;
+
+            // 1. Ocultar únicamente las filas <li> que NO contengan los botones System / Light / Dark
+            var filas = pop.querySelectorAll('li');
+            for (var i = 0; i < filas.length; i++) {
+                var li = filas[i];
+                if (li.dataset.percetItemHidden === "1") continue;
+                var txtLi = (li.innerText || li.textContent || "").toLowerCase();
+                // REGLA DE ORO: Si la fila contiene System, Light o Dark, protegerla al 100%
+                if (txtLi.indexOf("light") !== -1 || txtLi.indexOf("dark") !== -1 || txtLi.indexOf("system") !== -1) {
+                    continue;
+                }
+                li.dataset.percetItemHidden = "1";
+                li.style.setProperty("display", "none", "important");
+            }
+
+            // 2. Ocultar únicamente el texto hoja "Made with Streamlit v1.67.0" sin tocar los contenedores padres
+            var nodos = pop.querySelectorAll('span, p, a, footer, div');
+            for (var j = 0; j < nodos.length; j++) {
+                var nodo = nodos[j];
+                if (nodo.dataset.percetItemHidden === "1") continue;
+                var txtNodo = (nodo.innerText || nodo.textContent || "").trim().toLowerCase();
+                // Jamás tocar ningún contenedor cuyo texto incluya light, dark o system
+                if (txtNodo.indexOf("light") !== -1 || txtNodo.indexOf("dark") !== -1 || txtNodo.indexOf("system") !== -1) {
+                    continue;
+                }
+                if (
+                    (txtNodo.indexOf("made with streamlit") === 0 || txtNodo.indexOf("streamlit v") === 0) &&
+                    txtNodo.length < 45
+                ) {
+                    nodo.dataset.percetItemHidden = "1";
+                    nodo.style.setProperty("display", "none", "important");
+                }
+            }
+        }
+
         function cicloLigero() {
             try {
                 var pDoc = window.parent.document;
                 if (!pDoc) return;
 
-                // 1. Inyectar CSS una sola vez en window.parent (y en window.top si el navegador lo permite)
                 if (pDoc.head && !pDoc.getElementById("percet-fast-css")) {
                     var st = pDoc.createElement("style");
                     st.id = "percet-fast-css";
@@ -1186,42 +1233,16 @@ def aplicar_estilo_corporativo():
                     }
                 } catch (e) {}
 
-                // 2. Limpiar el menú de 3 puntitos cuando el usuario lo abre (dejando solo System, Light y Dark)
-                var pop = pDoc.querySelector('[data-testid="stMainMenuPopover"], [data-testid="stMainMenuList"]');
-                if (pop) {
-                    var items = pop.querySelectorAll('li, a, button, footer, div');
-                    for (var i = 0; i < items.length; i++) {
-                        var it = items[i];
-                        if (it.dataset.percetHidden === "1") continue;
-                        var txt = (it.innerText || it.textContent || "").trim().toLowerCase();
-                        if (!txt || txt === "system" || txt === "light" || txt === "dark") continue;
-                        if (
-                            txt === "print" ||
-                            txt === "record screen" ||
-                            txt === "rerun" ||
-                            txt === "clear cache" ||
-                            txt.indexOf("made with streamlit") !== -1 ||
-                            txt.indexOf("streamlit v") !== -1 ||
-                            txt === "developer options" ||
-                            txt === "about"
-                        ) {
-                            var target = it.closest("li") || it;
-                            if ((target.innerText || "").toLowerCase().indexOf("light") === -1) {
-                                ocultarElementoMicro(target);
-                            } else if (txt.indexOf("made with streamlit") !== -1 || txt.indexOf("streamlit v") !== -1) {
-                                ocultarElementoMicro(it);
-                            }
-                        }
-                    }
-                }
+                // Limpiar opciones extra del menú de 3 puntitos sin cerrarlo jamás
+                limpiarItemsMenuSinCerrar(pDoc);
 
-                // 3. Ocultar enlaces sueltos a streamlit.io si existieran
+                // Ocultar insignias externas fuera del menú
                 var links = pDoc.querySelectorAll('a[href*="streamlit.io"], [data-testid="manage-app-button"]');
                 for (var j = 0; j < links.length; j++) {
-                    ocultarElementoMicro(links[j]);
+                    ocultarInsigniaExterna(links[j]);
                 }
 
-                // 4. Sincronizar Modo Claro / Modo Oscuro
+                // Sincronizar Modo Claro / Modo Oscuro
                 var isDark = false;
                 var headerEl = pDoc.querySelector('header[data-testid="stHeader"]');
                 var inputEl = pDoc.querySelector('div[data-baseweb="select"] > div') || pDoc.querySelector('div[data-baseweb="input"]');
@@ -1256,7 +1277,7 @@ def aplicar_estilo_corporativo():
         }
 
         cicloLigero();
-        setInterval(cicloLigero, 450);
+        setInterval(cicloLigero, 350);
 
         // Pulso Keep-Alive cada 5 minutos para operación 24/7
         setInterval(function() {
