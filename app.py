@@ -1,5 +1,6 @@
 import streamlit as st
 import streamlit.components.v1 as components
+import html
 
 # 1. CONFIGURACIÓN DE LA PÁGINA (EJECUCIÓN EN MILISEGUNDO CERO)
 st.set_page_config(
@@ -8,10 +9,10 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# 2. ESCUDO INVISIBLE PERMANENTE 24/7 + SUBIDA DEL BANNER AZUL + LIMPIEZA DE MENÚ
+# 2. ESCUDO INVISIBLE 24/7 + ANTI-HACKEO + RESTAURACIÓN DE LOS 3 PUNTOS (LIGHT/DARK)
 st.markdown("""
 <style>
-/* Subir el banner azul para eliminar el espacio blanco superior (Imagen 1 -> Imagen 4) */
+/* Subir el banner azul para eliminar el espacio blanco superior */
 .block-container,
 [data-testid="stMainBlockContainer"],
 .stMainBlockContainer {
@@ -19,13 +20,26 @@ st.markdown("""
     padding-bottom: 2rem !important;
 }
 
+/* Garantizar que la cabecera y el botón de los 3 puntitos (⋮) estén SIEMPRE visibles */
 header[data-testid="stHeader"] {
     background: transparent !important;
-    height: 2.2rem !important;
-    min-height: 2.2rem !important;
+    height: 2.4rem !important;
+    min-height: 2.4rem !important;
+    display: flex !important;
+    visibility: visible !important;
+    opacity: 1 !important;
 }
 
-/* Reducir 10 millones de veces insignias, Manage App, Corona y opciones extras del menú */
+#MainMenu,
+[data-testid="stMainMenu"],
+[data-testid="stMainMenu"] button {
+    display: flex !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    pointer-events: auto !important;
+}
+
+/* Reducir 10 millones de veces Built with Streamlit, Fullscreen, Manage App, Corona y botones de GitHub */
 [data-testid="manage-app-button"],
 button[data-testid="manage-app-button"],
 [data-testid="stToolbarActions"],
@@ -39,6 +53,9 @@ a[href*="github.com"],
 [class*="profileContainer"],
 [class*="profileImage"],
 [class*="StatusWidget"],
+[class*="stEmbed"],
+button[title*="Fullscreen"],
+button[aria-label*="Fullscreen"],
 footer {
     transform: scale(0.0000001) !important;
     zoom: 0.0000001 !important;
@@ -49,12 +66,14 @@ footer {
     min-width: 0px !important;
     min-height: 0px !important;
     font-size: 0px !important;
+    margin: 0px !important;
+    padding: 0px !important;
     opacity: 0 !important;
     visibility: hidden !important;
-    pointer-events: none !important;
     position: fixed !important;
     bottom: -99999px !important;
     right: -99999px !important;
+    z-index: -99999 !important;
     overflow: hidden !important;
     display: none !important;
 }
@@ -66,14 +85,31 @@ components.html("""
 (function() {
     var WA_REDIRECT = "https://wa.me/51981328639?text=Hola%20PERCET%2C%20solicito%20informaci%C3%B3n%20sobre%20PERCET%20GeoRisk";
 
+    // Si alguien entra con ?embed=true en la URL, limpiarlo automáticamente al link original limpio
+    try {
+        if (window.top.location.search && window.top.location.search.indexOf('embed=true') !== -1) {
+            var cleanUrl = window.top.location.origin + window.top.location.pathname;
+            window.top.location.replace(cleanUrl);
+        }
+    } catch (e) {}
+
     var REGLA_MICROSCOPICA = `
         .block-container, [data-testid="stMainBlockContainer"], .stMainBlockContainer {
             padding-top: 1.15rem !important;
         }
         header[data-testid="stHeader"] {
             background: transparent !important;
-            height: 2.2rem !important;
-            min-height: 2.2rem !important;
+            height: 2.4rem !important;
+            min-height: 2.4rem !important;
+            display: flex !important;
+            visibility: visible !important;
+            opacity: 1 !important;
+        }
+        #MainMenu, [data-testid="stMainMenu"], [data-testid="stMainMenu"] button {
+            display: flex !important;
+            visibility: visible !important;
+            opacity: 1 !important;
+            pointer-events: auto !important;
         }
         [data-testid="manage-app-button"],
         button[data-testid="manage-app-button"],
@@ -83,10 +119,13 @@ components.html("""
         [data-testid="stMainMenuDivider"],
         .stAppDeployButton,
         a[href*="streamlit.io"],
+        a[href*="github.com"],
         [class*="viewerBadge"],
         [class*="profileContainer"],
         [class*="profileImage"],
         img[data-testid="appCreatorAvatar"],
+        button[title*="Fullscreen"],
+        button[aria-label*="Fullscreen"],
         footer {
             transform: scale(0.0000001) !important;
             zoom: 0.0000001 !important;
@@ -112,6 +151,14 @@ components.html("""
 
     function encogerYRedirigirWhatsApp(el) {
         if (!el || !el.style) return;
+        // Nunca ocultar el botón de los 3 puntitos ni los botones System/Light/Dark
+        if (
+            el.id === 'MainMenu' ||
+            el.getAttribute('data-testid') === 'stMainMenu' ||
+            el.closest('[data-testid="stMainMenu"]')
+        ) {
+            return;
+        }
         try {
             if (el.tagName === 'A') {
                 el.setAttribute('href', WA_REDIRECT);
@@ -130,6 +177,7 @@ components.html("""
         el.style.setProperty('max-width', '0px', 'important');
         el.style.setProperty('max-height', '0px', 'important');
         el.style.setProperty('min-height', '0px', 'important');
+        el.style.setProperty('font-size', '0px', 'important');
         el.style.setProperty('margin', '0px', 'important');
         el.style.setProperty('padding', '0px', 'important');
         el.style.setProperty('border', 'none', 'important');
@@ -146,24 +194,26 @@ components.html("""
             var popovers = doc.querySelectorAll('[data-testid="stMainMenuPopover"], [data-baseweb="popover"], ul[role="menu"], [data-testid="stMainMenuList"]');
             for (var p = 0; p < popovers.length; p++) {
                 var pop = popovers[p];
-                // Ocultar líneas divisorias dentro del menú de 3 puntos
-                var Lineas = pop.querySelectorAll('hr, [role="separator"], [data-testid="stMainMenuDivider"]');
-                for (var l = 0; l < Lineas.length; l++) {
-                    encogerYRedirigirWhatsApp(Lineas[l]);
+                var lineas = pop.querySelectorAll('hr, [role="separator"], [data-testid="stMainMenuDivider"]');
+                for (var l = 0; l < lineas.length; l++) {
+                    encogerYRedirigirWhatsApp(lineas[l]);
                 }
-                // Analizar todos los elementos del menú para dejar SOLO System, Light y Dark (Imagen 2)
                 var items = pop.querySelectorAll('li, a, button, div, span, footer');
                 for (var k = 0; k < items.length; k++) {
                     var item = items[k];
                     var texto = (item.innerText || item.textContent || '').trim().toLowerCase();
                     if (!texto) continue;
 
-                    // Si el elemento contiene System, Light o Dark, NO tocarlo
-                    if (texto === 'system' || texto === 'light' || texto === 'dark') {
+                    // Proteger los botones de tema: System, Light y Dark
+                    if (
+                        texto === 'system' ||
+                        texto === 'light' ||
+                        texto === 'dark' ||
+                        item.querySelector('button[aria-label*="Light"], button[aria-label*="Dark"], button[aria-label*="System"]')
+                    ) {
                         continue;
                     }
 
-                    // Si es Print, Record screen, Made with Streamlit v1.67.0, Rerun, Clear cache, etc. -> Encoger 1 millón de veces
                     var esProhibido = (
                         texto === 'print' ||
                         texto === 'record screen' ||
@@ -180,19 +230,34 @@ components.html("""
                     );
 
                     if (esProhibido) {
-                        var contenedorItem = item.closest('li') || item.closest('button') || item.closest('a') || item;
-                        if (contenedorItem && !contenedorItem.querySelector('button[aria-label*="Light"], button[aria-label*="Dark"]')) {
-                            encogerYRedirigirWhatsApp(contenedorItem);
-                        }
-                        if (texto.indexOf('made with streamlit') !== -1 || texto.indexOf('streamlit v') !== -1) {
+                        var fila = item.closest('li');
+                        if (fila && (fila.innerText || '').toLowerCase().indexOf('light') === -1) {
+                            encogerYRedirigirWhatsApp(fila);
+                        } else if ((item.innerText || '').toLowerCase().indexOf('light') === -1) {
                             encogerYRedirigirWhatsApp(item);
-                            if (item.parentElement && (item.parentElement.innerText || '').toLowerCase().indexOf('system') === -1) {
-                                encogerYRedirigirWhatsApp(item.parentElement);
-                            }
                         }
                     }
                 }
             }
+        } catch (e) {}
+    }
+
+    function instalarEscudoAntiHackeo(doc) {
+        try {
+            if (doc.__percetSecurityActive) return;
+            doc.__percetSecurityActive = true;
+            // Bloquear atajos de inspección de código fuente (F12, Ctrl+U, Ctrl+Shift+I/J/C)
+            doc.addEventListener('keydown', function(e) {
+                if (
+                    e.keyCode === 123 ||
+                    (e.ctrlKey && e.shiftKey && (e.keyCode === 73 || e.keyCode === 74 || e.keyCode === 67)) ||
+                    (e.ctrlKey && e.keyCode === 85)
+                ) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    return false;
+                }
+            }, true);
         } catch (e) {}
     }
 
@@ -205,6 +270,8 @@ components.html("""
                 st.innerHTML = REGLA_MICROSCOPICA;
                 doc.head.appendChild(st);
             }
+            instalarEscudoAntiHackeo(doc);
+
             var selectores = [
                 '[data-testid="manage-app-button"]',
                 'button[data-testid="manage-app-button"]',
@@ -212,10 +279,13 @@ components.html("""
                 '[data-testid="stActionButton"]',
                 '.stAppDeployButton',
                 'a[href*="streamlit.io"]',
+                'a[href*="github.com"]',
                 '[class*="viewerBadge"]',
                 '[class*="profileContainer"]',
                 '[class*="profileImage"]',
-                'img[data-testid="appCreatorAvatar"]'
+                'img[data-testid="appCreatorAvatar"]',
+                'button[title*="Fullscreen"]',
+                'button[aria-label*="Fullscreen"]'
             ];
             var nodos = doc.querySelectorAll(selectores.join(','));
             for (var i = 0; i < nodos.length; i++) {
@@ -227,17 +297,27 @@ components.html("""
                     encogerYRedirigirWhatsApp(nodos[i].parentElement);
                 }
             }
-            var botones = doc.querySelectorAll('button, a, div, span');
-            for (var j = 0; j < botones.length; j++) {
-                var b = botones[j];
-                var txt = (b.innerText || b.textContent || '').trim();
+
+            // Ocultar 1 millón de veces "Built with Streamlit", "Fullscreen", "Manage app", "Hosted with Streamlit", "Created by"
+            var elementos = doc.querySelectorAll('button, a, div, span, footer');
+            for (var j = 0; j < elementos.length; j++) {
+                var el = elementos[j];
+                if (el.children && el.children.length > 3) continue;
+                var txt = (el.innerText || el.textContent || '').trim();
+                var txtLower = txt.toLowerCase();
                 if (
                     txt === 'Manage app' ||
                     txt === 'Hosted with Streamlit' ||
                     txt.indexOf('Created by') === 0 ||
-                    txt.indexOf('Made with Streamlit') === 0
+                    txt.indexOf('Made with Streamlit') === 0 ||
+                    txtLower === 'built with streamlit' ||
+                    txtLower.indexOf('built with streamlit') === 0 ||
+                    txtLower === 'fullscreen'
                 ) {
-                    encogerYRedirigirWhatsApp(b);
+                    encogerYRedirigirWhatsApp(el);
+                    if (el.parentElement && el.parentElement.tagName !== 'BODY' && (el.parentElement.innerText || '').length < 45) {
+                        encogerYRedirigirWhatsApp(el.parentElement);
+                    }
                 }
             }
             limpiarMenuTresPuntos(doc);
@@ -833,7 +913,6 @@ def aplicar_estilo_corporativo():
         stroke: rgba(255, 255, 255, 0.14) !important;
     }
 
-    /* Banner Azul alineado arriba como en la Imagen 4 */
     .corporate-header {
         background: linear-gradient(135deg, #020b1e 0%, #042454 55%, #004799 100%);
         padding: 1.30rem 2rem;
@@ -1379,7 +1458,7 @@ def aplicar_estilo_corporativo():
 
 aplicar_estilo_corporativo()
 
-# 6. BARRA LATERAL
+# 6. BARRA LATERAL CON SANITIZACIÓN ANTI-HACKEO (XSS SHIELD)
 with st.sidebar:
     if os.path.exists(LOGO_FILE):
         st.image(LOGO_FILE, use_container_width=True)
@@ -1399,7 +1478,8 @@ with st.sidebar:
     st.markdown("<hr style='margin: 0.6rem 0;'>", unsafe_allow_html=True)
     st.markdown(f"<p style='font-weight:800; font-size:0.90rem; letter-spacing:0.5px;'>{T['params_header']}</p>", unsafe_allow_html=True)
     
-    nombre_proyecto = st.text_input(T["client_label"], value="Consorcio Qalvan")
+    nombre_proyecto_raw = st.text_input(T["client_label"], value="Consorcio Qalvan", max_chars=80)
+    nombre_proyecto = html.escape(nombre_proyecto_raw.strip()) if nombre_proyecto_raw.strip() else "Consorcio Qalvan"
     
     opciones_rubros = [r["es_name"] if LANG == "ES" else r["en_name"] for r in RUBROS_DATA]
     idx_rubro = st.selectbox(
@@ -1439,15 +1519,15 @@ def mostrar_modal_cotizacion():
             </div>
         </div>
         """, unsafe_allow_html=True)
-        emp = st.text_input("EMPRESA / CONSTRUCTORA O CLIENTE:")
-        correo_cli = st.text_input("CORREO CORPORATIVO:")
-        tel_cli = st.text_input("TELÉFONO / WHATSAPP DE CONTACTO:")
-        detalle_req = st.text_area("DETALLE SU REQUERIMIENTO O PROYECTO A COTIZAR (Ej. Estructura metálica, remodelación, obras civiles, consultoría BIM/VDC):", height=105)
+        emp = html.escape(st.text_input("EMPRESA / CONSTRUCTORA O CLIENTE:", max_chars=100).strip())
+        correo_cli = html.escape(st.text_input("CORREO CORPORATIVO:", max_chars=100).strip())
+        tel_cli = html.escape(st.text_input("TELÉFONO / WHATSAPP DE CONTACTO:", max_chars=40).strip())
+        detalle_req = html.escape(st.text_area("DETALLE SU REQUERIMIENTO O PROYECTO A COTIZAR (Ej. Estructura metálica, remodelación, obras civiles, consultoría BIM/VDC):", height=105, max_chars=1200).strip())
         archivo = st.file_uploader("ADJUNTAR PLANO, EXPEDIENTE O DOCUMENTO (OPCIONAL):", type=["pdf", "png", "jpg"])
         
         if st.button("🚀 ENVIAR SOLICITUD A OFICINA TÉCNICA", type="primary", use_container_width=True):
             if emp and correo_cli and detalle_req:
-                nombre_arch = archivo.name if archivo else "No adjuntado"
+                nombre_arch = html.escape(archivo.name) if archivo else "No adjuntado"
                 asunto = f"Cotización / Ingeniería PERCET - {emp} ({nombre_proyecto})"
                 cuerpo = (
                     f"Empresa / Cliente: {emp}\n"
@@ -1493,15 +1573,15 @@ def mostrar_modal_cotizacion():
             </div>
         </div>
         """, unsafe_allow_html=True)
-        emp = st.text_input("COMPANY / CONTRACTOR OR CLIENT NAME:")
-        correo_cli = st.text_input("CORPORATE EMAIL:")
-        tel_cli = st.text_input("CONTACT PHONE / WHATSAPP:")
-        detalle_req = st.text_area("PLEASE DETAIL YOUR PROJECT OR TECHNICAL REQUEST (e.g., Remote BIM/VDC consulting, hydrological study, civil works in Peru):", height=105)
+        emp = html.escape(st.text_input("COMPANY / CONTRACTOR OR CLIENT NAME:", max_chars=100).strip())
+        correo_cli = html.escape(st.text_input("CORPORATE EMAIL:", max_chars=100).strip())
+        tel_cli = html.escape(st.text_input("CONTACT PHONE / WHATSAPP:", max_chars=40).strip())
+        detalle_req = html.escape(st.text_area("PLEASE DETAIL YOUR PROJECT OR TECHNICAL REQUEST (e.g., Remote BIM/VDC consulting, hydrological study, civil works in Peru):", height=105, max_chars=1200).strip())
         archivo = st.file_uploader("UPLOAD BLUEPRINT, RFP OR DOCUMENT (OPTIONAL):", type=["pdf", "png", "jpg"])
         
         if st.button("🚀 SUBMIT REQUEST TO TECHNICAL OFFICE", type="primary", use_container_width=True):
             if emp and correo_cli and detalle_req:
-                nombre_arch = archivo.name if archivo else "Not attached"
+                nombre_arch = html.escape(archivo.name) if archivo else "Not attached"
                 asunto = f"PERCET Engineering Request - {emp} ({nombre_proyecto})"
                 cuerpo = (
                     f"Company / Client: {emp}\n"
@@ -1537,7 +1617,7 @@ def mostrar_modal_cotizacion():
             else:
                 st.warning("⚠️ Please complete Company, Email and Request Detail.")
 
-# 8. ENCABEZADO SUPERIOR (ALINEADO ARRIBA COMO EN IMAGEN 4)
+# 8. ENCABEZADO SUPERIOR
 st.markdown(f"""
 <div class="corporate-header">
     <p class="corporate-title">{T['header_title']}</p>
@@ -1594,9 +1674,9 @@ with col_mapa:
     
     c1, c2, c3 = st.columns([1.3, 1.3, 1.65])
     with c1:
-        lat_input = st.number_input(T["lat_label"], value=float(st.session_state.lat), format="%.4f", step=0.0010)
+        lat_input = st.number_input(T["lat_label"], value=float(st.session_state.lat), format="%.4f", step=0.0010, min_value=-90.0, max_value=90.0)
     with c2:
-        lon_input = st.number_input(T["lon_label"], value=float(st.session_state.lon), format="%.4f", step=0.0010)
+        lon_input = st.number_input(T["lon_label"], value=float(st.session_state.lon), format="%.4f", step=0.0010, min_value=-180.0, max_value=180.0)
     with c3:
         st.markdown("<div style='height: 27px;'></div>", unsafe_allow_html=True)
         buscar_btn = st.button(T["locate_btn"], use_container_width=True)
@@ -1926,14 +2006,13 @@ st.markdown(f"""
 
 st.markdown("<br>", unsafe_allow_html=True)
 
-# 13. GENERADOR DE INFOGRAFÍA PDF EN 1 SOLA HOJA A4 CON SELLO DE FECHA Y HORA EN LA PARTE INFERIOR (IMAGEN 3)
+# 13. GENERADOR DE INFOGRAFÍA PDF EN 1 SOLA HOJA A4 CON SELLO DE FECHA Y HORA EN LA PARTE INFERIOR
 def disparar_pdf_infografia_una_hoja():
     fechas_js = json.dumps(df_diario["Fecha"].tolist())
     valores_js = json.dumps(df_diario["Pronóstico"].tolist())
     colores_js = json.dumps(colores_barras)
     logo_img_tag = f'<img src="data:image/png;base64,{LOGO_B64}" style="height:52px; border-radius:8px;">' if LOGO_B64 else "<b>PERCET</b>"
     
-    # Hora oficial de Perú (UTC-5) para evidencia real de impresión
     hora_peru = datetime.utcnow() - timedelta(hours=5)
     fecha_emision = hora_peru.strftime("%d/%m/%Y — %H:%M:%S")
     sello_inferior_pdf = T["pdf_audit_stamp"].format(fecha_hora=fecha_emision, lat=lat_actual, lon=lon_actual)
