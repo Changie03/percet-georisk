@@ -1,355 +1,5 @@
 import streamlit as st
 import streamlit.components.v1 as components
-import html
-
-# 1. CONFIGURACIÓN DE LA PÁGINA (EJECUCIÓN EN MILISEGUNDO CERO)
-st.set_page_config(
-    page_title="PERCET GeoRisk™ | Climate Intelligence",
-    layout="wide",
-    initial_sidebar_state="expanded"
-)
-
-# 2. ESCUDO INVISIBLE 24/7 + ANTI-HACKEO + RESTAURACIÓN DE LOS 3 PUNTOS (LIGHT/DARK)
-st.markdown("""
-<style>
-/* Subir el banner azul para eliminar el espacio blanco superior */
-.block-container,
-[data-testid="stMainBlockContainer"],
-.stMainBlockContainer {
-    padding-top: 1.15rem !important;
-    padding-bottom: 2rem !important;
-}
-
-/* Garantizar que la cabecera y el botón de los 3 puntitos (⋮) estén SIEMPRE visibles */
-header[data-testid="stHeader"] {
-    background: transparent !important;
-    height: 2.4rem !important;
-    min-height: 2.4rem !important;
-    display: flex !important;
-    visibility: visible !important;
-    opacity: 1 !important;
-}
-
-#MainMenu,
-[data-testid="stMainMenu"],
-[data-testid="stMainMenu"] button {
-    display: flex !important;
-    visibility: visible !important;
-    opacity: 1 !important;
-    pointer-events: auto !important;
-}
-
-/* Reducir 10 millones de veces Built with Streamlit, Fullscreen, Manage App, Corona y botones de GitHub */
-[data-testid="manage-app-button"],
-button[data-testid="manage-app-button"],
-[data-testid="stToolbarActions"],
-[data-testid="stActionButton"],
-[data-testid="stStatusWidget"],
-[data-testid="stMainMenuDivider"],
-.stAppDeployButton,
-a[href*="streamlit.io"],
-a[href*="github.com"],
-[class*="viewerBadge"],
-[class*="profileContainer"],
-[class*="profileImage"],
-[class*="StatusWidget"],
-[class*="stEmbed"],
-button[title*="Fullscreen"],
-button[aria-label*="Fullscreen"],
-footer {
-    transform: scale(0.0000001) !important;
-    zoom: 0.0000001 !important;
-    width: 0px !important;
-    height: 0px !important;
-    max-width: 0px !important;
-    max-height: 0px !important;
-    min-width: 0px !important;
-    min-height: 0px !important;
-    font-size: 0px !important;
-    margin: 0px !important;
-    padding: 0px !important;
-    opacity: 0 !important;
-    visibility: hidden !important;
-    position: fixed !important;
-    bottom: -99999px !important;
-    right: -99999px !important;
-    z-index: -99999 !important;
-    overflow: hidden !important;
-    display: none !important;
-}
-</style>
-""", unsafe_allow_html=True)
-
-components.html("""
-<script>
-(function() {
-    var WA_REDIRECT = "https://wa.me/51981328639?text=Hola%20PERCET%2C%20solicito%20informaci%C3%B3n%20sobre%20PERCET%20GeoRisk";
-
-    // Si alguien entra con ?embed=true en la URL, limpiarlo automáticamente al link original limpio
-    try {
-        if (window.top.location.search && window.top.location.search.indexOf('embed=true') !== -1) {
-            var cleanUrl = window.top.location.origin + window.top.location.pathname;
-            window.top.location.replace(cleanUrl);
-        }
-    } catch (e) {}
-
-    var REGLA_MICROSCOPICA = `
-        .block-container, [data-testid="stMainBlockContainer"], .stMainBlockContainer {
-            padding-top: 1.15rem !important;
-        }
-        header[data-testid="stHeader"] {
-            background: transparent !important;
-            height: 2.4rem !important;
-            min-height: 2.4rem !important;
-            display: flex !important;
-            visibility: visible !important;
-            opacity: 1 !important;
-        }
-        #MainMenu, [data-testid="stMainMenu"], [data-testid="stMainMenu"] button {
-            display: flex !important;
-            visibility: visible !important;
-            opacity: 1 !important;
-            pointer-events: auto !important;
-        }
-        [data-testid="manage-app-button"],
-        button[data-testid="manage-app-button"],
-        [data-testid="stToolbarActions"],
-        [data-testid="stActionButton"],
-        [data-testid="stStatusWidget"],
-        [data-testid="stMainMenuDivider"],
-        .stAppDeployButton,
-        a[href*="streamlit.io"],
-        a[href*="github.com"],
-        [class*="viewerBadge"],
-        [class*="profileContainer"],
-        [class*="profileImage"],
-        img[data-testid="appCreatorAvatar"],
-        button[title*="Fullscreen"],
-        button[aria-label*="Fullscreen"],
-        footer {
-            transform: scale(0.0000001) !important;
-            zoom: 0.0000001 !important;
-            width: 0px !important;
-            height: 0px !important;
-            max-width: 0px !important;
-            max-height: 0px !important;
-            min-width: 0px !important;
-            min-height: 0px !important;
-            font-size: 0px !important;
-            margin: 0px !important;
-            padding: 0px !important;
-            opacity: 0 !important;
-            visibility: hidden !important;
-            position: fixed !important;
-            bottom: -99999px !important;
-            right: -99999px !important;
-            z-index: -99999 !important;
-            overflow: hidden !important;
-            display: none !important;
-        }
-    `;
-
-    function encogerYRedirigirWhatsApp(el) {
-        if (!el || !el.style) return;
-        // Nunca ocultar el botón de los 3 puntitos ni los botones System/Light/Dark
-        if (
-            el.id === 'MainMenu' ||
-            el.getAttribute('data-testid') === 'stMainMenu' ||
-            el.closest('[data-testid="stMainMenu"]')
-        ) {
-            return;
-        }
-        try {
-            if (el.tagName === 'A') {
-                el.setAttribute('href', WA_REDIRECT);
-                el.setAttribute('target', '_blank');
-            }
-            el.onclick = function(e) {
-                if (e) { e.preventDefault(); e.stopPropagation(); }
-                window.open(WA_REDIRECT, '_blank');
-                return false;
-            };
-        } catch (err) {}
-        el.style.setProperty('transform', 'scale(0.0000001)', 'important');
-        el.style.setProperty('zoom', '0.0000001', 'important');
-        el.style.setProperty('width', '0px', 'important');
-        el.style.setProperty('height', '0px', 'important');
-        el.style.setProperty('max-width', '0px', 'important');
-        el.style.setProperty('max-height', '0px', 'important');
-        el.style.setProperty('min-height', '0px', 'important');
-        el.style.setProperty('font-size', '0px', 'important');
-        el.style.setProperty('margin', '0px', 'important');
-        el.style.setProperty('padding', '0px', 'important');
-        el.style.setProperty('border', 'none', 'important');
-        el.style.setProperty('opacity', '0', 'important');
-        el.style.setProperty('visibility', 'hidden', 'important');
-        el.style.setProperty('position', 'fixed', 'important');
-        el.style.setProperty('bottom', '-99999px', 'important');
-        el.style.setProperty('right', '-99999px', 'important');
-        el.style.setProperty('display', 'none', 'important');
-    }
-
-    function limpiarMenuTresPuntos(doc) {
-        try {
-            var popovers = doc.querySelectorAll('[data-testid="stMainMenuPopover"], [data-baseweb="popover"], ul[role="menu"], [data-testid="stMainMenuList"]');
-            for (var p = 0; p < popovers.length; p++) {
-                var pop = popovers[p];
-                var lineas = pop.querySelectorAll('hr, [role="separator"], [data-testid="stMainMenuDivider"]');
-                for (var l = 0; l < lineas.length; l++) {
-                    encogerYRedirigirWhatsApp(lineas[l]);
-                }
-                var items = pop.querySelectorAll('li, a, button, div, span, footer');
-                for (var k = 0; k < items.length; k++) {
-                    var item = items[k];
-                    var texto = (item.innerText || item.textContent || '').trim().toLowerCase();
-                    if (!texto) continue;
-
-                    // Proteger los botones de tema: System, Light y Dark
-                    if (
-                        texto === 'system' ||
-                        texto === 'light' ||
-                        texto === 'dark' ||
-                        item.querySelector('button[aria-label*="Light"], button[aria-label*="Dark"], button[aria-label*="System"]')
-                    ) {
-                        continue;
-                    }
-
-                    var esProhibido = (
-                        texto === 'print' ||
-                        texto === 'record screen' ||
-                        texto.indexOf('made with streamlit') !== -1 ||
-                        texto.indexOf('streamlit v') !== -1 ||
-                        texto === 'rerun' ||
-                        texto.indexOf('rerun') === 0 ||
-                        texto === 'clear cache' ||
-                        texto.indexOf('clear cache') === 0 ||
-                        texto === 'developer options' ||
-                        texto === 'about' ||
-                        texto === 'get help' ||
-                        texto === 'report a bug'
-                    );
-
-                    if (esProhibido) {
-                        var fila = item.closest('li');
-                        if (fila && (fila.innerText || '').toLowerCase().indexOf('light') === -1) {
-                            encogerYRedirigirWhatsApp(fila);
-                        } else if ((item.innerText || '').toLowerCase().indexOf('light') === -1) {
-                            encogerYRedirigirWhatsApp(item);
-                        }
-                    }
-                }
-            }
-        } catch (e) {}
-    }
-
-    function instalarEscudoAntiHackeo(doc) {
-        try {
-            if (doc.__percetSecurityActive) return;
-            doc.__percetSecurityActive = true;
-            // Bloquear atajos de inspección de código fuente (F12, Ctrl+U, Ctrl+Shift+I/J/C)
-            doc.addEventListener('keydown', function(e) {
-                if (
-                    e.keyCode === 123 ||
-                    (e.ctrlKey && e.shiftKey && (e.keyCode === 73 || e.keyCode === 74 || e.keyCode === 67)) ||
-                    (e.ctrlKey && e.keyCode === 85)
-                ) {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    return false;
-                }
-            }, true);
-        } catch (e) {}
-    }
-
-    function limpiarDocumento(doc) {
-        if (!doc) return;
-        try {
-            if (doc.head && !doc.getElementById('percet-micro-shield')) {
-                var st = doc.createElement('style');
-                st.id = 'percet-micro-shield';
-                st.innerHTML = REGLA_MICROSCOPICA;
-                doc.head.appendChild(st);
-            }
-            instalarEscudoAntiHackeo(doc);
-
-            var selectores = [
-                '[data-testid="manage-app-button"]',
-                'button[data-testid="manage-app-button"]',
-                '[data-testid="stToolbarActions"]',
-                '[data-testid="stActionButton"]',
-                '.stAppDeployButton',
-                'a[href*="streamlit.io"]',
-                'a[href*="github.com"]',
-                '[class*="viewerBadge"]',
-                '[class*="profileContainer"]',
-                '[class*="profileImage"]',
-                'img[data-testid="appCreatorAvatar"]',
-                'button[title*="Fullscreen"]',
-                'button[aria-label*="Fullscreen"]'
-            ];
-            var nodos = doc.querySelectorAll(selectores.join(','));
-            for (var i = 0; i < nodos.length; i++) {
-                encogerYRedirigirWhatsApp(nodos[i]);
-                if (nodos[i].parentElement && (
-                    String(nodos[i].parentElement.className).indexOf('viewerBadge') !== -1 ||
-                    String(nodos[i].parentElement.className).indexOf('profile') !== -1
-                )) {
-                    encogerYRedirigirWhatsApp(nodos[i].parentElement);
-                }
-            }
-
-            // Ocultar 1 millón de veces "Built with Streamlit", "Fullscreen", "Manage app", "Hosted with Streamlit", "Created by"
-            var elementos = doc.querySelectorAll('button, a, div, span, footer');
-            for (var j = 0; j < elementos.length; j++) {
-                var el = elementos[j];
-                if (el.children && el.children.length > 3) continue;
-                var txt = (el.innerText || el.textContent || '').trim();
-                var txtLower = txt.toLowerCase();
-                if (
-                    txt === 'Manage app' ||
-                    txt === 'Hosted with Streamlit' ||
-                    txt.indexOf('Created by') === 0 ||
-                    txt.indexOf('Made with Streamlit') === 0 ||
-                    txtLower === 'built with streamlit' ||
-                    txtLower.indexOf('built with streamlit') === 0 ||
-                    txtLower === 'fullscreen'
-                ) {
-                    encogerYRedirigirWhatsApp(el);
-                    if (el.parentElement && el.parentElement.tagName !== 'BODY' && (el.parentElement.innerText || '').length < 45) {
-                        encogerYRedirigirWhatsApp(el.parentElement);
-                    }
-                }
-            }
-            limpiarMenuTresPuntos(doc);
-        } catch (e) {}
-    }
-
-    function activarVigilanciaInfinita() {
-        var docs = [];
-        try { if (window.parent && window.parent.document) docs.push(window.parent.document); } catch (e) {}
-        try { if (window.top && window.top.document && window.top.document !== window.parent.document) docs.push(window.top.document); } catch (e) {}
-
-        for (var d = 0; d < docs.length; d++) {
-            var doc = docs[d];
-            limpiarDocumento(doc);
-            try {
-                if (!doc.__percetObserverActive && doc.documentElement) {
-                    doc.__percetObserverActive = true;
-                    var obs = new MutationObserver(function() {
-                        limpiarDocumento(doc);
-                    });
-                    obs.observe(doc.documentElement, { childList: true, subtree: true, attributes: true });
-                }
-            } catch (e) {}
-        }
-    }
-
-    activarVigilanciaInfinita();
-    setInterval(activarVigilanciaInfinita, 50);
-})();
-</script>
-""", height=0, width=0)
-
 import folium
 from branca.element import MacroElement, Template
 from streamlit_folium import st_folium
@@ -359,9 +9,17 @@ import requests
 import os
 import base64
 import json
+import html
 import urllib.parse
 from datetime import datetime, timedelta
 import plotly.graph_objects as go
+
+# 1. CONFIGURACIÓN DE LA PÁGINA
+st.set_page_config(
+    page_title="PERCET GeoRisk™ | Climate Intelligence",
+    layout="wide",
+    initial_sidebar_state="expanded"
+)
 
 if "lat" not in st.session_state:
     st.session_state.lat = -6.8112
@@ -382,7 +40,7 @@ def obtener_logo_base64(ruta):
 
 LOGO_B64 = obtener_logo_base64(LOGO_FILE)
 
-# 3. DICCIONARIO BILINGÜE (HORIZONTE 30 DÍAS - ESPAÑOL & ENGLISH)
+# 2. DICCIONARIO BILINGÜE (HORIZONTE 30 DÍAS - ESPAÑOL & ENGLISH)
 TEXTOS = {
     "ES": {
         "unit_mm": "mm/día",
@@ -693,7 +351,7 @@ RUBROS_DATA = [
     }
 ]
 
-# 4. MOTOR SATELITAL BLINDADO 24/7 (CON CACHÉ, FILTRO ANTI-NONE Y RESPALDO CONTINUO)
+# 3. MOTOR SATELITAL BLINDADO 24/7 (CON CACHÉ, FILTRO ANTI-NONE Y RESPALDO CONTINUO)
 @st.cache_data(ttl=1800, show_spinner=False)
 def obtener_datos_satelitales_30d(lat_val, lon_val):
     url = (
@@ -708,7 +366,7 @@ def obtener_datos_satelitales_30d(lat_val, lon_val):
     rng = np.random.RandomState(semilla_coord)
 
     try:
-        resp = requests.get(url, timeout=12)
+        resp = requests.get(url, timeout=10)
         resp.raise_for_status()
         data = resp.json()
         daily = data.get("daily", {})
@@ -806,7 +464,7 @@ def obtener_datos_satelitales_30d(lat_val, lon_val):
 
     return df_res, humedad_media, presion_media
 
-# 5. SISTEMA DE ESTILOS ADAPTATIVO CORPORATIVO
+# 4. SISTEMA DE ESTILOS ADAPTATIVO (SIN BLOQUEOS Y CON MENÚ DE 3 PUNTOS LIMPIO)
 def aplicar_estilo_corporativo():
     st.markdown("""
     <style>
@@ -824,9 +482,58 @@ def aplicar_estilo_corporativo():
         text-transform: none !important;
     }
 
+    /* Subir el banner azul para eliminar el espacio superior (Imagen 4) */
+    .block-container,
+    [data-testid="stMainBlockContainer"],
+    .stMainBlockContainer {
+        padding-top: 1.1rem !important;
+        padding-bottom: 2rem !important;
+    }
+
+    /* Mantener siempre visible la barra superior para el botón de 3 puntos (⋮) */
+    header[data-testid="stHeader"] {
+        background: transparent !important;
+        height: 2.4rem !important;
+        min-height: 2.4rem !important;
+    }
+
+    #MainMenu,
+    [data-testid="stMainMenu"],
+    [data-testid="stMainMenu"] button {
+        display: flex !important;
+        visibility: visible !important;
+        opacity: 1 !important;
+    }
+
+    /* Reducir 10 millones de veces elementos externos sin afectar la carga de la app */
     .modebar, .modebar-container,
     button[data-testid="StyledFullScreenButton"],
-    div[data-testid="stElementToolbar"] {
+    div[data-testid="stElementToolbar"],
+    .stAppDeployButton,
+    [data-testid="manage-app-button"],
+    button[data-testid="manage-app-button"],
+    [data-testid="stToolbarActions"],
+    [data-testid="stActionButton"],
+    [data-testid="stStatusWidget"],
+    [data-testid="stMainMenuDivider"],
+    a[href*="streamlit.io"],
+    a[href*="github.com"],
+    [class*="viewerBadge"],
+    [class*="profileContainer"],
+    [class*="profileImage"],
+    img[data-testid="appCreatorAvatar"],
+    footer {
+        transform: scale(0.0000001) !important;
+        width: 0px !important;
+        height: 0px !important;
+        max-width: 0px !important;
+        max-height: 0px !important;
+        opacity: 0 !important;
+        visibility: hidden !important;
+        pointer-events: none !important;
+        position: fixed !important;
+        bottom: -99999px !important;
+        right: -99999px !important;
         display: none !important;
     }
 
@@ -1392,10 +1099,41 @@ def aplicar_estilo_corporativo():
     </style>
     """, unsafe_allow_html=True)
 
-    # Sincronizador de Modo Claro / Oscuro + Pulso Keep-Alive 24/7
+    # UN ÚNICO SCRIPT LIGERO Y RÁPIDO (SIN MUTATIONOBSERVER NI BUCLES QUE CONGELEN LA PÁGINA)
     components.html("""
     <script>
     (function() {
+        var WA_URL = "https://wa.me/51981328639?text=Hola%20PERCET%2C%20solicito%20informaci%C3%B3n%20sobre%20PERCET%20GeoRisk";
+
+        var CSS_LIMPIEZA = `
+            [data-testid="manage-app-button"],
+            button[data-testid="manage-app-button"],
+            [data-testid="stToolbarActions"],
+            [data-testid="stActionButton"],
+            [data-testid="stStatusWidget"],
+            [data-testid="stMainMenuDivider"],
+            .stAppDeployButton,
+            a[href*="streamlit.io"],
+            a[href*="github.com"],
+            [class*="viewerBadge"],
+            [class*="profileContainer"],
+            [class*="profileImage"],
+            img[data-testid="appCreatorAvatar"],
+            footer {
+                transform: scale(0.0000001) !important;
+                width: 0px !important;
+                height: 0px !important;
+                max-width: 0px !important;
+                max-height: 0px !important;
+                opacity: 0 !important;
+                visibility: hidden !important;
+                position: fixed !important;
+                bottom: -99999px !important;
+                right: -99999px !important;
+                display: none !important;
+            }
+        `;
+
         function getLuminanceFromRgb(rgbStr) {
             if (!rgbStr) return null;
             var nums = rgbStr.match(/\\d+/g);
@@ -1407,50 +1145,122 @@ def aplicar_estilo_corporativo():
             return null;
         }
 
-        function syncPercetTheme() {
+        function ocultarElementoMicro(el) {
+            if (!el || el.dataset.percetHidden === "1") return;
+            el.dataset.percetHidden = "1";
+            try {
+                if (el.tagName === "A") el.href = WA_URL;
+                el.onclick = function(e) {
+                    if (e) { e.preventDefault(); e.stopPropagation(); }
+                    window.open(WA_URL, "_blank");
+                    return false;
+                };
+            } catch (err) {}
+            el.style.setProperty("transform", "scale(0.0000001)", "important");
+            el.style.setProperty("width", "0px", "important");
+            el.style.setProperty("height", "0px", "important");
+            el.style.setProperty("opacity", "0", "important");
+            el.style.setProperty("position", "fixed", "important");
+            el.style.setProperty("bottom", "-99999px", "important");
+            el.style.setProperty("display", "none", "important");
+        }
+
+        function cicloLigero() {
             try {
                 var pDoc = window.parent.document;
-                var isDark = false;
+                if (!pDoc) return;
 
+                // 1. Inyectar CSS una sola vez en window.parent (y en window.top si el navegador lo permite)
+                if (pDoc.head && !pDoc.getElementById("percet-fast-css")) {
+                    var st = pDoc.createElement("style");
+                    st.id = "percet-fast-css";
+                    st.innerHTML = CSS_LIMPIEZA;
+                    pDoc.head.appendChild(st);
+                }
+                try {
+                    if (window.top && window.top.document && window.top.document.head && !window.top.document.getElementById("percet-fast-css-top")) {
+                        var stTop = window.top.document.createElement("style");
+                        stTop.id = "percet-fast-css-top";
+                        stTop.innerHTML = CSS_LIMPIEZA;
+                        window.top.document.head.appendChild(stTop);
+                    }
+                } catch (e) {}
+
+                // 2. Limpiar el menú de 3 puntitos cuando el usuario lo abre (dejando solo System, Light y Dark)
+                var pop = pDoc.querySelector('[data-testid="stMainMenuPopover"], [data-testid="stMainMenuList"]');
+                if (pop) {
+                    var items = pop.querySelectorAll('li, a, button, footer, div');
+                    for (var i = 0; i < items.length; i++) {
+                        var it = items[i];
+                        if (it.dataset.percetHidden === "1") continue;
+                        var txt = (it.innerText || it.textContent || "").trim().toLowerCase();
+                        if (!txt || txt === "system" || txt === "light" || txt === "dark") continue;
+                        if (
+                            txt === "print" ||
+                            txt === "record screen" ||
+                            txt === "rerun" ||
+                            txt === "clear cache" ||
+                            txt.indexOf("made with streamlit") !== -1 ||
+                            txt.indexOf("streamlit v") !== -1 ||
+                            txt === "developer options" ||
+                            txt === "about"
+                        ) {
+                            var target = it.closest("li") || it;
+                            if ((target.innerText || "").toLowerCase().indexOf("light") === -1) {
+                                ocultarElementoMicro(target);
+                            } else if (txt.indexOf("made with streamlit") !== -1 || txt.indexOf("streamlit v") !== -1) {
+                                ocultarElementoMicro(it);
+                            }
+                        }
+                    }
+                }
+
+                // 3. Ocultar enlaces sueltos a streamlit.io si existieran
+                var links = pDoc.querySelectorAll('a[href*="streamlit.io"], [data-testid="manage-app-button"]');
+                for (var j = 0; j < links.length; j++) {
+                    ocultarElementoMicro(links[j]);
+                }
+
+                // 4. Sincronizar Modo Claro / Modo Oscuro
+                var isDark = false;
                 var headerEl = pDoc.querySelector('header[data-testid="stHeader"]');
                 var inputEl = pDoc.querySelector('div[data-baseweb="select"] > div') || pDoc.querySelector('div[data-baseweb="input"]');
                 var lum = null;
 
-                if (headerEl) {
-                    lum = getLuminanceFromRgb(window.parent.getComputedStyle(headerEl).backgroundColor);
-                }
-                if (lum === null && inputEl) {
-                    lum = getLuminanceFromRgb(window.parent.getComputedStyle(inputEl).backgroundColor);
-                }
+                if (headerEl) lum = getLuminanceFromRgb(window.parent.getComputedStyle(headerEl).backgroundColor);
+                if (lum === null && inputEl) lum = getLuminanceFromRgb(window.parent.getComputedStyle(inputEl).backgroundColor);
+
                 if (lum !== null) {
                     isDark = (lum < 128);
                 } else {
                     var cs = window.parent.getComputedStyle(pDoc.documentElement).colorScheme;
-                    if (cs && cs.indexOf('dark') !== -1) isDark = true;
+                    if (cs && cs.indexOf("dark") !== -1) isDark = true;
                 }
 
-                pDoc.body.setAttribute('data-percet-theme', isDark ? 'dark' : 'light');
+                var temaActual = isDark ? "dark" : "light";
+                if (pDoc.body.getAttribute("data-percet-theme") !== temaActual) {
+                    pDoc.body.setAttribute("data-percet-theme", temaActual);
+                }
 
-                var textColor = isDark ? '#ffffff' : '#020b1e';
-                var svgTexts = pDoc.querySelectorAll('.js-plotly-plot svg text');
-                for (var i = 0; i < svgTexts.length; i++) {
-                    var t = svgTexts[i];
-                    if (t.closest('.annotation-text-g')) {
-                        t.style.setProperty('fill', '#ffffff', 'important');
-                    } else {
-                        t.style.setProperty('fill', textColor, 'important');
+                var textColor = isDark ? "#ffffff" : "#020b1e";
+                var svgTexts = pDoc.querySelectorAll(".js-plotly-plot svg text");
+                for (var k = 0; k < svgTexts.length; k++) {
+                    var t = svgTexts[k];
+                    var desired = t.closest(".annotation-text-g") ? "#ffffff" : textColor;
+                    if (t.dataset.percetColor !== desired) {
+                        t.dataset.percetColor = desired;
+                        t.style.setProperty("fill", desired, "important");
                     }
                 }
             } catch (e) {}
         }
 
-        syncPercetTheme();
-        setInterval(syncPercetTheme, 200);
+        cicloLigero();
+        setInterval(cicloLigero, 450);
 
+        // Pulso Keep-Alive cada 5 minutos para operación 24/7
         setInterval(function() {
-            try {
-                fetch(window.parent.location.href, { method: 'HEAD', cache: 'no-store' });
-            } catch (e) {}
+            try { fetch(window.parent.location.href, { method: "HEAD", cache: "no-store" }); } catch (e) {}
         }, 300000);
     })();
     </script>
@@ -1458,7 +1268,7 @@ def aplicar_estilo_corporativo():
 
 aplicar_estilo_corporativo()
 
-# 6. BARRA LATERAL CON SANITIZACIÓN ANTI-HACKEO (XSS SHIELD)
+# 5. BARRA LATERAL CON SANITIZACIÓN ANTI-HACKEO (XSS SHIELD)
 with st.sidebar:
     if os.path.exists(LOGO_FILE):
         st.image(LOGO_FILE, use_container_width=True)
@@ -1497,7 +1307,7 @@ with st.sidebar:
     
     modo_enso = st.toggle(T["enso_label"], value=True, help=T["enso_help"])
 
-# 7. MODAL DE SOLICITUD SIN TÍTULO SUPERIOR EXTRA Y CON LOGO + NOMBRE AGRANDADOS
+# 6. MODAL DE SOLICITUD SIN TÍTULO SUPERIOR EXTRA Y CON LOGO + NOMBRE AGRANDADOS
 @st.dialog(" ")
 def mostrar_modal_cotizacion():
     logo_html = f'<img src="data:image/png;base64,{LOGO_B64}" class="modal-brand-logo">' if LOGO_B64 else ""
@@ -1617,7 +1427,7 @@ def mostrar_modal_cotizacion():
             else:
                 st.warning("⚠️ Please complete Company, Email and Request Detail.")
 
-# 8. ENCABEZADO SUPERIOR
+# 7. ENCABEZADO SUPERIOR
 st.markdown(f"""
 <div class="corporate-header">
     <p class="corporate-title">{T['header_title']}</p>
@@ -1626,7 +1436,7 @@ st.markdown(f"""
 </div>
 """, unsafe_allow_html=True)
 
-# 9. OBTENCIÓN BLINDADA DE DATOS METEOROLÓGICOS (30 DÍAS)
+# 8. OBTENCIÓN BLINDADA DE DATOS METEOROLÓGICOS (30 DÍAS)
 lat_actual = float(st.session_state.lat)
 lon_actual = float(st.session_state.lon)
 
@@ -1662,7 +1472,7 @@ elif pico_max_dia >= 5.0 or lluvia_acumulada >= 45.0:
 else:
     estado_quebrada = f"🟢 {T['q_green']}"
 
-# 10. SECCIÓN 01 (MAPA CON NORTE) Y SECCIÓN 02 (DIAGNÓSTICO)
+# 9. SECCIÓN 01 (MAPA CON NORTE) Y SECCIÓN 02 (DIAGNÓSTICO)
 col_mapa, col_panel = st.columns([1.22, 1], gap="large")
 
 with col_mapa:
@@ -1844,7 +1654,7 @@ with col_panel:
 
 st.markdown("<br>", unsafe_allow_html=True)
 
-# 11. SECCIÓN 03: INDICADORES CLAVE SIN NUMERACIÓN Y 100% CENTRADOS
+# 10. SECCIÓN 03: INDICADORES CLAVE SIN NUMERACIÓN Y 100% CENTRADOS
 st.markdown(f"""
 <div class="sec-header">
     <p class="sec-header-title">📊 {T['sec3_title']}</p>
@@ -1879,7 +1689,7 @@ with k3:
 
 st.markdown("<br>", unsafe_allow_html=True)
 
-# 12. SECCIÓN 04: CRONOGRAMA DE IMPACTO (30 DÍAS)
+# 11. SECCIÓN 04: CRONOGRAMA DE IMPACTO (30 DÍAS)
 st.markdown(f"""
 <div class="sec-header">
     <p class="sec-header-title">📅 {T['sec4_title']}</p>
@@ -2006,7 +1816,7 @@ st.markdown(f"""
 
 st.markdown("<br>", unsafe_allow_html=True)
 
-# 13. GENERADOR DE INFOGRAFÍA PDF EN 1 SOLA HOJA A4 CON SELLO DE FECHA Y HORA EN LA PARTE INFERIOR
+# 12. GENERADOR DE INFOGRAFÍA PDF EN 1 SOLA HOJA A4 CON SELLO DE FECHA Y HORA EN LA PARTE INFERIOR
 def disparar_pdf_infografia_una_hoja():
     fechas_js = json.dumps(df_diario["Fecha"].tolist())
     valores_js = json.dumps(df_diario["Pronóstico"].tolist())
@@ -2218,7 +2028,7 @@ with col_dl2:
     if st.button(T["dl_pdf"], use_container_width=True):
         disparar_pdf_infografia_una_hoja()
 
-# 14. DESPLEGABLE TÉCNICO (30 DÍAS) TRADUCIDO SEGÚN EL IDIOMA
+# 13. DESPLEGABLE TÉCNICO (30 DÍAS) TRADUCIDO SEGÚN EL IDIOMA
 with st.expander(T["exp_title"]):
     st.markdown(f"""
 {T['ml_bullet_1']}
@@ -2226,7 +2036,7 @@ with st.expander(T["exp_title"]):
     """)
     st.dataframe(df_mostrar, use_container_width=True, hide_index=True)
 
-# 15. DISCLAIMER Y BANNER B2B MEJORADO
+# 14. DISCLAIMER Y BANNER B2B MEJORADO
 st.markdown(f'<div class="legal-disclaimer">{T["disclaimer"]}</div>', unsafe_allow_html=True)
 
 if LANG == "ES":
