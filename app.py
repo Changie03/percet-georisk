@@ -464,7 +464,7 @@ def obtener_datos_satelitales_30d(lat_val, lon_val):
 
     return df_res, humedad_media, presion_media
 
-# 4. SISTEMA DE ESTILOS ADAPTATIVO (MENÚ DE 3 PUNTOS ESTABLE SIN PARPADEO)
+# 4. SISTEMA DE ESTILOS ADAPTATIVO (LIGHT & DARK MODE COMO IMAGEN 2 + MENÚ DE 3 PUNTOS LIMPIO)
 def aplicar_estilo_corporativo():
     st.markdown("""
     <style>
@@ -490,11 +490,11 @@ def aplicar_estilo_corporativo():
         padding-bottom: 2rem !important;
     }
 
-    /* Mantener siempre visible la barra superior para el botón de 3 puntos (⋮) */
+    /* Cabecera superior integrada al color del tema y con los 3 puntos (⋮) siempre visibles */
     header[data-testid="stHeader"] {
-        background: transparent !important;
-        height: 2.4rem !important;
-        min-height: 2.4rem !important;
+        background-color: var(--p-bg-main) !important;
+        height: 2.3rem !important;
+        min-height: 2.3rem !important;
     }
 
     #MainMenu,
@@ -505,10 +505,15 @@ def aplicar_estilo_corporativo():
         opacity: 1 !important;
     }
 
-    /* En el menú de 3 puntitos: ocultar separadores sin tocar el contenedor del menú */
+    /* Ocultar instantáneamente en el menú de 3 puntos: Rerun, Clear cache, Print, Record screen y separadores */
     [data-testid="stMainMenuDivider"],
+    [data-baseweb="popover"] hr,
+    [data-baseweb="popover"] [role="separator"],
+    [data-baseweb="popover"] ul[role="option"] > li,
+    [data-baseweb="popover"] [data-testid="stMainMenuList"] > li,
     [data-testid="stMainMenuPopover"] hr,
-    [data-testid="stMainMenuPopover"] [role="separator"] {
+    [data-testid="stMainMenuPopover"] [role="separator"],
+    [data-testid="stMainMenuPopover"] ul > li {
         display: none !important;
     }
 
@@ -558,9 +563,9 @@ def aplicar_estilo_corporativo():
         --p-disclaimer-bg: #e2e8f0;
         --p-disclaimer-text: #334155;
         --p-rec-item-bg: rgba(255, 255, 255, 0.92);
-        --p-input-bg: #ffffff;
     }
 
+    /* MODO OSCURO EXACTO AL DE LA IMAGEN 2 */
     body[data-percet-theme="dark"] {
         --p-bg-main: #0b0e14;
         --p-bg-sidebar: #111621;
@@ -576,14 +581,16 @@ def aplicar_estilo_corporativo():
         --p-disclaimer-bg: #161c28;
         --p-disclaimer-text: #e2e8f0;
         --p-rec-item-bg: #1c2536;
-        --p-input-bg: #1c2536;
     }
 
-    .stApp {
+    .stApp,
+    [data-testid="stAppViewContainer"],
+    [data-testid="stMain"] {
         background-color: var(--p-bg-main) !important;
         color: var(--p-text-primary) !important;
     }
 
+    section[data-testid="stSidebar"],
     section[data-testid="stSidebar"] > div {
         padding-top: 0.85rem !important;
         background-color: var(--p-bg-sidebar) !important;
@@ -610,13 +617,6 @@ def aplicar_estilo_corporativo():
     body[data-percet-theme="dark"] div[data-testid="stTextInput"] input,
     body[data-percet-theme="dark"] div[data-baseweb="select"] span {
         color: #ffffff !important;
-    }
-
-    body[data-percet-theme="dark"] div[data-baseweb="input"],
-    body[data-percet-theme="dark"] div[data-baseweb="base-input"],
-    body[data-percet-theme="dark"] div[data-baseweb="select"] > div {
-        background-color: #161c28 !important;
-        border-color: #2d3b55 !important;
     }
 
     body[data-percet-theme="dark"] .js-plotly-plot .plotly text {
@@ -804,6 +804,20 @@ def aplicar_estilo_corporativo():
         font-size: 1.55rem;
         font-weight: 900;
         color: var(--p-text-primary) !important;
+        line-height: 1.15;
+        margin: 4px 0 2px 0;
+    }
+    .mini-kpi-val-excess {
+        font-size: 1.55rem;
+        font-weight: 900;
+        color: #ff5a5f !important;
+        line-height: 1.15;
+        margin: 4px 0 2px 0;
+    }
+    .mini-kpi-val-margin {
+        font-size: 1.55rem;
+        font-weight: 900;
+        color: #4ade80 !important;
         line-height: 1.15;
         margin: 4px 0 2px 0;
     }
@@ -1105,7 +1119,7 @@ def aplicar_estilo_corporativo():
     </style>
     """, unsafe_allow_html=True)
 
-    # SCRIPT ESTABLE: PROTEGE EL MENÚ DE 3 PUNTITOS PARA QUE NUNCA PARPADEE NI SE CIERRE SOLO
+    # MOTOR LIGERO DE SINCRONIZACIÓN DE TEMA (DARK/LIGHT) Y LIMPIEZA DEL MENÚ DE 3 PUNTOS
     components.html("""
     <script>
     (function() {
@@ -1118,6 +1132,10 @@ def aplicar_estilo_corporativo():
             [data-testid="stActionButton"],
             [data-testid="stStatusWidget"],
             [data-testid="stMainMenuDivider"],
+            [data-baseweb="popover"] hr,
+            [data-baseweb="popover"] [role="separator"],
+            [data-baseweb="popover"] ul[role="option"] > li,
+            [data-baseweb="popover"] [data-testid="stMainMenuList"] > li,
             [data-testid="stMainMenuPopover"] hr,
             [data-testid="stMainMenuPopover"] [role="separator"],
             .stAppDeployButton,
@@ -1153,10 +1171,35 @@ def aplicar_estilo_corporativo():
             return null;
         }
 
+        function detectarModoOscuro(pDoc) {
+            // 1. Leer el fondo real de las casillas nativas de Streamlit (que cambian al instante al pulsar Light o Dark)
+            var cajas = pDoc.querySelectorAll('div[data-baseweb="base-input"], div[data-baseweb="input"], [data-testid="stNumberInput"] input, [data-testid="stTextInput"] input');
+            for (var i = 0; i < cajas.length; i++) {
+                var el = cajas[i];
+                if (el.closest('[role="dialog"]')) continue;
+                var bg = window.parent.getComputedStyle(el).backgroundColor;
+                var lum = getLuminanceFromRgb(bg);
+                if (lum !== null) {
+                    return (lum < 128);
+                }
+            }
+            // 2. Respaldo: leer la preferencia activa guardada por Streamlit en localStorage
+            try {
+                for (var k = 0; k < window.parent.localStorage.length; k++) {
+                    var key = window.parent.localStorage.key(k);
+                    if (key && key.indexOf("stActiveTheme") !== -1) {
+                        var val = window.parent.localStorage.getItem(key) || "";
+                        if (val.indexOf('"Dark"') !== -1 || val.indexOf('#0e1117') !== -1) return true;
+                        if (val.indexOf('"Light"') !== -1 || val.indexOf('#ffffff') !== -1) return false;
+                    }
+                }
+            } catch (e) {}
+            return false;
+        }
+
         function ocultarInsigniaExterna(el) {
             if (!el || el.dataset.percetHidden === "1") return;
-            // Jamás ocultar nada que esté dentro del menú de 3 puntitos con esta función
-            if (el.closest('[data-testid="stMainMenuPopover"], [data-baseweb="popover"], [data-testid="stMainMenu"]')) return;
+            if (el.closest('[data-baseweb="popover"], [data-testid="stMainMenuPopover"], [data-testid="stMainMenu"]')) return;
             el.dataset.percetHidden = "1";
             try {
                 if (el.tagName === "A") el.href = WA_URL;
@@ -1175,45 +1218,51 @@ def aplicar_estilo_corporativo():
             el.style.setProperty("display", "none", "important");
         }
 
-        function limpiarItemsMenuSinCerrar(pDoc) {
-            var pop = pDoc.querySelector('[data-testid="stMainMenuPopover"]');
-            if (!pop) return;
-
-            // 1. Ocultar únicamente las filas <li> que NO contengan los botones System / Light / Dark
-            var filas = pop.querySelectorAll('li');
-            for (var i = 0; i < filas.length; i++) {
-                var li = filas[i];
-                if (li.dataset.percetItemHidden === "1") continue;
-                var txtLi = (li.innerText || li.textContent || "").toLowerCase();
-                // REGLA DE ORO: Si la fila contiene System, Light o Dark, protegerla al 100%
-                if (txtLi.indexOf("light") !== -1 || txtLi.indexOf("dark") !== -1 || txtLi.indexOf("system") !== -1) {
-                    continue;
+        function limpiarMenuTresPuntos(pDoc) {
+            var popovers = pDoc.querySelectorAll('[data-baseweb="popover"], [data-testid="stMainMenuPopover"], [data-testid="stMainMenuList"], ul[role="option"], ul[role="menu"]');
+            for (var p = 0; p < popovers.length; p++) {
+                var pop = popovers[p];
+                var sep = pop.querySelectorAll('hr, [role="separator"], [data-testid="stMainMenuDivider"]');
+                for (var s = 0; s < sep.length; s++) {
+                    sep[s].style.setProperty("display", "none", "important");
                 }
-                li.dataset.percetItemHidden = "1";
-                li.style.setProperty("display", "none", "important");
-            }
+                // Evaluar únicamente elementos hoja/filas (li, button, a, footer) sin tocar jamás un <div> contenedor
+                var items = pop.querySelectorAll('li, button, a, footer');
+                for (var i = 0; i < items.length; i++) {
+                    var it = items[i];
+                    if (it.dataset.percetItemHidden === "1") continue;
+                    var txt = (it.innerText || it.textContent || "").trim().toLowerCase();
+                    if (!txt) continue;
 
-            // 2. Ocultar únicamente el texto hoja "Made with Streamlit v1.67.0" sin tocar los contenedores padres
-            var nodos = pop.querySelectorAll('span, p, a, footer, div');
-            for (var j = 0; j < nodos.length; j++) {
-                var nodo = nodos[j];
-                if (nodo.dataset.percetItemHidden === "1") continue;
-                var txtNodo = (nodo.innerText || nodo.textContent || "").trim().toLowerCase();
-                // Jamás tocar ningún contenedor cuyo texto incluya light, dark o system
-                if (txtNodo.indexOf("light") !== -1 || txtNodo.indexOf("dark") !== -1 || txtNodo.indexOf("system") !== -1) {
-                    continue;
-                }
-                if (
-                    (txtNodo.indexOf("made with streamlit") === 0 || txtNodo.indexOf("streamlit v") === 0) &&
-                    txtNodo.length < 45
-                ) {
-                    nodo.dataset.percetItemHidden = "1";
-                    nodo.style.setProperty("display", "none", "important");
+                    // Protección total a los botones System, Light y Dark
+                    if (txt.indexOf("system") !== -1 || txt.indexOf("light") !== -1 || txt.indexOf("dark") !== -1) {
+                        continue;
+                    }
+
+                    if (
+                        txt.indexOf("rerun") === 0 ||
+                        txt.indexOf("clear cache") === 0 ||
+                        txt === "print" ||
+                        txt.indexOf("record screen") === 0 ||
+                        txt.indexOf("made with streamlit") !== -1 ||
+                        txt.indexOf("streamlit v") !== -1 ||
+                        txt.indexOf("developer options") === 0 ||
+                        txt === "about" ||
+                        txt.indexOf("report a bug") === 0 ||
+                        txt.indexOf("get help") === 0
+                    ) {
+                        var target = it.closest("li") || it;
+                        var targetTxt = (target.innerText || target.textContent || "").toLowerCase();
+                        if (targetTxt.indexOf("system") === -1 && targetTxt.indexOf("light") === -1 && targetTxt.indexOf("dark") === -1) {
+                            target.dataset.percetItemHidden = "1";
+                            target.style.setProperty("display", "none", "important");
+                        }
+                    }
                 }
             }
         }
 
-        function cicloLigero() {
+        function cicloPrincipal() {
             try {
                 var pDoc = window.parent.document;
                 if (!pDoc) return;
@@ -1233,31 +1282,15 @@ def aplicar_estilo_corporativo():
                     }
                 } catch (e) {}
 
-                // Limpiar opciones extra del menú de 3 puntitos sin cerrarlo jamás
-                limpiarItemsMenuSinCerrar(pDoc);
+                limpiarMenuTresPuntos(pDoc);
 
-                // Ocultar insignias externas fuera del menú
                 var links = pDoc.querySelectorAll('a[href*="streamlit.io"], [data-testid="manage-app-button"]');
                 for (var j = 0; j < links.length; j++) {
                     ocultarInsigniaExterna(links[j]);
                 }
 
-                // Sincronizar Modo Claro / Modo Oscuro
-                var isDark = false;
-                var headerEl = pDoc.querySelector('header[data-testid="stHeader"]');
-                var inputEl = pDoc.querySelector('div[data-baseweb="select"] > div') || pDoc.querySelector('div[data-baseweb="input"]');
-                var lum = null;
-
-                if (headerEl) lum = getLuminanceFromRgb(window.parent.getComputedStyle(headerEl).backgroundColor);
-                if (lum === null && inputEl) lum = getLuminanceFromRgb(window.parent.getComputedStyle(inputEl).backgroundColor);
-
-                if (lum !== null) {
-                    isDark = (lum < 128);
-                } else {
-                    var cs = window.parent.getComputedStyle(pDoc.documentElement).colorScheme;
-                    if (cs && cs.indexOf("dark") !== -1) isDark = true;
-                }
-
+                // Sincronizar Modo Claro / Modo Oscuro (Imagen 2)
+                var isDark = detectarModoOscuro(pDoc);
                 var temaActual = isDark ? "dark" : "light";
                 if (pDoc.body.getAttribute("data-percet-theme") !== temaActual) {
                     pDoc.body.setAttribute("data-percet-theme", temaActual);
@@ -1276,8 +1309,8 @@ def aplicar_estilo_corporativo():
             } catch (e) {}
         }
 
-        cicloLigero();
-        setInterval(cicloLigero, 350);
+        cicloPrincipal();
+        setInterval(cicloPrincipal, 200);
 
         // Pulso Keep-Alive cada 5 minutos para operación 24/7
         setInterval(function() {
@@ -1578,6 +1611,7 @@ with col_panel:
 
     etiqueta_dif = T["card_excess"] if diferencia_umbral > 0 else T["card_margin"]
     color_dif = "#ff5a5f" if diferencia_umbral > 0 else "#4ade80"
+    clase_val_dif = "mini-kpi-val-excess" if diferencia_umbral > 0 else "mini-kpi-val-margin"
     signo_dif = f"+{diferencia_umbral:.1f}" if diferencia_umbral > 0 else f"{diferencia_umbral:.1f}"
 
     st.markdown(f"""
@@ -1594,7 +1628,7 @@ with col_panel:
         </div>
         <div class="mini-kpi-card" style="border-top-color: {color_dif};">
             <div class="mini-kpi-label">{etiqueta_dif}</div>
-            <div class="mini-kpi-val" style="color: {color_dif} !important;">{signo_dif}</div>
+            <div class="{clase_val_dif}">{signo_dif}</div>
             <div class="mini-kpi-unit">{UNIT_MM}</div>
         </div>
     </div>
