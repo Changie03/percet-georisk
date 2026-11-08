@@ -1,5 +1,172 @@
 import streamlit as st
 import streamlit.components.v1 as components
+
+# 1. CONFIGURACIÓN DE LA PÁGINA (EJECUCIÓN EN MILISEGUNDO CERO)
+st.set_page_config(
+    page_title="PERCET GeoRisk™ | Climate Intelligence",
+    layout="wide",
+    initial_sidebar_state="expanded"
+)
+
+# 2. ESCUDO INVISIBLE INSTANTÁNEO (REDUCE 10 MILLONES DE VECES LOGO, CORONA Y MANAGE APP AL CARGAR)
+st.markdown("""
+<style>
+[data-testid="manage-app-button"],
+button[data-testid="manage-app-button"],
+[data-testid="stToolbarActions"],
+[data-testid="stActionButton"],
+[data-testid="stStatusWidget"],
+.stAppDeployButton,
+a[href*="streamlit.io"],
+a[href*="github.com"],
+[class*="viewerBadge"],
+[class*="profileContainer"],
+[class*="profileImage"],
+[class*="StatusWidget"],
+footer {
+    transform: scale(0.0000001) !important;
+    zoom: 0.0000001 !important;
+    width: 0px !important;
+    height: 0px !important;
+    max-width: 0px !important;
+    max-height: 0px !important;
+    min-width: 0px !important;
+    min-height: 0px !important;
+    font-size: 0px !important;
+    opacity: 0 !important;
+    visibility: hidden !important;
+    pointer-events: none !important;
+    position: fixed !important;
+    bottom: -99999px !important;
+    right: -99999px !important;
+    overflow: hidden !important;
+    display: none !important;
+}
+</style>
+""", unsafe_allow_html=True)
+
+components.html("""
+<script>
+(function() {
+    var REGLA_MICROSCOPICA = `
+        [data-testid="manage-app-button"],
+        button[data-testid="manage-app-button"],
+        [data-testid="stToolbarActions"],
+        [data-testid="stActionButton"],
+        [data-testid="stStatusWidget"],
+        .stAppDeployButton,
+        a[href*="streamlit.io"],
+        [class*="viewerBadge"],
+        [class*="profileContainer"],
+        [class*="profileImage"],
+        img[data-testid="appCreatorAvatar"],
+        footer {
+            transform: scale(0.0000001) !important;
+            zoom: 0.0000001 !important;
+            width: 0px !important;
+            height: 0px !important;
+            max-width: 0px !important;
+            max-height: 0px !important;
+            min-width: 0px !important;
+            min-height: 0px !important;
+            font-size: 0px !important;
+            opacity: 0 !important;
+            visibility: hidden !important;
+            pointer-events: none !important;
+            position: fixed !important;
+            bottom: -99999px !important;
+            right: -99999px !important;
+            z-index: -99999 !important;
+            overflow: hidden !important;
+            display: none !important;
+        }
+    `;
+
+    function encogerUnMillonDeVeces(el) {
+        if (!el || !el.style) return;
+        el.style.setProperty('transform', 'scale(0.0000001)', 'important');
+        el.style.setProperty('zoom', '0.0000001', 'important');
+        el.style.setProperty('width', '0px', 'important');
+        el.style.setProperty('height', '0px', 'important');
+        el.style.setProperty('max-width', '0px', 'important');
+        el.style.setProperty('max-height', '0px', 'important');
+        el.style.setProperty('opacity', '0', 'important');
+        el.style.setProperty('visibility', 'hidden', 'important');
+        el.style.setProperty('pointer-events', 'none', 'important');
+        el.style.setProperty('position', 'fixed', 'important');
+        el.style.setProperty('bottom', '-99999px', 'important');
+        el.style.setProperty('right', '-99999px', 'important');
+        el.style.setProperty('display', 'none', 'important');
+    }
+
+    function limpiarDocumento(doc) {
+        if (!doc) return;
+        try {
+            if (doc.head && !doc.getElementById('percet-micro-shield')) {
+                var st = doc.createElement('style');
+                st.id = 'percet-micro-shield';
+                st.innerHTML = REGLA_MICROSCOPICA;
+                doc.head.appendChild(st);
+            }
+            var selectores = [
+                '[data-testid="manage-app-button"]',
+                'button[data-testid="manage-app-button"]',
+                '[data-testid="stToolbarActions"]',
+                '[data-testid="stActionButton"]',
+                '.stAppDeployButton',
+                'a[href*="streamlit.io"]',
+                '[class*="viewerBadge"]',
+                '[class*="profileContainer"]',
+                '[class*="profileImage"]',
+                'img[data-testid="appCreatorAvatar"]'
+            ];
+            var nodos = doc.querySelectorAll(selectores.join(','));
+            for (var i = 0; i < nodos.length; i++) {
+                encogerUnMillonDeVeces(nodos[i]);
+                if (nodos[i].parentElement && (
+                    String(nodos[i].parentElement.className).indexOf('viewerBadge') !== -1 ||
+                    String(nodos[i].parentElement.className).indexOf('profile') !== -1
+                )) {
+                    encogerUnMillonDeVeces(nodos[i].parentElement);
+                }
+            }
+            var botones = doc.querySelectorAll('button, a, div');
+            for (var j = 0; j < botones.length; j++) {
+                var b = botones[j];
+                var txt = (b.innerText || b.textContent || '').trim();
+                if (txt === 'Manage app' || txt === 'Hosted with Streamlit' || txt.indexOf('Created by') === 0) {
+                    encogerUnMillonDeVeces(b);
+                }
+            }
+        } catch (e) {}
+    }
+
+    function activarVigilanciaInstantanea() {
+        var docs = [];
+        try { if (window.parent && window.parent.document) docs.push(window.parent.document); } catch (e) {}
+        try { if (window.top && window.top.document && window.top.document !== window.parent.document) docs.push(window.top.document); } catch (e) {}
+
+        for (var d = 0; d < docs.length; d++) {
+            var doc = docs[d];
+            limpiarDocumento(doc);
+            try {
+                if (!doc.__percetObserverActive && doc.documentElement) {
+                    doc.__percetObserverActive = true;
+                    var obs = new MutationObserver(function() {
+                        limpiarDocumento(doc);
+                    });
+                    obs.observe(doc.documentElement, { childList: true, subtree: true });
+                }
+            } catch (e) {}
+        }
+    }
+
+    activarVigilanciaInstantanea();
+    setInterval(activarVigilanciaInstantanea, 100);
+})();
+</script>
+""", height=0, width=0)
+
 import folium
 from branca.element import MacroElement, Template
 from streamlit_folium import st_folium
@@ -12,13 +179,6 @@ import json
 import urllib.parse
 from datetime import datetime, timedelta
 import plotly.graph_objects as go
-
-# 1. CONFIGURACIÓN DE LA PÁGINA
-st.set_page_config(
-    page_title="PERCET GeoRisk™ | Climate Intelligence",
-    layout="wide",
-    initial_sidebar_state="expanded"
-)
 
 if "lat" not in st.session_state:
     st.session_state.lat = -6.8112
@@ -39,7 +199,7 @@ def obtener_logo_base64(ruta):
 
 LOGO_B64 = obtener_logo_base64(LOGO_FILE)
 
-# 2. DICCIONARIO BILINGÜE (HORIZONTE 30 DÍAS - ESPAÑOL & ENGLISH)
+# 3. DICCIONARIO BILINGÜE (HORIZONTE 30 DÍAS - ESPAÑOL & ENGLISH)
 TEXTOS = {
     "ES": {
         "unit_mm": "mm/día",
@@ -348,7 +508,7 @@ RUBROS_DATA = [
     }
 ]
 
-# 3. MOTOR SATELITAL BLINDADO 24/7 (CON CACHÉ, FILTRO ANTI-NONE Y RESPALDO CONTINUO)
+# 4. MOTOR SATELITAL BLINDADO 24/7 (CON CACHÉ, FILTRO ANTI-NONE Y RESPALDO CONTINUO)
 @st.cache_data(ttl=1800, show_spinner=False)
 def obtener_datos_satelitales_30d(lat_val, lon_val):
     url = (
@@ -461,7 +621,7 @@ def obtener_datos_satelitales_30d(lat_val, lon_val):
 
     return df_res, humedad_media, presion_media
 
-# 4. SISTEMA DE ESTILOS ADAPTATIVO + OCULTAMIENTO DE CORONA ROJA Y MANAGE APP
+# 5. SISTEMA DE ESTILOS ADAPTATIVO CORPORATIVO
 def aplicar_estilo_corporativo():
     st.markdown("""
     <style>
@@ -479,21 +639,10 @@ def aplicar_estilo_corporativo():
         text-transform: none !important;
     }
 
-    /* Ocultar barra de herramientas externa, Fork, GitHub, Manage App y Corona Roja de Streamlit */
-    .stAppDeployButton, .modebar, .modebar-container,
+    .modebar, .modebar-container,
     button[data-testid="StyledFullScreenButton"],
-    div[data-testid="stElementToolbar"],
-    [data-testid="manage-app-button"],
-    button[data-testid="manage-app-button"],
-    [data-testid="stToolbarActions"],
-    [data-testid="stActionButton"],
-    [data-testid="stStatusWidget"],
-    a[href*="streamlit.io/cloud"],
-    a[href*="streamlit.io"][class*="viewerBadge"],
-    [class*="viewerBadge"] > svg,
-    footer {
+    div[data-testid="stElementToolbar"] {
         display: none !important;
-        visibility: hidden !important;
     }
 
     :root, body[data-percet-theme="light"] {
@@ -1057,7 +1206,7 @@ def aplicar_estilo_corporativo():
     </style>
     """, unsafe_allow_html=True)
 
-    # Sincronizador Light/Dark + Eliminador de Corona Roja y Manage App en ventana raíz (window.top)
+    # Sincronizador de Modo Claro / Oscuro + Pulso Keep-Alive 24/7
     components.html("""
     <script>
     (function() {
@@ -1070,60 +1219,6 @@ def aplicar_estilo_corporativo():
                 return (r * 299 + g * 587 + b * 114) / 1000;
             }
             return null;
-        }
-
-        function ocultarCoronaYManageApp() {
-            var docs = [];
-            try { if (window.parent && window.parent.document) docs.push(window.parent.document); } catch (e) {}
-            try { if (window.top && window.top.document && window.top.document !== window.parent.document) docs.push(window.top.document); } catch (e) {}
-
-            for (var d = 0; d < docs.length; d++) {
-                var doc = docs[d];
-                try {
-                    // 1. Inyectar hoja de estilo en la ventana contenedora si aún no existe
-                    if (doc.head && !doc.getElementById('percet-clean-ui-style')) {
-                        var st = doc.createElement('style');
-                        st.id = 'percet-clean-ui-style';
-                        st.innerHTML = `
-                            [data-testid="manage-app-button"],
-                            button[data-testid="manage-app-button"],
-                            [data-testid="stToolbarActions"],
-                            [data-testid="stActionButton"],
-                            .stAppDeployButton,
-                            a[href*="streamlit.io/cloud"],
-                            a[href*="streamlit.io"][class*="viewerBadge"] {
-                                display: none !important;
-                                visibility: hidden !important;
-                                width: 0 !important;
-                                height: 0 !important;
-                                opacity: 0 !important;
-                                pointer-events: none !important;
-                            }
-                        `;
-                        doc.head.appendChild(st);
-                    }
-
-                    // 2. Ocultar el botón "< Manage app" en laptop
-                    var btns = doc.querySelectorAll('button, [data-testid="manage-app-button"]');
-                    for (var i = 0; i < btns.length; i++) {
-                        var txt = (btns[i].innerText || btns[i].textContent || '').trim();
-                        if (txt.indexOf('Manage app') !== -1 || btns[i].getAttribute('data-testid') === 'manage-app-button') {
-                            btns[i].style.setProperty('display', 'none', 'important');
-                        }
-                    }
-
-                    // 3. Ocultar la corona roja de Streamlit en celular/laptop conservando el logo circular de PERCET (img)
-                    var links = doc.querySelectorAll('a[href*="streamlit.io"], [class*="viewerBadge"]');
-                    for (var j = 0; j < links.length; j++) {
-                        var el = links[j];
-                        var tieneLogoImg = el.querySelector('img');
-                        if (!tieneLogoImg) {
-                            el.style.setProperty('display', 'none', 'important');
-                            el.style.setProperty('visibility', 'hidden', 'important');
-                        }
-                    }
-                } catch (err) {}
-            }
         }
 
         function syncPercetTheme() {
@@ -1164,13 +1259,8 @@ def aplicar_estilo_corporativo():
         }
 
         syncPercetTheme();
-        ocultarCoronaYManageApp();
-        setInterval(function() {
-            syncPercetTheme();
-            ocultarCoronaYManageApp();
-        }, 250);
+        setInterval(syncPercetTheme, 200);
 
-        // Pulso Keep-Alive cada 5 minutos para mantener sesiones activas 24/7
         setInterval(function() {
             try {
                 fetch(window.parent.location.href, { method: 'HEAD', cache: 'no-store' });
@@ -1182,7 +1272,7 @@ def aplicar_estilo_corporativo():
 
 aplicar_estilo_corporativo()
 
-# 5. BARRA LATERAL
+# 6. BARRA LATERAL
 with st.sidebar:
     if os.path.exists(LOGO_FILE):
         st.image(LOGO_FILE, use_container_width=True)
@@ -1220,7 +1310,7 @@ with st.sidebar:
     
     modo_enso = st.toggle(T["enso_label"], value=True, help=T["enso_help"])
 
-# 6. MODAL DE SOLICITUD SIN TÍTULO SUPERIOR EXTRA Y CON LOGO + NOMBRE AGRANDADOS
+# 7. MODAL DE SOLICITUD SIN TÍTULO SUPERIOR EXTRA Y CON LOGO + NOMBRE AGRANDADOS
 @st.dialog(" ")
 def mostrar_modal_cotizacion():
     logo_html = f'<img src="data:image/png;base64,{LOGO_B64}" class="modal-brand-logo">' if LOGO_B64 else ""
@@ -1340,7 +1430,7 @@ def mostrar_modal_cotizacion():
             else:
                 st.warning("⚠️ Please complete Company, Email and Request Detail.")
 
-# 7. ENCABEZADO SUPERIOR
+# 8. ENCABEZADO SUPERIOR
 st.markdown(f"""
 <div class="corporate-header">
     <p class="corporate-title">{T['header_title']}</p>
@@ -1349,7 +1439,7 @@ st.markdown(f"""
 </div>
 """, unsafe_allow_html=True)
 
-# 8. OBTENCIÓN BLINDADA DE DATOS METEOROLÓGICOS (30 DÍAS)
+# 9. OBTENCIÓN BLINDADA DE DATOS METEOROLÓGICOS (30 DÍAS)
 lat_actual = float(st.session_state.lat)
 lon_actual = float(st.session_state.lon)
 
@@ -1385,7 +1475,7 @@ elif pico_max_dia >= 5.0 or lluvia_acumulada >= 45.0:
 else:
     estado_quebrada = f"🟢 {T['q_green']}"
 
-# 9. SECCIÓN 01 (MAPA CON NORTE) Y SECCIÓN 02 (DIAGNÓSTICO)
+# 10. SECCIÓN 01 (MAPA CON NORTE) Y SECCIÓN 02 (DIAGNÓSTICO)
 col_mapa, col_panel = st.columns([1.22, 1], gap="large")
 
 with col_mapa:
@@ -1567,7 +1657,7 @@ with col_panel:
 
 st.markdown("<br>", unsafe_allow_html=True)
 
-# 10. SECCIÓN 03: INDICADORES CLAVE SIN NUMERACIÓN Y 100% CENTRADOS
+# 11. SECCIÓN 03: INDICADORES CLAVE SIN NUMERACIÓN Y 100% CENTRADOS
 st.markdown(f"""
 <div class="sec-header">
     <p class="sec-header-title">📊 {T['sec3_title']}</p>
@@ -1602,7 +1692,7 @@ with k3:
 
 st.markdown("<br>", unsafe_allow_html=True)
 
-# 11. SECCIÓN 04: CRONOGRAMA DE IMPACTO (30 DÍAS)
+# 12. SECCIÓN 04: CRONOGRAMA DE IMPACTO (30 DÍAS)
 st.markdown(f"""
 <div class="sec-header">
     <p class="sec-header-title">📅 {T['sec4_title']}</p>
@@ -1729,7 +1819,7 @@ st.markdown(f"""
 
 st.markdown("<br>", unsafe_allow_html=True)
 
-# 12. GENERADOR DE INFOGRAFÍA PDF EN 1 SOLA HOJA A4 CON UNIDADES EN PRONÓSTICO Y VIENTO
+# 13. GENERADOR DE INFOGRAFÍA PDF EN 1 SOLA HOJA A4 CON UNIDADES EN PRONÓSTICO Y VIENTO
 def disparar_pdf_infografia_una_hoja():
     fechas_js = json.dumps(df_diario["Fecha"].tolist())
     valores_js = json.dumps(df_diario["Pronóstico"].tolist())
@@ -1933,7 +2023,7 @@ with col_dl2:
     if st.button(T["dl_pdf"], use_container_width=True):
         disparar_pdf_infografia_una_hoja()
 
-# 13. DESPLEGABLE TÉCNICO (30 DÍAS) TRADUCIDO SEGÚN EL IDIOMA
+# 14. DESPLEGABLE TÉCNICO (30 DÍAS) TRADUCIDO SEGÚN EL IDIOMA
 with st.expander(T["exp_title"]):
     st.markdown(f"""
 {T['ml_bullet_1']}
@@ -1941,7 +2031,7 @@ with st.expander(T["exp_title"]):
     """)
     st.dataframe(df_mostrar, use_container_width=True, hide_index=True)
 
-# 14. DISCLAIMER Y BANNER B2B MEJORADO
+# 15. DISCLAIMER Y BANNER B2B MEJORADO
 st.markdown(f'<div class="legal-disclaimer">{T["disclaimer"]}</div>', unsafe_allow_html=True)
 
 if LANG == "ES":
