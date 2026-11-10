@@ -112,7 +112,7 @@ TEXTOS = {
         "dl_pdf": "📄 EXPORTAR INFORME TÉCNICO PDF (1 HOJA)",
         "exp_title": "🛠️ VER METODOLOGÍA, FUENTES Y MATRIZ METEOROLÓGICA COMPLETA (14 DÍAS)",
         "ml_bullet_1": "* **Fuente Meteorológica en Vivo:** Datos satelitales y modelos numéricos provistos por **Open-Meteo.com (CC BY 4.0)**. Días 1–7 corresponden a Pronóstico Operativo; Días 8–14 corresponden a Tendencia Referencial.",
-        "ml_bullet_2": "* **Nota sobre Investigación ML PERCET & Presión Media:** Los parámetros $R^2 = 0.947$, $\\text{{RMSE}} = 0.599\\text{{ mm/día}}$, $\\text{{MAE}} = 0.394\\text{{ mm/día}}$ ($y = 0.871x + 0.163$) corresponden al modelo base de validación científica desarrollado por PERCET (cuenca del río Chamaya). | **Presión Superficial Media:** `{presion} hPa`.",
+        "ml_bullet_2": "* **Nota sobre Investigación ML PERCET & Presión Media:** Los parámetros $R^2 = 0.947$, $\\text{{RMSE}} = 0.599\\text{{ mm/día}}$, $\\text{{MAE}} = 0.394\\text{{ mm/día}}$ ($y = 0.871x + 0.163$) corresponden al modelo base de validación científica desarrollado por PERCET. | **Presión Superficial Media:** `{presion} hPa`.",
         "disclaimer": "<b>🛡️ AVISO LEGAL Y ATRIBUCIÓN:</b> PERCET GeoRisk™ es una herramienta analítica referencial de apoyo a la toma de decisiones. No constituye un dictamen pericial ni sustituye los protocolos oficiales de seguridad, supervisión de obra ni estudios definitivos. El factor El Niño (+25%) es un margen preventivo de seguridad configurable por el usuario. Datos meteorológicos: <i>Weather data by Open-Meteo.com (CC BY 4.0)</i>.",
         "pdf_sig_box": "✍️ <b>REVISADO EN OBRA POR:</b> ______________________________________ &nbsp;&nbsp;|&nbsp;&nbsp; <b>ING. RESIDENTE / CIP N°:</b> ______________________",
         "pdf_audit_stamp": "🆔 <b>ID INFORME:</b> {rep_id} &nbsp;|&nbsp; 🕒 <b>EMISIÓN:</b> {fecha_hora} hrs (UTC-5) &nbsp;|&nbsp; 📍 <b>COORD:</b> [{lat}, {lon}] &nbsp;|&nbsp; 🏢 <b>PERCET UNIVERSAL HOLDINGS S.A.C. (RUC: 20614633345)</b>",
@@ -215,7 +215,7 @@ TEXTOS = {
         "dl_pdf": "📄 EXPORT TECHNICAL PDF REPORT (1 PAGE)",
         "exp_title": "🛠️ VIEW METHODOLOGY, SOURCES & FULL METEOROLOGICAL MATRIX (14 DAYS)",
         "ml_bullet_1": "* **Live Meteorological Source:** Satellite and numerical weather prediction data provided by **Open-Meteo.com (CC BY 4.0)**. Days 1–7 represent Operational Forecast; Days 8–14 represent Referential Trend.",
-        "ml_bullet_2": "* **PERCET ML Calibration Research & Mean Pressure:** Metrics $R^2 = 0.947$, $\\text{{RMSE}} = 0.599\\text{{ mm/day}}$, $\\text{{MAE}} = 0.394\\text{{ mm/day}}$ ($y = 0.871x + 0.163$) correspond to PERCET's scientific calibration model (Chamaya river basin study). | **Mean Surface Pressure:** `{presion} hPa`.",
+        "ml_bullet_2": "* **PERCET ML Calibration Research & Mean Pressure:** Metrics $R^2 = 0.947$, $\\text{{RMSE}} = 0.599\\text{{ mm/day}}$, $\\text{{MAE}} = 0.394\\text{{ mm/day}}$ ($y = 0.871x + 0.163$) correspond to PERCET's scientific calibration model. | **Mean Surface Pressure:** `{presion} hPa`.",
         "disclaimer": "<b>🛡️ LEGAL DISCLAIMER & ATTRIBUTION:</b> PERCET GeoRisk™ is a referential analytical support tool. Results constitute technical estimates and do not replace official safety protocols, on-site engineering supervision, or local building codes. The El Niño (+25%) factor is a user-configurable safety margin. Meteorological data: <i>Weather data by Open-Meteo.com (CC BY 4.0)</i>.",
         "pdf_sig_box": "✍️ <b>REVIEWED ON SITE BY:</b> ______________________________________ &nbsp;&nbsp;|&nbsp;&nbsp; <b>RESIDENT ENG. / LICENSE N°:</b> ______________________",
         "pdf_audit_stamp": "🆔 <b>REPORT ID:</b> {rep_id} &nbsp;|&nbsp; 🕒 <b>ISSUED:</b> {fecha_hora} hrs (UTC-5) &nbsp;|&nbsp; 📍 <b>COORD:</b> [{lat}, {lon}] &nbsp;|&nbsp; 🏢 <b>PERCET UNIVERSAL HOLDINGS S.A.C. (TAX ID: 20614633345)</b>",
@@ -1334,7 +1334,6 @@ with st.sidebar:
     rubro_actual = RUBROS_DATA[idx_rubro]
     nombre_rubro_activo = rubro_actual["es_name"] if LANG == "ES" else rubro_actual["en_name"]
     
-    # Umbral editable por el residente de obra (se inicializa con el criterio PERCET del rubro elegido)
     umbral_critico = st.number_input(
         f"{T['thresh_input_label']} ({UNIT_MM})",
         min_value=0.2,
@@ -1502,7 +1501,6 @@ if df_base_14d is None:
 
 df_diario = df_base_14d.copy()
 
-# Separación transparente entre Modelo Base y Escenario Conservador ENSO (+25%)
 df_diario["Modelo Base"] = df_diario["Precipitación Base (mm)"].round(1)
 df_diario["Escenario ENSO (+25%)"] = (df_diario["Precipitación Base (mm)"] * 1.25).round(1)
 df_diario["Pronóstico"] = df_diario["Escenario ENSO (+25%)"] if modo_enso else df_diario["Modelo Base"]
@@ -1546,7 +1544,6 @@ elif pico_max_dia >= 5.0 or lluvia_acumulada >= 22.0:
 else:
     estado_quebrada = f"🟢 {T['q_green']}"
 
-# ID único de informe para trazabilidad documental (PG-AAAA-NNNNN)
 codigo_unico_id = f"PG-{datetime.now().strftime('%Y')}-{abs(hash(f'{nombre_proyecto}_{lat_actual}_{lon_actual}_{fecha_pico}')) % 90000 + 10000}"
 
 # 9. SECCIÓN 01 (MAPA CON NORTE) Y SECCIÓN 02 (EVALUACIÓN OPERATIVA)
@@ -1823,7 +1820,6 @@ colores_barras = [
     "#ef4444" if val > umbral_critico else ("#f59e0b" if val >= umbral_critico * 0.7 else "#1d70b8")
     for val in df_diario["Pronóstico"]
 ]
-# Días 1-7 con opacidad 1.0 (Pronóstico) y Días 8-14 con opacidad 0.68 (Tendencia)
 opacidad_barras = [1.0 if i < 7 else 0.68 for i in range(len(df_diario))]
 
 fig_bar = go.Figure()
@@ -1844,7 +1840,6 @@ fig_bar.add_trace(go.Scatter(
     hoverinfo="skip",
     showlegend=False
 ))
-# Línea vertical divisoria entre Pronóstico (D1-D7) y Tendencia (D8-D14)
 fig_bar.add_vline(
     x=6.5,
     line_dash="dot",
