@@ -40,7 +40,7 @@ def obtener_logo_base64(ruta):
 
 LOGO_B64 = obtener_logo_base64(LOGO_FILE)
 
-# 2. DICCIONARIO BILINGÜE (HORIZONTE 30 DÍAS - ESPAÑOL & ENGLISH)
+# 2. DICCIONARIO BILINGÜE (HORIZONTE 14 DÍAS REALES - ESPAÑOL & ENGLISH)
 TEXTOS = {
     "ES": {
         "unit_mm": "mm/día",
@@ -48,11 +48,14 @@ TEXTOS = {
         "params_header": "⚙️ PARÁMETROS DEL PROYECTO",
         "client_label": "NOMBRE DEL CLIENTE / OBRA:",
         "rubro_label": "PARTIDA CRÍTICA EN EJECUCIÓN (RUBROS MACRO):",
-        "threshold_caption": "UMBRAL TÉCNICO DE ALERTA PARA ESTE RUBRO:",
-        "enso_label": "FACTOR DE SEGURIDAD EL NIÑO (ENSO)",
-        "enso_help": "Aplica un factor mayorante (+25%) en escenarios de anomalía térmica convectiva.",
+        "thresh_input_label": "UMBRAL ADMISIBLE DE LLUVIA (EDITABLE):",
+        "threshold_caption": "Origen: Criterio PERCET / Editable según Expediente Técnico.",
+        "enso_label": "ESCENARIO CONSERVADOR EL NIÑO (+25%)",
+        "enso_help": "Aplica un factor preventivo de seguridad (+25%) sobre el modelo base satelital para evaluar el umbral. No constituye un pronóstico meteorológico directo.",
+        "enso_mode_active": "Evaluando con: Escenario Conservador ENSO (+25%)",
+        "enso_mode_base": "Evaluando con: Modelo Base Satelital (Sin ajuste)",
         "header_title": "PERCET GEORISK™ | PLATAFORMA DE INTELIGENCIA CLIMÁTICA PARA LA CONSTRUCCIÓN",
-        "header_sub": "Monitoreo satelital multibanda y analítica predictiva mediante Machine Learning (Gradient Boosting) para la gestión de riesgos en proyectos de infraestructura.",
+        "header_sub": "Monitoreo satelital multibanda y analítica referencial de riesgos hidroclimáticos para proyectos de ingeniería e infraestructura.",
         "header_client": "CLIENTE / PROYECTO ACTUAL:",
         "header_rubro": "RUBRO:",
         "sec1_title": "01. LOCALIZACIÓN TÉCNICA DE LA OBRA",
@@ -60,14 +63,16 @@ TEXTOS = {
         "lon_label": "LONGITUD (DECIMAL)",
         "locate_btn": "📍 LOCALIZAR OBRA",
         "map_hint": "Ingrese coordenadas de planos/GPS o haga clic directamente sobre cualquier punto del mapa.",
-        "sec2_title": "02. DIAGNÓSTICO OPERATIVO EN TIEMPO REAL",
-        "pdf_sec1_title": "01. DIAGNÓSTICO OPERATIVO EN TIEMPO REAL & RESUMEN KPI (30 DÍAS)",
-        "pdf_sec2_title": "02. CRONOGRAMA DE IMPACTO PLUVIAL MENSUAL (30 DÍAS) VS. UMBRAL DEL RUBRO",
-        "pdf_sec3_title": "03. DICTAMEN DE INGENIERÍA & ACCIONES RECOMENDADAS",
-        "pdf_sec4_title": "04. RESUMEN DE MATRIZ METEOROLÓGICA COMPLETA (30 DÍAS)",
+        "sea_warning": "⚠️ Coordenada ubicada fuera de continente o sobre el océano. Verifique el punto GPS de la obra.",
+        "sec2_title": "02. EVALUACIÓN OPERATIVA REFERENCIAL",
+        "pdf_report_main_title": "PERCET GEORISK™ | INFORME TÉCNICO REFERENCIAL DE RIESGO CLIMÁTICO (14 DÍAS)",
+        "pdf_sec1_title": "01. RESUMEN EJECUTIVO DE INDICADORES & ESCENARIO EVALUADO (14 DÍAS)",
+        "pdf_sec2_title": "02. CRONOGRAMA PLUVIAL: PRONÓSTICO (DÍAS 1–7) Y TENDENCIA (DÍAS 8–14) VS. UMBRAL",
+        "pdf_sec3_title": "03. EVALUACIÓN TÉCNICA REFERENCIAL & ACCIONES PREVENTIVAS SUGERIDAS",
+        "pdf_sec4_title": "04. MATRIZ METEOROLÓGICA DE DATOS SIN RELLENO (14 DÍAS)",
         "active_badge": "MONITOREO ACTIVO",
-        "peak_banner": "PICO PRONOSTICADO · {fecha} · UMBRAL {umbral} mm/día",
-        "card_forecast": "PRONÓSTICO",
+        "peak_banner": "PICO MÁXIMO · {fecha} · UMBRAL {umbral} mm/día",
+        "card_forecast": "VALOR EVALUADO",
         "card_threshold": "UMBRAL",
         "card_excess": "EXCESO",
         "card_margin": "MARGEN SEGURO",
@@ -77,42 +82,49 @@ TEXTOS = {
         "alert_crit_badge": "ALERTA PREVENTIVA · RIESGO ELEVADO",
         "alert_warn_badge": "AVISO OPERATIVO · RIESGO MODERADO",
         "alert_ok_badge": "OPERACIÓN ESTÁNDAR · RIESGO BAJO",
-        "diag_crit_desc": "Se pronostica un pico de <b>{pico} mm/día</b> el <b>{fecha}</b>, superando el límite admisible de <b>{umbral} mm/día</b> en <b>+{exceso} mm/día</b>.",
-        "diag_warn_desc": "Se pronostica un pico de <b>{pico} mm/día</b> el <b>{fecha}</b>, próximo al umbral establecido de <b>{umbral} mm/día</b>.",
-        "diag_ok_desc": "Se pronostica un pico máximo de <b>{pico} mm/día</b>, manteniéndose dentro del margen seguro inferior al umbral de <b>{umbral} mm/día</b>.",
-        "rec_title": "ACCIONES RECOMENDADAS PARA EL FRENTE DE OBRA",
+        "diag_crit_desc": "Se estima un pico de <b>{pico} mm/día</b> el <b>{fecha}</b> ({modo_txt}), superando el umbral admisible de <b>{umbral} mm/día</b> en <b>+{exceso} mm/día</b>.",
+        "diag_warn_desc": "Se estima un pico de <b>{pico} mm/día</b> el <b>{fecha}</b> ({modo_txt}), próximo al umbral establecido de <b>{umbral} mm/día</b>.",
+        "diag_ok_desc": "Se estima un pico máximo de <b>{pico} mm/día</b> ({modo_txt}), manteniéndose dentro del margen seguro inferior al umbral de <b>{umbral} mm/día</b>.",
+        "rec_title": "ACCIONES PREVENTIVAS SUGERIDAS PARA EL FRENTE DE OBRA (REFERENCIAL)",
         "peak_detected": "Pico detectado",
         "days_affected": "Días afectados",
         "day_unit": "sobre el umbral",
-        "sec3_title": "03. INDICADORES CLAVE DE INGENIERÍA DE CAMPO (HORIZONTE 30 DÍAS)",
-        "kpi1_title": "PRECIPITACIÓN PRONOSTICADA (PICO / ACUM.)",
-        "kpi1_sub": "Acumulado 30 días: {acum} mm",
-        "kpi2_title": "HUMEDAD RELATIVA DEL AMBIENTE / SUELO",
-        "kpi2_sub": "Monitoreo de saturación superficial",
-        "kpi3_title": "ESTADO DE ALERTA FLUVIAL / QUEBRADAS",
-        "kpi3_sub": "Coordenada: {lat}, {lon}",
-        "q_red": "ALERTA ROJA (Riesgo de Escombros)",
-        "q_yellow": "VIGILANCIA (Caudal Moderado)",
-        "q_green": "ESTABLE (Sin Activación)",
-        "sec4_title": "04. CRONOGRAMA DE IMPACTO PLUVIAL DIARIO VS. UMBRAL DEL RUBRO (30 DÍAS)",
+        "sec3_title": "03. INDICADORES CLAVE DE INGENIERÍA DE CAMPO (HORIZONTE 14 DÍAS)",
+        "kpi1_title": "PRECIPITACIÓN EVALUADA (PICO / ACUM.)",
+        "kpi1_sub": "Acumulado 14 días: {acum} mm | Base: {base_acum} mm",
+        "kpi2_title": "HUMEDAD RELATIVA MEDIA DEL AMBIENTE",
+        "kpi2_sub": "Monitoreo referencial de saturación",
+        "kpi3_title": "ÍNDICE PLUVIAL REFERENCIAL / QUEBRADAS",
+        "kpi3_sub": "Estimación por lluvia acumulada (No reemplaza monitoreo local)",
+        "q_red": "ALTO (Precaución por Escorrentía)",
+        "q_yellow": "MODERADO (Vigilancia Preventiva)",
+        "q_green": "BAJO (Condición Estable)",
+        "sec4_title": "04. CRONOGRAMA PLUVIAL: PRONÓSTICO (DÍAS 1–7) Y TENDENCIA (DÍAS 8–14)",
         "pill_peak": "PRECIPITACIÓN MÁXIMA",
         "pill_days": "DÍAS SOBRE EL UMBRAL",
         "pill_thresh": "UMBRAL DE ALERTA",
-        "axis_x": "HORIZONTE DE PRONÓSTICO MENSUAL (30 DÍAS)",
+        "axis_x": "DÍAS 1 AL 7: PRONÓSTICO OPERATIVO  |  DÍAS 8 AL 14: TENDENCIA REFERENCIAL",
         "axis_y": "PRECIPITACIÓN (mm/día)",
         "thresh_tag": "Umbral: {umbral} mm/día",
-        "dl_csv": "📥 DESCARGAR MATRIZ 30 DÍAS (EXCEL / CSV)",
-        "dl_pdf": "📄 EXPORTAR REPORTE TÉCNICO PDF (1 HOJA)",
-        "exp_title": "🛠️ VER PARÁMETROS DE INFERENCIA TÉCNICA Y MATRIZ METEOROLÓGICA COMPLETA (30 DÍAS)",
-        "ml_bullet_1": "* **Motor de Machine Learning:** Regresor Gradient Boosting ($R^2 = 0.947$, $\\text{{RMSE}} = 0.599\\text{{ mm/día}}$, $\\text{{MAE}} = 0.394\\text{{ mm/día}}$).",
-        "ml_bullet_2": "* **Ecuación de Ajuste Lineal:** $y = 0.871x + 0.163$ | **Presión Superficial:** `{presion} hPa`",
-        "disclaimer": "<b>🛡️ AVISO LEGAL / DISCLAIMER:</b> PERCET GeoRisk™ es una herramienta analítica de asistencia y soporte basada en modelos predictivos satelitales y probabilísticos. Los resultados constituyen estimaciones técnicas de riesgo y no eximen al usuario de aplicar los protocolos oficiales de seguridad, supervisión en campo y normativas técnicas locales de construcción.",
-        "pdf_audit_stamp": "🕒 <b>EVIDENCIA OFICIAL DE EMISIÓN E IMPRESIÓN:</b> {fecha_hora} hrs (UTC-5) &nbsp;|&nbsp; 📍 <b>COORDENADA AUDITADA:</b> [{lat}, {lon}] &nbsp;|&nbsp; 🏢 <b>PERCET UNIVERSAL HOLDINGS S.A.C. (RUC: 20614633345)</b>",
+        "chart_div_left": "◀ PRONÓSTICO (D1-D7)",
+        "chart_div_right": "TENDENCIA (D8-D14) ▶",
+        "dl_csv": "📥 DESCARGAR MATRIZ 14 DÍAS (EXCEL / CSV)",
+        "dl_pdf": "📄 EXPORTAR INFORME TÉCNICO PDF (1 HOJA)",
+        "exp_title": "🛠️ VER METODOLOGÍA, FUENTES Y MATRIZ METEOROLÓGICA COMPLETA (14 DÍAS)",
+        "ml_bullet_1": "* **Fuente Meteorológica en Vivo:** Datos satelitales y modelos numéricos provistos por **Open-Meteo.com (CC BY 4.0)**. Días 1–7 corresponden a Pronóstico Operativo; Días 8–14 corresponden a Tendencia Referencial.",
+        "ml_bullet_2": "* **Nota sobre Investigación ML PERCET & Presión Media:** Los parámetros $R^2 = 0.947$, $\\text{{RMSE}} = 0.599\\text{{ mm/día}}$, $\\text{{MAE}} = 0.394\\text{{ mm/día}}$ ($y = 0.871x + 0.163$) corresponden al modelo base de validación científica desarrollado por PERCET (cuenca del río Chamaya). | **Presión Superficial Media:** `{presion} hPa`.",
+        "disclaimer": "<b>🛡️ AVISO LEGAL Y ATRIBUCIÓN:</b> PERCET GeoRisk™ es una herramienta analítica referencial de apoyo a la toma de decisiones. No constituye un dictamen pericial ni sustituye los protocolos oficiales de seguridad, supervisión de obra ni estudios definitivos. El factor El Niño (+25%) es un margen preventivo de seguridad configurable por el usuario. Datos meteorológicos: <i>Weather data by Open-Meteo.com (CC BY 4.0)</i>.",
+        "pdf_sig_box": "✍️ <b>REVISADO EN OBRA POR:</b> ______________________________________ &nbsp;&nbsp;|&nbsp;&nbsp; <b>ING. RESIDENTE / CIP N°:</b> ______________________",
+        "pdf_audit_stamp": "🆔 <b>ID INFORME:</b> {rep_id} &nbsp;|&nbsp; 🕒 <b>EMISIÓN:</b> {fecha_hora} hrs (UTC-5) &nbsp;|&nbsp; 📍 <b>COORD:</b> [{lat}, {lon}] &nbsp;|&nbsp; 🏢 <b>PERCET UNIVERSAL HOLDINGS S.A.C. (RUC: 20614633345)</b>",
         "b2b_title": "🏢 PERCET UNIVERSAL HOLDINGS S.A.C. | INGENIERÍA, OBRAS Y CONSULTORÍA",
         "b2b_sub": "Respaldamos tus proyectos de infraestructura con soluciones de alto nivel técnico:<br>🇵🇪 <b>Operaciones en Perú:</b> Cotización y ejecución física de obras civiles, estructuras metálicas, remodelaciones y supervisión BIM/VDC en campo.<br>🌎 <b>Cobertura en Latinoamérica:</b> Consultoría especializada en mitigación hidrológica, modelamiento BIM/VDC y soporte técnico remoto.",
         "btn_quote": "📝 SOLICITAR COTIZACIÓN DE OBRA / CONSULTORÍA",
         "btn_wa": "💬 HABLAR CON UN ASESOR POR WHATSAPP",
+        "privacy_check": "Acepto el tratamiento de mis datos para fines comerciales y técnicos conforme a la Ley N° 29733 (Ley de Protección de Datos Personales - Perú).",
+        "privacy_warn": "⚠️ Debe aceptar la cláusula de Protección de Datos Personales (Ley N° 29733) y completar los campos obligatorios.",
+        "api_err_msg": "⚠️ El servicio satelital Open-Meteo no devolvió datos completos en este momento. Por política de integridad técnica (cero datos inventados), reintente la consulta en unos segundos.",
         "col_date": "Fecha",
+        "col_horizon": "Horizonte",
         "col_tmax": "Temp. Máx (°C)",
         "col_tmin": "Temp. Mín (°C)",
         "col_tavg": "Temp. Prom (°C)",
@@ -120,17 +132,18 @@ TEXTOS = {
         "col_wind": "Viento Máx (km/h)",
         "col_wdir": "Dirección Viento (°)",
         "col_prob": "Prob. Lluvia (%)",
-        "col_base": "Precipitación Base (mm)",
-        "col_fcst": "Pronóstico (mm/día)",
+        "col_base": "Modelo Base (mm/día)",
+        "col_enso": "Escenario ENSO +25% (mm/día)",
+        "col_fcst": "Valor Evaluado (mm/día)",
         "pdf_col_date": "FECHA",
-        "pdf_col_fcst": "PRONÓSTICO (mm/día)",
+        "pdf_col_base": "BASE (mm/d)",
+        "pdf_col_fcst": "EVAL. (mm/d)",
         "pdf_col_prob": "PROB. (%)",
         "pdf_col_tmax": "T.MÁX (°C)",
-        "pdf_col_tmin": "T.MÍN (°C)",
         "pdf_col_wind": "VIENTO (km/h)",
-        "pdf_quebradas": "QUEBRADAS",
-        "pdf_days_1_15": "DÍAS 01 AL 15",
-        "pdf_days_16_30": "DÍAS 16 AL 30"
+        "pdf_quebradas": "ÍNDICE PLUVIAL",
+        "pdf_days_1_7": "DÍAS 01 AL 07 — PRONÓSTICO OPERATIVO",
+        "pdf_days_8_14": "DÍAS 08 AL 14 — TENDENCIA REFERENCIAL"
     },
     "EN": {
         "unit_mm": "mm/day",
@@ -138,11 +151,14 @@ TEXTOS = {
         "params_header": "⚙️ PROJECT PARAMETERS",
         "client_label": "CLIENT / PROJECT NAME:",
         "rubro_label": "CRITICAL WORK PACKAGE (MACRO SECTORS):",
-        "threshold_caption": "TECHNICAL ALERT THRESHOLD FOR THIS SECTOR:",
-        "enso_label": "EL NIÑO SAFETY FACTOR (ENSO)",
-        "enso_help": "Applies a safety multiplier (+25%) for convective thermal anomaly scenarios.",
+        "thresh_input_label": "ALLOWABLE RAINFALL THRESHOLD (EDITABLE):",
+        "threshold_caption": "Origin: PERCET Criterion / Editable per Project Specifications.",
+        "enso_label": "EL NIÑO CONSERVATIVE SCENARIO (+25%)",
+        "enso_help": "Applies a preventive safety factor (+25%) over the base satellite model for threshold evaluation. Not a direct meteorological forecast.",
+        "enso_mode_active": "Evaluated with: Conservative ENSO Scenario (+25%)",
+        "enso_mode_base": "Evaluated with: Base Satellite Model (Unadjusted)",
         "header_title": "PERCET GEORISK™ | CLIMATE INTELLIGENCE PLATFORM FOR CONSTRUCTION",
-        "header_sub": "Multi-band satellite monitoring and Machine Learning predictive analytics (Gradient Boosting) for infrastructure project risk management.",
+        "header_sub": "Multi-band satellite monitoring and referential hydro-climatic risk analytics for infrastructure projects.",
         "header_client": "CURRENT CLIENT / PROJECT:",
         "header_rubro": "SECTOR:",
         "sec1_title": "01. TECHNICAL SITE LOCATION",
@@ -150,14 +166,16 @@ TEXTOS = {
         "lon_label": "LONGITUDE (DECIMAL)",
         "locate_btn": "📍 LOCATE SITE",
         "map_hint": "Enter blueprint/GPS coordinates or click directly on any point on the map.",
-        "sec2_title": "02. REAL-TIME OPERATIONAL DIAGNOSTIC",
-        "pdf_sec1_title": "01. REAL-TIME OPERATIONAL DIAGNOSTIC & KPI SUMMARY (30 DAYS)",
-        "pdf_sec2_title": "02. MONTHLY RAINFALL IMPACT SCHEDULE (30 DAYS) VS. SECTOR THRESHOLD",
-        "pdf_sec3_title": "03. ENGINEERING ASSESSMENT & RECOMMENDED ACTIONS",
-        "pdf_sec4_title": "04. FULL METEOROLOGICAL MATRIX SUMMARY (30 DAYS)",
+        "sea_warning": "⚠️ Coordinate appears to be offshore or over the ocean. Please verify the site GPS point.",
+        "sec2_title": "02. REFERENTIAL OPERATIONAL ASSESSMENT",
+        "pdf_report_main_title": "PERCET GEORISK™ | REFERENTIAL TECHNICAL CLIMATE RISK REPORT (14 DAYS)",
+        "pdf_sec1_title": "01. EXECUTIVE KPI SUMMARY & EVALUATED SCENARIO (14 DAYS)",
+        "pdf_sec2_title": "02. RAINFALL SCHEDULE: FORECAST (DAYS 1–7) & TREND (DAYS 8–14) VS. THRESHOLD",
+        "pdf_sec3_title": "03. REFERENTIAL TECHNICAL ASSESSMENT & SUGGESTED PREVENTIVE ACTIONS",
+        "pdf_sec4_title": "04. UNALTERED METEOROLOGICAL DATA MATRIX (14 DAYS)",
         "active_badge": "ACTIVE MONITORING",
-        "peak_banner": "FORECASTED PEAK · {fecha} · THRESHOLD {umbral} mm/day",
-        "card_forecast": "FORECAST",
+        "peak_banner": "MAXIMUM PEAK · {fecha} · THRESHOLD {umbral} mm/day",
+        "card_forecast": "EVALUATED VALUE",
         "card_threshold": "THRESHOLD",
         "card_excess": "EXCESS",
         "card_margin": "SAFE MARGIN",
@@ -167,42 +185,49 @@ TEXTOS = {
         "alert_crit_badge": "PREVENTIVE ALERT · HIGH RISK",
         "alert_warn_badge": "OPERATIONAL NOTICE · MODERATE RISK",
         "alert_ok_badge": "STANDARD OPERATION · LOW RISK",
-        "diag_crit_desc": "A peak of <b>{pico} mm/day</b> is forecasted on <b>{fecha}</b>, exceeding the established threshold of <b>{umbral} mm/day</b> by <b>+{exceso} mm/day</b>.",
-        "diag_warn_desc": "A peak of <b>{pico} mm/day</b> is forecasted on <b>{fecha}</b>, approaching the established threshold of <b>{umbral} mm/day</b>.",
-        "diag_ok_desc": "A maximum peak of <b>{pico} mm/day</b> is forecasted, remaining safely below the threshold of <b>{umbral} mm/day</b>.",
-        "rec_title": "RECOMMENDED FIELD ACTIONS",
+        "diag_crit_desc": "A peak of <b>{pico} mm/day</b> is estimated on <b>{fecha}</b> ({modo_txt}), exceeding the allowable threshold of <b>{umbral} mm/day</b> by <b>+{exceso} mm/day</b>.",
+        "diag_warn_desc": "A peak of <b>{pico} mm/day</b> is estimated on <b>{fecha}</b> ({modo_txt}), approaching the established threshold of <b>{umbral} mm/day</b>.",
+        "diag_ok_desc": "A maximum peak of <b>{pico} mm/day</b> is estimated ({modo_txt}), remaining safely below the threshold of <b>{umbral} mm/day</b>.",
+        "rec_title": "SUGGESTED PREVENTIVE FIELD ACTIONS (REFERENTIAL)",
         "peak_detected": "Peak detected",
         "days_affected": "Affected days",
         "day_unit": "above threshold",
-        "sec3_title": "03. KEY FIELD ENGINEERING INDICATORS (30-DAY HORIZON)",
-        "kpi1_title": "FORECASTED PRECIPITATION (PEAK / ACCUM.)",
-        "kpi1_sub": "30-day cumulative: {acum} mm",
-        "kpi2_title": "AMBIENT / SOIL RELATIVE HUMIDITY",
-        "kpi2_sub": "Surface saturation monitoring",
-        "kpi3_title": "FLUVIAL / RAVINE ACTIVATION STATUS",
-        "kpi3_sub": "Coordinate: {lat}, {lon}",
-        "q_red": "RED ALERT (Debris Flow Risk)",
-        "q_yellow": "WATCH (Moderate Flow)",
-        "q_green": "STABLE (No Activation)",
-        "sec4_title": "04. DAILY RAINFALL IMPACT SCHEDULE VS. SECTOR THRESHOLD (30 DAYS)",
+        "sec3_title": "03. KEY FIELD ENGINEERING INDICATORS (14-DAY HORIZON)",
+        "kpi1_title": "EVALUATED PRECIPITATION (PEAK / ACCUM.)",
+        "kpi1_sub": "14-day accum: {acum} mm | Base: {base_acum} mm",
+        "kpi2_title": "MEAN AMBIENT RELATIVE HUMIDITY",
+        "kpi2_sub": "Referential saturation monitoring",
+        "kpi3_title": "REFERENTIAL PLUVIAL / RUNOFF INDEX",
+        "kpi3_sub": "Estimated from cumulative rainfall (Does not replace local gauges)",
+        "q_red": "HIGH (Runoff Caution)",
+        "q_yellow": "MODERATE (Preventive Watch)",
+        "q_green": "LOW (Stable Condition)",
+        "sec4_title": "04. RAINFALL SCHEDULE: FORECAST (DAYS 1–7) & TREND (DAYS 8–14)",
         "pill_peak": "MAXIMUM PRECIPITATION",
         "pill_days": "DAYS ABOVE THRESHOLD",
         "pill_thresh": "ALERT THRESHOLD",
-        "axis_x": "MONTHLY FORECAST HORIZON (30 DAYS)",
+        "axis_x": "DAYS 1 TO 7: OPERATIONAL FORECAST  |  DAYS 8 TO 14: REFERENTIAL TREND",
         "axis_y": "PRECIPITATION (mm/day)",
         "thresh_tag": "Threshold: {umbral} mm/day",
-        "dl_csv": "📥 DOWNLOAD 30-DAY MATRIX (EXCEL / CSV)",
+        "chart_div_left": "◀ FORECAST (D1-D7)",
+        "chart_div_right": "TREND (D8-D14) ▶",
+        "dl_csv": "📥 DOWNLOAD 14-DAY MATRIX (EXCEL / CSV)",
         "dl_pdf": "📄 EXPORT TECHNICAL PDF REPORT (1 PAGE)",
-        "exp_title": "🛠️ VIEW TECHNICAL INFERENCE PARAMETERS & FULL METEOROLOGICAL MATRIX (30 DAYS)",
-        "ml_bullet_1": "* **Machine Learning Engine:** Gradient Boosting Regressor ($R^2 = 0.947$, $\\text{{RMSE}} = 0.599\\text{{ mm/day}}$, $\\text{{MAE}} = 0.394\\text{{ mm/day}}$).",
-        "ml_bullet_2": "* **Linear Fit Equation:** $y = 0.871x + 0.163$ | **Surface Pressure:** `{presion} hPa`",
-        "disclaimer": "<b>🛡️ LEGAL DISCLAIMER:</b> PERCET GeoRisk™ is an analytical support tool based on satellite and probabilistic predictive models. Results constitute technical risk estimates and do not exempt the user from applying official safety protocols, field supervision, and local construction codes.",
-        "pdf_audit_stamp": "🕒 <b>OFFICIAL ISSUANCE & PRINTING TIMESTAMP:</b> {fecha_hora} hrs (UTC-5) &nbsp;|&nbsp; 📍 <b>AUDITED COORDINATE:</b> [{lat}, {lon}] &nbsp;|&nbsp; 🏢 <b>PERCET UNIVERSAL HOLDINGS S.A.C. (TAX ID: 20614633345)</b>",
+        "exp_title": "🛠️ VIEW METHODOLOGY, SOURCES & FULL METEOROLOGICAL MATRIX (14 DAYS)",
+        "ml_bullet_1": "* **Live Meteorological Source:** Satellite and numerical weather prediction data provided by **Open-Meteo.com (CC BY 4.0)**. Days 1–7 represent Operational Forecast; Days 8–14 represent Referential Trend.",
+        "ml_bullet_2": "* **PERCET ML Calibration Research & Mean Pressure:** Metrics $R^2 = 0.947$, $\\text{{RMSE}} = 0.599\\text{{ mm/day}}$, $\\text{{MAE}} = 0.394\\text{{ mm/day}}$ ($y = 0.871x + 0.163$) correspond to PERCET's scientific calibration model (Chamaya river basin study). | **Mean Surface Pressure:** `{presion} hPa`.",
+        "disclaimer": "<b>🛡️ LEGAL DISCLAIMER & ATTRIBUTION:</b> PERCET GeoRisk™ is a referential analytical support tool. Results constitute technical estimates and do not replace official safety protocols, on-site engineering supervision, or local building codes. The El Niño (+25%) factor is a user-configurable safety margin. Meteorological data: <i>Weather data by Open-Meteo.com (CC BY 4.0)</i>.",
+        "pdf_sig_box": "✍️ <b>REVIEWED ON SITE BY:</b> ______________________________________ &nbsp;&nbsp;|&nbsp;&nbsp; <b>RESIDENT ENG. / LICENSE N°:</b> ______________________",
+        "pdf_audit_stamp": "🆔 <b>REPORT ID:</b> {rep_id} &nbsp;|&nbsp; 🕒 <b>ISSUED:</b> {fecha_hora} hrs (UTC-5) &nbsp;|&nbsp; 📍 <b>COORD:</b> [{lat}, {lon}] &nbsp;|&nbsp; 🏢 <b>PERCET UNIVERSAL HOLDINGS S.A.C. (TAX ID: 20614633345)</b>",
         "b2b_title": "🌎 PERCET UNIVERSAL HOLDINGS S.A.C. | ENGINEERING & INFRASTRUCTURE SUPPORT",
         "b2b_sub": "We support your infrastructure projects with high-level engineering solutions:<br>🌐 <b>International Coverage:</b> Remote hydrological risk consulting, climate modeling, and BIM/VDC digital supervision worldwide.<br>🇵🇪 <b>Operations in Peru:</b> Full on-site civil works execution, structural steel, remodeling, and field engineering.",
         "btn_quote": "📝 REQUEST ENGINEERING CONSULTING / QUOTE",
         "btn_wa": "💬 CONTACT ENGINEERING SUPPORT (WHATSAPP)",
+        "privacy_check": "I accept the processing of my data for commercial and technical purposes in accordance with Data Protection Law N° 29733 (Peru).",
+        "privacy_warn": "⚠️ Please accept the Data Protection clause (Law N° 29733) and complete all required fields.",
+        "api_err_msg": "⚠️ Open-Meteo satellite service did not return complete data at this moment. Per our strict data integrity policy (zero fabricated data), please retry in a few seconds.",
         "col_date": "Date",
+        "col_horizon": "Horizon",
         "col_tmax": "Max Temp (°C)",
         "col_tmin": "Min Temp (°C)",
         "col_tavg": "Avg Temp (°C)",
@@ -210,17 +235,18 @@ TEXTOS = {
         "col_wind": "Max Wind (km/h)",
         "col_wdir": "Wind Direction (°)",
         "col_prob": "Rain Prob. (%)",
-        "col_base": "Base Precipitation (mm)",
-        "col_fcst": "Forecast (mm/day)",
+        "col_base": "Base Model (mm/day)",
+        "col_enso": "ENSO Scenario +25% (mm/day)",
+        "col_fcst": "Evaluated Value (mm/day)",
         "pdf_col_date": "DATE",
-        "pdf_col_fcst": "FORECAST (mm/day)",
+        "pdf_col_base": "BASE (mm/d)",
+        "pdf_col_fcst": "EVAL. (mm/d)",
         "pdf_col_prob": "PROB. (%)",
         "pdf_col_tmax": "T.MAX (°C)",
-        "pdf_col_tmin": "T.MIN (°C)",
         "pdf_col_wind": "WIND (km/h)",
-        "pdf_quebradas": "RAVINES",
-        "pdf_days_1_15": "DAYS 01 TO 15",
-        "pdf_days_16_30": "DAYS 16 TO 30"
+        "pdf_quebradas": "PLUVIAL INDEX",
+        "pdf_days_1_7": "DAYS 01 TO 07 — OPERATIONAL FORECAST",
+        "pdf_days_8_14": "DAYS 08 TO 14 — REFERENTIAL TREND"
     }
 }
 
@@ -230,30 +256,30 @@ RUBROS_DATA = [
         "es_name": "1. Geotecnia y Movimiento de Tierras",
         "en_name": "1. Geotechnics & Earthworks",
         "es_recs_crit": [
-            "Detener compactación de subrasante inmediatamente por saturación.",
-            "Perfilar y proteger taludes expuestos con geomembranas.",
-            "Activar bombeo en zanjas y drenaje perimetral de escorrentía."
+            "Suspender preventivamente la compactación de subrasante por posible saturación.",
+            "Perfilar y proteger taludes expuestos con coberturas plásticas o geomembranas.",
+            "Verificar operatividad de bombeo en zanjas y cunetas de coronación."
         ],
         "es_recs_warn": [
-            "Monitorear el límite líquido del suelo antes de compactar.",
-            "Cubrir acopios de material de préstamo y agregados."
+            "Controlar el contenido de humedad natural antes de compactar capas granulares.",
+            "Cubrir acopios de material de préstamo y agregados en cancha."
         ],
         "es_recs_ok": [
-            "Continuar excavación masiva y compactación según cronograma.",
-            "Mantener inspección rutinaria de humedad en canteras."
+            "Condiciones favorables para excavación masiva y conformación de terraplenes.",
+            "Mantener inspección rutinaria de drenaje superficial en canteras."
         ],
         "en_recs_crit": [
-            "Halt subgrade compaction immediately due to soil saturation.",
-            "Reinforce and cover exposed slopes with geomembranes.",
-            "Activate trench pumping and perimeter runoff drainage."
+            "Preventively suspend subgrade compaction due to potential soil saturation.",
+            "Protect exposed slopes with plastic tarps or geomembranes.",
+            "Verify trench pumping and perimeter runoff drainage readiness."
         ],
         "en_recs_warn": [
-            "Monitor soil liquid limit prior to compaction operations.",
-            "Cover borrow material and aggregate stockpiles."
+            "Verify soil moisture content prior to granular layer compaction.",
+            "Cover borrow material and aggregate stockpiles on site."
         ],
         "en_recs_ok": [
-            "Proceed with mass excavation and compaction per schedule.",
-            "Maintain routine moisture inspection on site."
+            "Favorable conditions for mass excavation and embankment grading.",
+            "Maintain routine surface drainage inspection on site."
         ]
     },
     {
@@ -261,30 +287,30 @@ RUBROS_DATA = [
         "es_name": "2. Estructuras de Concreto y Acero",
         "en_name": "2. Concrete & Steel Structures",
         "es_recs_crit": [
-            "Reprogramar vaciados expuestos de losas y elementos horizontales.",
-            "Proteger elementos frescos con mantas plásticas impermeables.",
-            "Verificar relación agua/cemento por exceso de humedad superficial."
+            "Evaluar reprogramación de vaciados expuestos de losas y elementos horizontales.",
+            "Disponer mantas impermeables y carpas sobre elementos recién vaciados.",
+            "Controlar humedad superficial de agregados para proteger la relación a/c."
         ],
         "es_recs_warn": [
-            "Instalar carpas preventivas sobre frentes de vaciado activo.",
-            "Cubrir acero de refuerzo habilitado para evitar oxidación."
+            "Prever coberturas preventivas sobre frentes de vaciado activo.",
+            "Proteger acero de refuerzo habilitado contra humedad prolongada."
         ],
         "es_recs_ok": [
-            "Condiciones óptimas para vaciado de concreto estructural.",
-            "Proceder con encofrado y montaje de armaduras sin restricción."
+            "Condiciones favorables para colocación y curado de concreto estructural.",
+            "Continuar con encofrado y montaje de armaduras según programación."
         ],
         "en_recs_crit": [
-            "Reschedule exposed slab and horizontal concrete pours.",
-            "Protect fresh concrete elements with waterproof plastic tarps.",
-            "Check water/cement ratio against surface moisture excess."
+            "Evaluate rescheduling exposed slab and horizontal concrete pours.",
+            "Deploy waterproof tarps over freshly poured structural elements.",
+            "Monitor aggregate surface moisture to protect the water/cement ratio."
         ],
         "en_recs_warn": [
-            "Deploy preventive tents over active concrete pouring fronts.",
-            "Cover staged rebar to prevent premature surface oxidation."
+            "Stage preventive tents over active concrete pouring fronts.",
+            "Protect staged rebar against prolonged moisture exposure."
         ],
         "en_recs_ok": [
-            "Optimal conditions for structural concrete placement.",
-            "Proceed with formwork and rebar assembly without restriction."
+            "Favorable conditions for structural concrete placement and curing.",
+            "Proceed with formwork and rebar assembly per schedule."
         ]
     },
     {
@@ -292,29 +318,29 @@ RUBROS_DATA = [
         "es_name": "3. Arquitectura y Cierre de Envolvente",
         "en_name": "3. Architecture & Building Envelope",
         "es_recs_crit": [
-            "Paralizar aplicación de pintura exterior y recubrimientos.",
-            "Suspender colocación de mantos impermeabilizantes en techos.",
-            "Sellar vanos y proteger materiales de acabados en almacén."
+            "Posponer aplicación de pintura exterior, empastes y selladores en fachada.",
+            "Suspender instalación de mantos impermeabilizantes a la intemperie.",
+            "Resguardar paneles de drywall, maderas y acabados en almacén techado."
         ],
         "es_recs_warn": [
             "Restringir acabados en fachadas expuestas al viento húmedo.",
-            "Priorizar partidas de tabiquería y acabados interiores."
+            "Priorizar avance de partidas de tabiquería y acabados interiores."
         ],
         "es_recs_ok": [
-            "Clima seco favorable para pintura exterior y sellado de fachadas.",
-            "Ejecutar instalación de mantos impermeables según plan."
+            "Condición seca favorable para pintura exterior y sellado de envolvente.",
+            "Ejecutar instalación de recubrimientos e impermeabilización según plan."
         ],
         "en_recs_crit": [
-            "Halt exterior painting and facade coating applications.",
-            "Suspend installation of roof waterproofing membranes.",
-            "Seal openings and protect finishing materials in storage."
+            "Postpone exterior painting, plastering, and facade sealant application.",
+            "Suspend outdoor roof waterproofing membrane installation.",
+            "Secure drywall panels, timber, and finishes in covered storage."
         ],
         "en_recs_warn": [
             "Restrict facade finishes exposed to wind-driven moisture.",
             "Prioritize interior drywall and finishing work packages."
         ],
         "en_recs_ok": [
-            "Dry weather favorable for exterior painting and facade sealing.",
+            "Dry conditions favorable for exterior painting and envelope sealing.",
             "Execute roof waterproofing membrane installation as planned."
         ]
     },
@@ -323,26 +349,26 @@ RUBROS_DATA = [
         "es_name": "4. Instalaciones y Redes de Servicio",
         "en_name": "4. MEP Installations & Utility Networks",
         "es_recs_crit": [
-            "Cortar energía temporal en frentes descubiertos por riesgo eléctrico.",
-            "Suspender tendido de redes en zanjas con riesgo de inundación.",
-            "Asegurar grupos electrógenos y tableros con cerramiento IP65."
+            "Aislar energía temporal en frentes descubiertos por seguridad eléctrica.",
+            "Suspender tendido de tuberías y termofusión en zanjas expuestas a aniego.",
+            "Asegurar grupos electrógenos y tableros provisionales con protección IP65."
         ],
         "es_recs_warn": [
-            "Aislar empalmes y tableros provisionales de obra.",
-            "Entibar y proteger zanjas de tuberías sanitarias/hidráulicas."
+            "Revisar aislamiento de empalmes y tableros eléctricos provisionales.",
+            "Entibar y proteger zanjas de redes sanitarias e hidráulicas."
         ],
         "es_recs_ok": [
-            "Operación segura para montaje electromecánico y tendido de redes.",
-            "Realizar pruebas hidráulicas y de presión con normalidad."
+            "Operación segura para montaje electromecánico y tendido de tuberías.",
+            "Realizar pruebas hidráulicas y de hermeticidad con normalidad."
         ],
         "en_recs_crit": [
-            "Cut temporary power in open fronts due to electrocution hazard.",
-            "Suspend utility trenching in areas prone to waterlogging.",
-            "Secure generators and switchboards with IP65 enclosures."
+            "Isolate temporary power in open fronts for electrical safety.",
+            "Suspend pipe laying and fusion in trenches prone to waterlogging.",
+            "Secure generators and temporary switchboards with IP65 protection."
         ],
         "en_recs_warn": [
-            "Insulate splices and temporary site distribution boards.",
-            "Shore and protect sanitary/hydraulic pipeline trenches."
+            "Inspect insulation on splices and temporary distribution boards.",
+            "Shore and protect sanitary and hydraulic pipeline trenches."
         ],
         "en_recs_ok": [
             "Safe operation for MEP assembly and utility network laying.",
@@ -351,120 +377,84 @@ RUBROS_DATA = [
     }
 ]
 
-# 3. MOTOR SATELITAL BLINDADO 24/7 (CON CACHÉ, FILTRO ANTI-NONE Y RESPALDO CONTINUO)
-@st.cache_data(ttl=1800, show_spinner=False)
-def obtener_datos_satelitales_30d(lat_val, lon_val):
+# 3. MOTOR SATELITAL DE 14 DÍAS REALES (CERO DATOS INVENTADOS / CON REINTENTOS Y CACHÉ 1 HORA)
+@st.cache_data(ttl=3600, show_spinner=False)
+def obtener_datos_satelitales_14d(lat_val, lon_val):
+    lat_r = round(float(lat_val), 4)
+    lon_r = round(float(lon_val), 4)
     url = (
-        f"https://api.open-meteo.com/v1/forecast?latitude={lat_val}&longitude={lon_val}"
+        f"https://api.open-meteo.com/v1/forecast?latitude={lat_r}&longitude={lon_r}"
         f"&daily=temperature_2m_max,temperature_2m_min,temperature_2m_mean,"
         f"precipitation_sum,precipitation_probability_max,wind_speed_10m_max,"
         f"wind_direction_10m_dominant,shortwave_radiation_sum"
         f"&hourly=relative_humidity_2m,surface_pressure"
-        f"&timezone=America%2FLima&forecast_days=16"
+        f"&timezone=America%2FLima&forecast_days=14"
     )
-    semilla_coord = int(abs(lat_val * 10000) + abs(lon_val * 10000)) % (2**31 - 1)
-    rng = np.random.RandomState(semilla_coord)
 
-    try:
-        resp = requests.get(url, timeout=10)
-        resp.raise_for_status()
-        data = resp.json()
-        daily = data.get("daily", {})
-        hourly = data.get("hourly", {})
+    ultimo_error = None
+    for intento in range(3):
+        try:
+            resp = requests.get(url, timeout=10)
+            resp.raise_for_status()
+            data = resp.json()
+            daily = data.get("daily", {})
+            hourly = data.get("hourly", {})
 
-        fechas_raw = daily.get("time", [])
-        if not fechas_raw:
-            raise ValueError("Empty daily time array")
+            fechas_raw = daily.get("time", [])
+            if not fechas_raw or len(fechas_raw) < 14:
+                raise ValueError("Incomplete daily time series from Open-Meteo")
 
-        fechas_base = pd.to_datetime(fechas_raw)
+            fechas_base = pd.to_datetime(fechas_raw[:14])
 
-        def limpiar_lista(lista, defecto, es_entero=False):
-            resultado = []
-            for x in lista:
-                if x is None or (isinstance(x, float) and np.isnan(x)):
-                    resultado.append(int(defecto) if es_entero else float(defecto))
-                else:
-                    resultado.append(int(round(float(x))) if es_entero else float(x))
-            return resultado
+            def extraer_serie_real(clave, decimales=1, es_entero=False):
+                lista = daily.get(clave, [])[:14]
+                salida = []
+                calidad_ok = True
+                for x in lista:
+                    if x is None or (isinstance(x, float) and np.isnan(x)):
+                        salida.append(np.nan)
+                        calidad_ok = False
+                    else:
+                        val = float(x)
+                        salida.append(int(round(val)) if es_entero else round(val, decimales))
+                return salida, calidad_ok
 
-        tmax_base = limpiar_lista(daily.get("temperature_2m_max", []), 24.0)
-        tmin_base = limpiar_lista(daily.get("temperature_2m_min", []), 16.0)
-        tmean_base = limpiar_lista(daily.get("temperature_2m_mean", []), 20.0)
-        rad_base = limpiar_lista(daily.get("shortwave_radiation_sum", []), 18.0)
-        wind_base = limpiar_lista(daily.get("wind_speed_10m_max", []), 15.0)
-        wdir_base = limpiar_lista(daily.get("wind_direction_10m_dominant", []), 180, es_entero=True)
-        prob_base = limpiar_lista(daily.get("precipitation_probability_max", []), 15, es_entero=True)
-        prec_base = limpiar_lista(daily.get("precipitation_sum", []), 0.0)
+            tmax_s, ok1 = extraer_serie_real("temperature_2m_max", 1)
+            tmin_s, ok2 = extraer_serie_real("temperature_2m_min", 1)
+            tmean_s, ok3 = extraer_serie_real("temperature_2m_mean", 1)
+            rad_s, ok4 = extraer_serie_real("shortwave_radiation_sum", 2)
+            wind_s, ok5 = extraer_serie_real("wind_speed_10m_max", 1)
+            wdir_s, ok6 = extraer_serie_real("wind_direction_10m_dominant", 0, es_entero=True)
+            prob_s, ok7 = extraer_serie_real("precipitation_probability_max", 0, es_entero=True)
+            prec_s, ok8 = extraer_serie_real("precipitation_sum", 1)
 
-        hum_validos = [float(x) for x in hourly.get("relative_humidity_2m", []) if x is not None and not np.isnan(float(x))]
-        pres_validos = [float(x) for x in hourly.get("surface_pressure", []) if x is not None and not np.isnan(float(x))]
+            hum_validos = [float(x) for x in hourly.get("relative_humidity_2m", []) if x is not None and not np.isnan(float(x))]
+            pres_validos = [float(x) for x in hourly.get("surface_pressure", []) if x is not None and not np.isnan(float(x))]
 
-        humedad_media = round(float(np.mean(hum_validos)), 1) if hum_validos else 74.5
-        presion_media = round(float(np.mean(pres_validos)), 1) if pres_validos else 1011.2
+            humedad_media = round(float(np.mean(hum_validos)), 1) if hum_validos else None
+            presion_media = round(float(np.mean(pres_validos)), 1) if pres_validos else None
 
-    except Exception:
-        hoy = datetime.now()
-        fechas_base = pd.date_range(hoy, periods=16, freq="D")
-        tmax_base = [round(25.0 + rng.uniform(-2.0, 2.5), 1) for _ in range(16)]
-        tmin_base = [round(17.5 + rng.uniform(-1.5, 1.5), 1) for _ in range(16)]
-        tmean_base = [round((tmax_base[i] + tmin_base[i]) / 2.0, 1) for i in range(16)]
-        rad_base = [round(18.5 + rng.uniform(-3.0, 3.0), 2) for _ in range(16)]
-        wind_base = [round(14.5 + rng.uniform(-3.0, 4.0), 1) for _ in range(16)]
-        wdir_base = [int((185 + rng.randint(-25, 25)) % 360) for _ in range(16)]
-        prec_base = [round(max(0.0, rng.exponential(1.6) - 0.4), 1) for _ in range(16)]
-        prob_base = [int(min(95, max(5, p * 18 + rng.randint(0, 15)))) for p in prec_base]
-        humedad_media = 75.2
-        presion_media = 1010.8
+            df_res = pd.DataFrame({
+                "Fecha": fechas_base.strftime('%d-%b'),
+                "Temp. Máx (°C)": tmax_s,
+                "Temp. Mín (°C)": tmin_s,
+                "Temp. Prom (°C)": tmean_s,
+                "Radiación (MJ/m²)": rad_s,
+                "Viento Máx (km/h)": wind_s,
+                "Dirección Viento (°)": wdir_s,
+                "Prob. Lluvia (%)": prob_s,
+                "Precipitación Base (mm)": prec_s
+            })
 
-    n_actual = len(fechas_base)
-    dias_faltantes = max(0, 30 - n_actual)
-    ultima_fecha = fechas_base[-1]
+            aviso_calidad = not all([ok1, ok2, ok3, ok4, ok5, ok6, ok7, ok8])
+            return df_res, humedad_media, presion_media, aviso_calidad, None
 
-    for i in range(1, dias_faltantes + 1):
-        nueva_fecha = ultima_fecha + timedelta(days=i)
-        fechas_base = fechas_base.append(pd.DatetimeIndex([nueva_fecha]))
+        except Exception as e:
+            ultimo_error = str(e)
 
-        idx_ref = (i * 3) % n_actual
-        var_t = rng.uniform(-1.2, 1.2)
-        tmax_val = round(tmax_base[idx_ref] + var_t, 1)
-        tmin_val = round(min(tmax_val - 2.5, tmin_base[idx_ref] + var_t * 0.8), 1)
-        tmean_val = round((tmax_val + tmin_val) / 2.0, 1)
-        rad_val = round(max(8.0, rad_base[idx_ref] + rng.uniform(-2.0, 2.0)), 2)
-        wind_val = round(max(5.0, wind_base[idx_ref] + rng.uniform(-2.5, 2.5)), 1)
-        wdir_val = int((wdir_base[idx_ref] + rng.randint(-15, 16)) % 360)
+    return None, None, None, False, ultimo_error
 
-        peso_estacional = rng.uniform(0.65, 1.25)
-        prec_val = round(max(0.0, prec_base[idx_ref] * peso_estacional), 1)
-        if prec_val < 0.2 and rng.rand() < 0.65:
-            prec_val = 0.0
-        prob_val = int(np.clip(prob_base[idx_ref] * peso_estacional + rng.randint(-8, 9), 0, 100))
-        if prec_val == 0.0:
-            prob_val = min(prob_val, 25)
-
-        tmax_base.append(tmax_val)
-        tmin_base.append(tmin_val)
-        tmean_base.append(tmean_val)
-        rad_base.append(rad_val)
-        wind_base.append(wind_val)
-        wdir_base.append(wdir_val)
-        prob_base.append(prob_val)
-        prec_base.append(prec_val)
-
-    df_res = pd.DataFrame({
-        "Fecha": fechas_base[:30].strftime('%d-%b'),
-        "Temp. Máx (°C)": tmax_base[:30],
-        "Temp. Mín (°C)": tmin_base[:30],
-        "Temp. Prom (°C)": tmean_base[:30],
-        "Radiación (MJ/m²)": rad_base[:30],
-        "Viento Máx (km/h)": wind_base[:30],
-        "Dirección Viento (°)": wdir_base[:30],
-        "Prob. Lluvia (%)": prob_base[:30],
-        "Precipitación Base (mm)": prec_base[:30]
-    })
-
-    return df_res, humedad_media, presion_media
-
-# 4. SISTEMA DE ESTILOS ADAPTATIVO (LIGHT & DARK MODE COMO IMAGEN 2 + MENÚ DE 3 PUNTOS LIMPIO)
+# 4. SISTEMA DE ESTILOS ADAPTATIVO (LIGHT & DARK MODE + MENÚ DE 3 PUNTOS LIMPIO)
 def aplicar_estilo_corporativo():
     st.markdown("""
     <style>
@@ -482,7 +472,6 @@ def aplicar_estilo_corporativo():
         text-transform: none !important;
     }
 
-    /* Subir el banner azul para eliminar el espacio superior */
     .block-container,
     [data-testid="stMainBlockContainer"],
     .stMainBlockContainer {
@@ -490,7 +479,6 @@ def aplicar_estilo_corporativo():
         padding-bottom: 2rem !important;
     }
 
-    /* Cabecera superior integrada al color del tema y con los 3 puntos (⋮) siempre visibles */
     header[data-testid="stHeader"] {
         background-color: var(--p-bg-main) !important;
         height: 2.3rem !important;
@@ -505,7 +493,6 @@ def aplicar_estilo_corporativo():
         opacity: 1 !important;
     }
 
-    /* Ocultar instantáneamente en el menú de 3 puntos: Rerun, Clear cache, Print, Record screen y separadores */
     [data-testid="stMainMenuDivider"],
     [data-baseweb="popover"] hr,
     [data-baseweb="popover"] [role="separator"],
@@ -517,7 +504,6 @@ def aplicar_estilo_corporativo():
         display: none !important;
     }
 
-    /* Reducir 10 millones de veces elementos externos (Corona, Manage App, GitHub) */
     .modebar, .modebar-container,
     button[data-testid="StyledFullScreenButton"],
     div[data-testid="stElementToolbar"],
@@ -565,7 +551,6 @@ def aplicar_estilo_corporativo():
         --p-rec-item-bg: rgba(255, 255, 255, 0.92);
     }
 
-    /* MODO OSCURO EXACTO AL DE LA IMAGEN 2 */
     body[data-percet-theme="dark"] {
         --p-bg-main: #0b0e14;
         --p-bg-sidebar: #111621;
@@ -922,7 +907,7 @@ def aplicar_estilo_corporativo():
     }
     .field-kpi-pill {
         display: inline-block;
-        font-size: 0.76rem !important;
+        font-size: 0.75rem !important;
         font-weight: 700 !important;
         padding: 4px 14px;
         border-radius: 20px;
@@ -1119,7 +1104,6 @@ def aplicar_estilo_corporativo():
     </style>
     """, unsafe_allow_html=True)
 
-    # MOTOR LIGERO DE SINCRONIZACIÓN DE TEMA (DARK/LIGHT) Y LIMPIEZA DEL MENÚ DE 3 PUNTOS
     components.html("""
     <script>
     (function() {
@@ -1172,7 +1156,6 @@ def aplicar_estilo_corporativo():
         }
 
         function detectarModoOscuro(pDoc) {
-            // 1. Leer el fondo real de las casillas nativas de Streamlit (que cambian al instante al pulsar Light o Dark)
             var cajas = pDoc.querySelectorAll('div[data-baseweb="base-input"], div[data-baseweb="input"], [data-testid="stNumberInput"] input, [data-testid="stTextInput"] input');
             for (var i = 0; i < cajas.length; i++) {
                 var el = cajas[i];
@@ -1183,7 +1166,6 @@ def aplicar_estilo_corporativo():
                     return (lum < 128);
                 }
             }
-            // 2. Respaldo: leer la preferencia activa guardada por Streamlit en localStorage
             try {
                 for (var k = 0; k < window.parent.localStorage.length; k++) {
                     var key = window.parent.localStorage.key(k);
@@ -1226,7 +1208,6 @@ def aplicar_estilo_corporativo():
                 for (var s = 0; s < sep.length; s++) {
                     sep[s].style.setProperty("display", "none", "important");
                 }
-                // Evaluar únicamente elementos hoja/filas (li, button, a, footer) sin tocar jamás un <div> contenedor
                 var items = pop.querySelectorAll('li, button, a, footer');
                 for (var i = 0; i < items.length; i++) {
                     var it = items[i];
@@ -1234,7 +1215,6 @@ def aplicar_estilo_corporativo():
                     var txt = (it.innerText || it.textContent || "").trim().toLowerCase();
                     if (!txt) continue;
 
-                    // Protección total a los botones System, Light y Dark
                     if (txt.indexOf("system") !== -1 || txt.indexOf("light") !== -1 || txt.indexOf("dark") !== -1) {
                         continue;
                     }
@@ -1289,7 +1269,6 @@ def aplicar_estilo_corporativo():
                     ocultarInsigniaExterna(links[j]);
                 }
 
-                // Sincronizar Modo Claro / Modo Oscuro (Imagen 2)
                 var isDark = detectarModoOscuro(pDoc);
                 var temaActual = isDark ? "dark" : "light";
                 if (pDoc.body.getAttribute("data-percet-theme") !== temaActual) {
@@ -1312,7 +1291,6 @@ def aplicar_estilo_corporativo():
         cicloPrincipal();
         setInterval(cicloPrincipal, 200);
 
-        // Pulso Keep-Alive cada 5 minutos para operación 24/7
         setInterval(function() {
             try { fetch(window.parent.location.href, { method: "HEAD", cache: "no-store" }); } catch (e) {}
         }, 300000);
@@ -1322,7 +1300,7 @@ def aplicar_estilo_corporativo():
 
 aplicar_estilo_corporativo()
 
-# 5. BARRA LATERAL CON SANITIZACIÓN ANTI-HACKEO (XSS SHIELD)
+# 5. BARRA LATERAL CON UMBRAL EDITABLE POR EL USUARIO Y SEPARACIÓN DEL FACTOR ENSO (+25%)
 with st.sidebar:
     if os.path.exists(LOGO_FILE):
         st.image(LOGO_FILE, use_container_width=True)
@@ -1355,13 +1333,23 @@ with st.sidebar:
     
     rubro_actual = RUBROS_DATA[idx_rubro]
     nombre_rubro_activo = rubro_actual["es_name"] if LANG == "ES" else rubro_actual["en_name"]
-    umbral_critico = rubro_actual["umbral"]
     
-    st.caption(f"{T['threshold_caption']} **> {umbral_critico} {UNIT_MM}**")
+    # Umbral editable por el residente de obra (se inicializa con el criterio PERCET del rubro elegido)
+    umbral_critico = st.number_input(
+        f"{T['thresh_input_label']} ({UNIT_MM})",
+        min_value=0.2,
+        max_value=50.0,
+        value=float(rubro_actual["umbral"]),
+        step=0.5,
+        format="%.1f",
+        key=f"umbral_editable_{idx_rubro}"
+    )
+    st.caption(f"ℹ️ {T['threshold_caption']}")
     
     modo_enso = st.toggle(T["enso_label"], value=True, help=T["enso_help"])
+    st.caption(f"📌 **{T['enso_mode_active'] if modo_enso else T['enso_mode_base']}**")
 
-# 6. MODAL DE SOLICITUD SIN TÍTULO SUPERIOR EXTRA Y CON LOGO + NOMBRE AGRANDADOS
+# 6. MODAL DE SOLICITUD CON CLÁUSULA DE PROTECCIÓN DE DATOS (LEY N° 29733) Y LÍMITE DE ARCHIVO
 @st.dialog(" ")
 def mostrar_modal_cotizacion():
     logo_html = f'<img src="data:image/png;base64,{LOGO_B64}" class="modal-brand-logo">' if LOGO_B64 else ""
@@ -1386,22 +1374,26 @@ def mostrar_modal_cotizacion():
         emp = html.escape(st.text_input("EMPRESA / CONSTRUCTORA O CLIENTE:", max_chars=100).strip())
         correo_cli = html.escape(st.text_input("CORREO CORPORATIVO:", max_chars=100).strip())
         tel_cli = html.escape(st.text_input("TELÉFONO / WHATSAPP DE CONTACTO:", max_chars=40).strip())
-        detalle_req = html.escape(st.text_area("DETALLE SU REQUERIMIENTO O PROYECTO A COTIZAR (Ej. Estructura metálica, remodelación, obras civiles, consultoría BIM/VDC):", height=105, max_chars=1200).strip())
-        archivo = st.file_uploader("ADJUNTAR PLANO, EXPEDIENTE O DOCUMENTO (OPCIONAL):", type=["pdf", "png", "jpg"])
+        detalle_req = html.escape(st.text_area("DETALLE SU REQUERIMIENTO O PROYECTO A COTIZAR (Ej. Estructura metálica, remodelación, obras civiles, consultoría BIM/VDC):", height=95, max_chars=1200).strip())
+        archivo = st.file_uploader("ADJUNTAR PLANO O EXPEDIENTE (OPCIONAL - MÁX 15 MB):", type=["pdf", "png", "jpg"])
+        consentimiento_ley = st.checkbox(T["privacy_check"], value=True)
         
         if st.button("🚀 ENVIAR SOLICITUD A OFICINA TÉCNICA", type="primary", use_container_width=True):
-            if emp and correo_cli and detalle_req:
-                nombre_arch = html.escape(archivo.name) if archivo else "No adjuntado"
+            if archivo and archivo.size > 15 * 1024 * 1024:
+                st.warning("⚠️ El archivo adjunto supera el límite de seguridad de 15 MB.")
+            elif emp and correo_cli and detalle_req and consentimiento_ley:
+                nombre_arch = html.escape(os.path.basename(archivo.name)) if archivo else "No adjuntado"
                 asunto = f"Cotización / Ingeniería PERCET - {emp} ({nombre_proyecto})"
                 cuerpo = (
                     f"Empresa / Cliente: {emp}\n"
                     f"Correo del Cliente: {correo_cli}\n"
                     f"Teléfono / WhatsApp: {tel_cli}\n"
                     f"Proyecto Evaluado: {nombre_proyecto}\n"
-                    f"Rubro: {nombre_rubro_activo}\n"
+                    f"Rubro: {nombre_rubro_activo} (Umbral: {umbral_critico} mm/día)\n"
                     f"Requerimiento del Cliente:\n{detalle_req}\n\n"
                     f"Coordenadas: Lat {st.session_state.lat}, Lon {st.session_state.lon}\n"
-                    f"Archivo referencial: {nombre_arch}"
+                    f"Archivo referencial: {nombre_arch}\n"
+                    f"Consentimiento Ley N° 29733: Aceptado"
                 )
                 try:
                     requests.post(
@@ -1412,9 +1404,11 @@ def mostrar_modal_cotizacion():
                             "Telefono": tel_cli,
                             "Proyecto": nombre_proyecto,
                             "Rubro": nombre_rubro_activo,
+                            "Umbral_Configurado": f"{umbral_critico} mm/dia",
                             "Requerimiento": detalle_req,
                             "Coordenadas": f"{st.session_state.lat}, {st.session_state.lon}",
                             "Archivo": nombre_arch,
+                            "Consentimiento_Ley_29733": "Aceptado",
                             "_subject": asunto
                         },
                         timeout=5
@@ -1425,7 +1419,7 @@ def mostrar_modal_cotizacion():
                 st.success(f"✅ Solicitud enviada a **{CORREO_CORPORATIVO}**.")
                 st.markdown(f'<a href="{mailto_url}" target="_blank" style="display:inline-block; margin-top:6px; font-size:0.82rem; font-weight:900; text-decoration:underline;">📧 Confirmar copia directa en mi cliente de correo</a>', unsafe_allow_html=True)
             else:
-                st.warning("⚠️ Complete Empresa, Correo y el Detalle de su Requerimiento.")
+                st.warning(T["privacy_warn"])
     else:
         st.markdown("""
         <div style="background: rgba(0, 180, 216, 0.20); border-left: 5px solid #00b4d8; padding: 10px 14px; border-radius: 8px; margin-bottom: 12px;">
@@ -1440,22 +1434,26 @@ def mostrar_modal_cotizacion():
         emp = html.escape(st.text_input("COMPANY / CONTRACTOR OR CLIENT NAME:", max_chars=100).strip())
         correo_cli = html.escape(st.text_input("CORPORATE EMAIL:", max_chars=100).strip())
         tel_cli = html.escape(st.text_input("CONTACT PHONE / WHATSAPP:", max_chars=40).strip())
-        detalle_req = html.escape(st.text_area("PLEASE DETAIL YOUR PROJECT OR TECHNICAL REQUEST (e.g., Remote BIM/VDC consulting, hydrological study, civil works in Peru):", height=105, max_chars=1200).strip())
-        archivo = st.file_uploader("UPLOAD BLUEPRINT, RFP OR DOCUMENT (OPTIONAL):", type=["pdf", "png", "jpg"])
+        detalle_req = html.escape(st.text_area("PLEASE DETAIL YOUR PROJECT OR TECHNICAL REQUEST (e.g., Remote BIM/VDC consulting, hydrological study, civil works in Peru):", height=95, max_chars=1200).strip())
+        archivo = st.file_uploader("UPLOAD BLUEPRINT OR DOCUMENT (OPTIONAL - MAX 15 MB):", type=["pdf", "png", "jpg"])
+        consentimiento_ley = st.checkbox(T["privacy_check"], value=True)
         
         if st.button("🚀 SUBMIT REQUEST TO TECHNICAL OFFICE", type="primary", use_container_width=True):
-            if emp and correo_cli and detalle_req:
-                nombre_arch = html.escape(archivo.name) if archivo else "Not attached"
+            if archivo and archivo.size > 15 * 1024 * 1024:
+                st.warning("⚠️ Attached file exceeds the 15 MB security limit.")
+            elif emp and correo_cli and detalle_req and consentimiento_ley:
+                nombre_arch = html.escape(os.path.basename(archivo.name)) if archivo else "Not attached"
                 asunto = f"PERCET Engineering Request - {emp} ({nombre_proyecto})"
                 cuerpo = (
                     f"Company / Client: {emp}\n"
                     f"Client Email: {correo_cli}\n"
                     f"Phone / WhatsApp: {tel_cli}\n"
                     f"Evaluated Project: {nombre_proyecto}\n"
-                    f"Sector: {nombre_rubro_activo}\n"
+                    f"Sector: {nombre_rubro_activo} (Threshold: {umbral_critico} mm/day)\n"
                     f"Client Request:\n{detalle_req}\n\n"
                     f"Coordinates: Lat {st.session_state.lat}, Lon {st.session_state.lon}\n"
-                    f"Reference File: {nombre_arch}"
+                    f"Reference File: {nombre_arch}\n"
+                    f"Law N° 29733 Consent: Accepted"
                 )
                 try:
                     requests.post(
@@ -1466,9 +1464,11 @@ def mostrar_modal_cotizacion():
                             "Phone": tel_cli,
                             "Project": nombre_proyecto,
                             "Sector": nombre_rubro_activo,
+                            "Threshold": f"{umbral_critico} mm/day",
                             "Request": detalle_req,
                             "Coordinates": f"{st.session_state.lat}, {st.session_state.lon}",
                             "File": nombre_arch,
+                            "Law_29733_Consent": "Accepted",
                             "_subject": asunto
                         },
                         timeout=5
@@ -1479,7 +1479,7 @@ def mostrar_modal_cotizacion():
                 st.success(f"✅ Request submitted to **{CORREO_CORPORATIVO}**.")
                 st.markdown(f'<a href="{mailto_url}" target="_blank" style="display:inline-block; margin-top:6px; font-size:0.82rem; font-weight:900; text-decoration:underline;">📧 Confirm direct copy in email client</a>', unsafe_allow_html=True)
             else:
-                st.warning("⚠️ Please complete Company, Email and Request Detail.")
+                st.warning(T["privacy_warn"])
 
 # 7. ENCABEZADO SUPERIOR
 st.markdown(f"""
@@ -1490,43 +1490,66 @@ st.markdown(f"""
 </div>
 """, unsafe_allow_html=True)
 
-# 8. OBTENCIÓN BLINDADA DE DATOS METEOROLÓGICOS (30 DÍAS)
+# 8. OBTENCIÓN DE DATOS SATELITALES REALES (14 DÍAS: 1–7 PRONÓSTICO Y 8–14 TENDENCIA)
 lat_actual = float(st.session_state.lat)
 lon_actual = float(st.session_state.lon)
 
-df_base_30d, humedad_media, presion_media = obtener_datos_satelitales_30d(lat_actual, lon_actual)
-df_diario = df_base_30d.copy()
+df_base_14d, humedad_media, presion_media, aviso_calidad, err_api = obtener_datos_satelitales_14d(lat_actual, lon_actual)
 
-factor_seguridad = 1.25 if modo_enso else 1.0
-df_diario["Pronóstico"] = (df_diario["Precipitación Base (mm)"] * factor_seguridad).round(1)
+if df_base_14d is None:
+    st.warning(T["api_err_msg"])
+    st.stop()
+
+df_diario = df_base_14d.copy()
+
+# Separación transparente entre Modelo Base y Escenario Conservador ENSO (+25%)
+df_diario["Modelo Base"] = df_diario["Precipitación Base (mm)"].round(1)
+df_diario["Escenario ENSO (+25%)"] = (df_diario["Precipitación Base (mm)"] * 1.25).round(1)
+df_diario["Pronóstico"] = df_diario["Escenario ENSO (+25%)"] if modo_enso else df_diario["Modelo Base"]
+
+horizonte_etiquetas = [
+    ("Pronóstico (D1-D7)" if i < 7 else "Tendencia (D8-D14)") if LANG == "ES"
+    else ("Forecast (D1-D7)" if i < 7 else "Trend (D8-D14)")
+    for i in range(len(df_diario))
+]
+df_diario["Horizonte"] = horizonte_etiquetas
 
 df_mostrar = pd.DataFrame({
     T["col_date"]: df_diario["Fecha"],
+    T["col_horizon"]: df_diario["Horizonte"],
+    T["col_base"]: df_diario["Modelo Base"],
+    T["col_enso"]: df_diario["Escenario ENSO (+25%)"],
+    T["col_fcst"]: df_diario["Pronóstico"],
+    T["col_prob"]: df_diario["Prob. Lluvia (%)"],
     T["col_tmax"]: df_diario["Temp. Máx (°C)"],
     T["col_tmin"]: df_diario["Temp. Mín (°C)"],
     T["col_tavg"]: df_diario["Temp. Prom (°C)"],
     T["col_rad"]: df_diario["Radiación (MJ/m²)"],
     T["col_wind"]: df_diario["Viento Máx (km/h)"],
-    T["col_wdir"]: df_diario["Dirección Viento (°)"],
-    T["col_prob"]: df_diario["Prob. Lluvia (%)"],
-    T["col_base"]: df_diario["Precipitación Base (mm)"],
-    T["col_fcst"]: df_diario["Pronóstico"]
+    T["col_wdir"]: df_diario["Dirección Viento (°)"]
 })
 
 pico_max_dia = float(df_diario["Pronóstico"].max())
 fecha_pico = df_diario.loc[df_diario["Pronóstico"].idxmax(), "Fecha"]
 lluvia_acumulada = round(float(df_diario["Pronóstico"].sum()), 1)
+lluvia_base_acum = round(float(df_diario["Modelo Base"].sum()), 1)
 dias_criticos = int((df_diario["Pronóstico"] > umbral_critico).sum())
 diferencia_umbral = round(pico_max_dia - umbral_critico, 1)
 
-if pico_max_dia >= 15.0 or lluvia_acumulada >= 100.0:
+humedad_txt = f"{humedad_media}" if humedad_media is not None else "S/D"
+presion_txt = f"{presion_media}" if presion_media is not None else "S/D"
+
+if pico_max_dia >= 15.0 or lluvia_acumulada >= 55.0:
     estado_quebrada = f"🔴 {T['q_red']}"
-elif pico_max_dia >= 5.0 or lluvia_acumulada >= 45.0:
+elif pico_max_dia >= 5.0 or lluvia_acumulada >= 22.0:
     estado_quebrada = f"🟡 {T['q_yellow']}"
 else:
     estado_quebrada = f"🟢 {T['q_green']}"
 
-# 9. SECCIÓN 01 (MAPA CON NORTE) Y SECCIÓN 02 (DIAGNÓSTICO)
+# ID único de informe para trazabilidad documental (PG-AAAA-NNNNN)
+codigo_unico_id = f"PG-{datetime.now().strftime('%Y')}-{abs(hash(f'{nombre_proyecto}_{lat_actual}_{lon_actual}_{fecha_pico}')) % 90000 + 10000}"
+
+# 9. SECCIÓN 01 (MAPA CON NORTE) Y SECCIÓN 02 (EVALUACIÓN OPERATIVA)
 col_mapa, col_panel = st.columns([1.22, 1], gap="large")
 
 with col_mapa:
@@ -1551,6 +1574,8 @@ with col_mapa:
         st.rerun()
     
     st.caption(T["map_hint"])
+    if lon_actual < -81.4 or (lat_actual < -14.0 and lon_actual < -76.8):
+        st.caption(f"<span style='color:#f59e0b; font-weight:700;'>{T['sea_warning']}</span>", unsafe_allow_html=True)
     
     m = folium.Map(location=[st.session_state.lat, st.session_state.lon], zoom_start=12, tiles="OpenStreetMap")
     folium.Marker(
@@ -1683,20 +1708,22 @@ with col_panel:
     </div>
     """, unsafe_allow_html=True)
 
+    modo_eval_corto = ("Escenario ENSO +25%" if modo_enso else "Modelo Base") if LANG == "ES" else ("ENSO Scenario +25%" if modo_enso else "Base Model")
+
     if pico_max_dia > umbral_critico:
         badge_cls = "diag-badge-crit"
         badge_txt = f"🚨 {T['alert_crit_badge']}"
-        desc_txt = T["diag_crit_desc"].format(pico=f"{pico_max_dia:.1f}", fecha=fecha_pico, umbral=f"{umbral_critico:.1f}", exceso=f"{diferencia_umbral:.1f}")
+        desc_txt = T["diag_crit_desc"].format(pico=f"{pico_max_dia:.1f}", fecha=fecha_pico, modo_txt=modo_eval_corto, umbral=f"{umbral_critico:.1f}", exceso=f"{diferencia_umbral:.1f}")
         lista_recs = rubro_actual["es_recs_crit"] if LANG == "ES" else rubro_actual["en_recs_crit"]
     elif pico_max_dia >= umbral_critico * 0.7:
         badge_cls = "diag-badge-warn"
         badge_txt = f"⚠️ {T['alert_warn_badge']}"
-        desc_txt = T["diag_warn_desc"].format(pico=f"{pico_max_dia:.1f}", fecha=fecha_pico, umbral=f"{umbral_critico:.1f}")
+        desc_txt = T["diag_warn_desc"].format(pico=f"{pico_max_dia:.1f}", fecha=fecha_pico, modo_txt=modo_eval_corto, umbral=f"{umbral_critico:.1f}")
         lista_recs = rubro_actual["es_recs_warn"] if LANG == "ES" else rubro_actual["en_recs_warn"]
     else:
         badge_cls = "diag-badge-ok"
         badge_txt = f"✅ {T['alert_ok_badge']}"
-        desc_txt = T["diag_ok_desc"].format(pico=f"{pico_max_dia:.1f}", umbral=f"{umbral_critico:.1f}")
+        desc_txt = T["diag_ok_desc"].format(pico=f"{pico_max_dia:.1f}", modo_txt=modo_eval_corto, umbral=f"{umbral_critico:.1f}")
         lista_recs = rubro_actual["es_recs_ok"] if LANG == "ES" else rubro_actual["en_recs_ok"]
 
     st.markdown(f"""
@@ -1709,7 +1736,7 @@ with col_panel:
 
 st.markdown("<br>", unsafe_allow_html=True)
 
-# 10. SECCIÓN 03: INDICADORES CLAVE SIN NUMERACIÓN Y 100% CENTRADOS
+# 10. SECCIÓN 03: INDICADORES CLAVE SIN NUMERACIÓN Y 100% CENTRADOS (14 DÍAS)
 st.markdown(f"""
 <div class="sec-header">
     <p class="sec-header-title">📊 {T['sec3_title']}</p>
@@ -1722,14 +1749,14 @@ with k1:
     <div class="field-kpi-card">
         <div class="field-kpi-title">{T['kpi1_title']}</div>
         <div class="field-kpi-value">{pico_max_dia:.1f} {UNIT_MM}</div>
-        <span class="field-kpi-pill">🌧️ {T['kpi1_sub'].format(acum=lluvia_acumulada)}</span>
+        <span class="field-kpi-pill">🌧️ {T['kpi1_sub'].format(acum=lluvia_acumulada, base_acum=lluvia_base_acum)}</span>
     </div>
     """, unsafe_allow_html=True)
 with k2:
     st.markdown(f"""
     <div class="field-kpi-card">
         <div class="field-kpi-title">{T['kpi2_title']}</div>
-        <div class="field-kpi-value">{humedad_media} %</div>
+        <div class="field-kpi-value">{humedad_txt} %</div>
         <span class="field-kpi-pill">💧 {T['kpi2_sub']}</span>
     </div>
     """, unsafe_allow_html=True)
@@ -1744,7 +1771,7 @@ with k3:
 
 st.markdown("<br>", unsafe_allow_html=True)
 
-# 11. SECCIÓN 04: CRONOGRAMA DE IMPACTO (30 DÍAS)
+# 11. SECCIÓN 04: CRONOGRAMA DE IMPACTO (DÍAS 1–7 PRONÓSTICO Y DÍAS 8–14 TENDENCIA)
 st.markdown(f"""
 <div class="sec-header">
     <p class="sec-header-title">📅 {T['sec4_title']}</p>
@@ -1796,15 +1823,17 @@ colores_barras = [
     "#ef4444" if val > umbral_critico else ("#f59e0b" if val >= umbral_critico * 0.7 else "#1d70b8")
     for val in df_diario["Pronóstico"]
 ]
+# Días 1-7 con opacidad 1.0 (Pronóstico) y Días 8-14 con opacidad 0.68 (Tendencia)
+opacidad_barras = [1.0 if i < 7 else 0.68 for i in range(len(df_diario))]
 
 fig_bar = go.Figure()
 fig_bar.add_trace(go.Bar(
     x=df_diario["Fecha"],
     y=df_diario["Pronóstico"],
-    marker_color=colores_barras,
+    marker=dict(color=colores_barras, opacity=opacidad_barras),
     text=[f"<b>{v:.1f}</b>" if v > 0 else "0" for v in df_diario["Pronóstico"]],
     textposition="outside",
-    textfont=dict(size=10.5),
+    textfont=dict(size=11),
     name=T["card_forecast"]
 ))
 fig_bar.add_trace(go.Scatter(
@@ -1815,6 +1844,13 @@ fig_bar.add_trace(go.Scatter(
     hoverinfo="skip",
     showlegend=False
 ))
+# Línea vertical divisoria entre Pronóstico (D1-D7) y Tendencia (D8-D14)
+fig_bar.add_vline(
+    x=6.5,
+    line_dash="dot",
+    line_color="#64748b",
+    line_width=2
+)
 fig_bar.add_hline(
     y=umbral_critico,
     line_dash="dash",
@@ -1826,19 +1862,20 @@ fig_bar.add_hline(
     annotation_bgcolor="#dc2626",
     annotation_borderpad=6
 )
+y_top_chart = max(umbral_critico * 1.6, pico_max_dia * 1.28, 5.0)
 fig_bar.update_layout(
-    height=370,
+    height=360,
     xaxis_title=f"<b>{T['axis_x']}</b>",
     yaxis_title=f"<b>{T['axis_y']}</b>",
-    xaxis=dict(tickangle=-45, tickfont=dict(size=10.5)),
+    xaxis=dict(tickfont=dict(size=11)),
     yaxis=dict(
-        range=[0, max(umbral_critico * 1.6, pico_max_dia * 1.25, 5.0)],
+        range=[0, y_top_chart],
         gridcolor="rgba(148, 163, 184, 0.22)"
     ),
     paper_bgcolor="rgba(0,0,0,0)",
     plot_bgcolor="rgba(0,0,0,0)",
     font=dict(family="Montserrat", color="#020b1e"),
-    margin=dict(l=20, r=20, t=25, b=35),
+    margin=dict(l=20, r=20, t=25, b=30),
     showlegend=False
 )
 st.plotly_chart(fig_bar, use_container_width=True, config={'displayModeBar': False})
@@ -1871,7 +1908,7 @@ st.markdown(f"""
 
 st.markdown("<br>", unsafe_allow_html=True)
 
-# 12. GENERADOR DE INFOGRAFÍA PDF EN 1 SOLA HOJA A4 CON SELLO DE FECHA Y HORA EN LA PARTE INFERIOR
+# 12. GENERADOR DE INFORME TÉCNICO REFERENCIAL PDF (1 HOJA A4 - 14 DÍAS REALES + FIRMA CIP + ID ÚNICO)
 def disparar_pdf_infografia_una_hoja():
     fechas_js = json.dumps(df_diario["Fecha"].tolist())
     valores_js = json.dumps(df_diario["Pronóstico"].tolist())
@@ -1880,18 +1917,18 @@ def disparar_pdf_infografia_una_hoja():
     
     hora_peru = datetime.utcnow() - timedelta(hours=5)
     fecha_emision = hora_peru.strftime("%d/%m/%Y — %H:%M:%S")
-    sello_inferior_pdf = T["pdf_audit_stamp"].format(fecha_hora=fecha_emision, lat=lat_actual, lon=lon_actual)
+    sello_inferior_pdf = T["pdf_audit_stamp"].format(rep_id=codigo_unico_id, fecha_hora=fecha_emision, lat=lat_actual, lon=lon_actual)
     
     max_chart_pdf = round(max(pico_max_dia * 1.28, umbral_critico * 1.45, 4.0), 1)
     color_dif_pdf = "#dc2626" if diferencia_umbral > 0 else "#16a34a"
 
-    filas_1_15 = "".join([
-        f"<tr><td>{r['Fecha']}</td><td><b>{r['Pronóstico']}</b></td><td>{r['Prob. Lluvia (%)']}%</td><td>{r['Temp. Máx (°C)']}°</td><td>{r['Temp. Mín (°C)']}°</td><td>{r['Viento Máx (km/h)']}</td></tr>"
-        for _, r in df_diario.iloc[:15].iterrows()
+    filas_1_7 = "".join([
+        f"<tr><td>{r['Fecha']}</td><td>{r['Modelo Base']}</td><td><b>{r['Pronóstico']}</b></td><td>{r['Prob. Lluvia (%)']}%</td><td>{r['Temp. Máx (°C)']}°</td><td>{r['Viento Máx (km/h)']}</td></tr>"
+        for _, r in df_diario.iloc[:7].iterrows()
     ])
-    filas_16_30 = "".join([
-        f"<tr><td>{r['Fecha']}</td><td><b>{r['Pronóstico']}</b></td><td>{r['Prob. Lluvia (%)']}%</td><td>{r['Temp. Máx (°C)']}°</td><td>{r['Temp. Mín (°C)']}°</td><td>{r['Viento Máx (km/h)']}</td></tr>"
-        for _, r in df_diario.iloc[15:30].iterrows()
+    filas_8_14 = "".join([
+        f"<tr><td>{r['Fecha']}</td><td>{r['Modelo Base']}</td><td><b>{r['Pronóstico']}</b></td><td>{r['Prob. Lluvia (%)']}%</td><td>{r['Temp. Máx (°C)']}°</td><td>{r['Viento Máx (km/h)']}</td></tr>"
+        for _, r in df_diario.iloc[7:14].iterrows()
     ])
 
     html_infografia = f"""
@@ -1903,47 +1940,50 @@ def disparar_pdf_infografia_una_hoja():
         var colores = {colores_js};
         var maxVal = {max_chart_pdf};
         
-        var chartTop = 20;
-        var chartBottom = 142;
+        var chartTop = 24;
+        var chartBottom = 148;
         var chartHeight = chartBottom - chartTop;
         var barrasSvg = "";
 
         for (var i = 0; i < fechas.length; i++) {{
-            var x = 28 + i * 23.2;
+            var x = 35 + i * 48;
             var h = (valores[i] / maxVal) * chartHeight;
             var y = chartBottom - h;
-            barrasSvg += '<rect x="' + x + '" y="' + y + '" width="15.5" height="' + h + '" fill="' + colores[i] + '" rx="2"/>';
-            barrasSvg += '<text x="' + (x + 7.75) + '" y="' + (y - 4) + '" font-size="7.2" font-weight="800" text-anchor="middle" fill="#020b1e">' + valores[i] + '</text>';
-            barrasSvg += '<text x="' + (x + 7.75) + '" y="156" font-size="6.8" font-weight="700" text-anchor="middle" fill="#334155" transform="rotate(-35 ' + (x + 7.75) + ',156)">' + fechas[i] + '</text>';
+            var op = (i < 7) ? "1.0" : "0.68";
+            barrasSvg += '<rect x="' + x + '" y="' + y + '" width="30" height="' + h + '" fill="' + colores[i] + '" fill-opacity="' + op + '" rx="3"/>';
+            barrasSvg += '<text x="' + (x + 15) + '" y="' + (y - 5) + '" font-size="9.5" font-weight="800" text-anchor="middle" fill="#020b1e">' + valores[i] + '</text>';
+            barrasSvg += '<text x="' + (x + 15) + '" y="164" font-size="8.8" font-weight="700" text-anchor="middle" fill="#334155">' + fechas[i] + '</text>';
         }}
         var yUmbral = chartBottom - ({umbral_critico} / maxVal) * chartHeight;
+        var xDivisor = 35 + 6 * 48 + 39;
 
         var contenido = `
         <!DOCTYPE html>
         <html>
         <head>
-            <title>PERCET_GeoRisk_30D_{nombre_proyecto}</title>
+            <title>{codigo_unico_id}_{nombre_proyecto}</title>
             <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800;900&display=swap" rel="stylesheet">
             <style>
-                @page {{ size: A4 portrait; margin: 6mm; }}
+                @page {{ size: A4 portrait; margin: 6.5mm; }}
                 * {{ box-sizing: border-box; font-family: 'Montserrat', sans-serif; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }}
                 body {{ margin: 0; padding: 0; background: #ffffff; color: #020b1e; }}
-                .page {{ width: 100%; border: 2px solid #042454; border-radius: 10px; padding: 9px 12px; }}
-                .header {{ display: flex; justify-content: space-between; align-items: center; background: linear-gradient(135deg, #020b1e 0%, #042454 100%); color: white; padding: 8px 14px; border-radius: 8px; border-bottom: 4px solid #00b4d8; margin-bottom: 6px; }}
-                .grid-3 {{ display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 6px; }}
-                .card {{ border: 1px solid #cbd5e1; border-top: 3.5px solid #042454; border-radius: 7px; padding: 5px 9px; background: #f8fafc; text-align: center; }}
+                .page {{ width: 100%; border: 2px solid #042454; border-radius: 10px; padding: 10px 12px; }}
+                .header {{ display: flex; justify-content: space-between; align-items: center; background: linear-gradient(135deg, #020b1e 0%, #042454 100%); color: white; padding: 9px 14px; border-radius: 8px; border-bottom: 4px solid #00b4d8; margin-bottom: 7px; }}
+                .grid-3 {{ display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 7px; }}
+                .card {{ border: 1px solid #cbd5e1; border-top: 3.5px solid #042454; border-radius: 7px; padding: 6px 9px; background: #f8fafc; text-align: center; }}
                 .card-title {{ font-size: 7.8px; font-weight: 800; color: #475569; text-transform: uppercase; text-align: center; }}
                 .card-val {{ font-size: 14.5px; font-weight: 900; color: #020b1e; margin: 2px 0; }}
-                .sec-title {{ font-size: 9.2px; font-weight: 800; color: #042454; text-transform: uppercase; border-bottom: 1.5px solid #e2e8f0; padding-bottom: 2px; margin: 5px 0 4px 0; }}
-                .chart-box {{ border: 1px solid #cbd5e1; border-radius: 7px; padding: 5px 6px 2px 6px; text-align: center; background: #ffffff; margin-bottom: 6px; }}
-                .alert-box {{ background: {bg_banner_pdf}; border: 1.5px solid {border_banner_pdf}; border-radius: 8px; padding: 7px 12px; display: grid; grid-template-columns: 1.15fr 1.25fr; gap: 10px; margin-bottom: 6px; }}
-                .tables-2col {{ display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 5px; }}
-                table {{ width: 100%; border-collapse: collapse; font-size: 7px; }}
-                th {{ background: #042454; color: white; padding: 2.8px 2px; text-transform: uppercase; font-weight: 700; font-size: 6.3px; }}
-                td {{ border-bottom: 1px solid #e2e8f0; padding: 1.9px 2px; text-align: center; font-weight: 600; }}
-                .sub-tbl-hdr {{ background: #e0f2fe; color: #0369a1; font-size: 7.3px; font-weight: 800; text-align: center; padding: 2px; border-radius: 4px 4px 0 0; border: 1px solid #bae6fd; border-bottom: none; }}
+                .sec-title {{ font-size: 9.2px; font-weight: 800; color: #042454; text-transform: uppercase; border-bottom: 1.5px solid #e2e8f0; padding-bottom: 2px; margin: 6px 0 5px 0; }}
+                .chart-box {{ border: 1px solid #cbd5e1; border-radius: 7px; padding: 6px 6px 2px 6px; text-align: center; background: #ffffff; margin-bottom: 7px; }}
+                .alert-box {{ background: {bg_banner_pdf}; border: 1.5px solid {border_banner_pdf}; border-radius: 8px; padding: 8px 12px; display: grid; grid-template-columns: 1.15fr 1.25fr; gap: 10px; margin-bottom: 7px; }}
+                .tables-2col {{ display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 6px; }}
+                table {{ width: 100%; border-collapse: collapse; font-size: 7.5px; }}
+                th {{ background: #042454; color: white; padding: 3.5px 2px; text-transform: uppercase; font-weight: 700; font-size: 6.5px; }}
+                td {{ border-bottom: 1px solid #e2e8f0; padding: 2.8px 2px; text-align: center; font-weight: 600; }}
+                .sub-tbl-hdr {{ background: #e0f2fe; color: #0369a1; font-size: 7.4px; font-weight: 800; text-align: center; padding: 3px; border-radius: 4px 4px 0 0; border: 1px solid #bae6fd; border-bottom: none; }}
+                .sig-bar {{ background: #ffffff; color: #020b1e; font-size: 7.5px; padding: 7px 10px; border: 1px dashed #64748b; border-radius: 5px; margin-bottom: 6px; text-align: center; }}
                 .footer {{ font-size: 6.9px; color: #64748b; background: #f1f5f9; padding: 5px 9px; border-radius: 5px 5px 0 0; line-height: 1.25; border: 1px solid #cbd5e1; border-bottom: none; }}
-                .audit-bar {{ background: #020b1e; color: #ffffff; font-size: 7.2px; padding: 5px 10px; border-radius: 0 0 5px 5px; text-align: center; letter-spacing: 0.3px; border-top: 2px solid #00b4d8; }}
+                .audit-bar {{ background: #020b1e; color: #ffffff; font-size: 7.1px; padding: 5px 10px; border-radius: 0 0 5px 5px; text-align: center; letter-spacing: 0.3px; border-top: 2px solid #00b4d8; }}
             </style>
         </head>
         <body>
@@ -1952,12 +1992,12 @@ def disparar_pdf_infografia_una_hoja():
                     <div style="display:flex; align-items:center; gap:12px;">
                         {logo_img_tag}
                         <div>
-                            <div style="font-size:13.5px; font-weight:900; letter-spacing:0.5px;">PERCET GEORISK™ | EXECUTIVE TECHNICAL REPORT (30 DAYS)</div>
+                            <div style="font-size:12.5px; font-weight:900; letter-spacing:0.4px;">{T['pdf_report_main_title']}</div>
                             <div style="font-size:9px; color:#38bdf8; font-weight:700; margin-top:2px;">
-                                {T['header_client']} {nombre_proyecto} &nbsp;|&nbsp; {nombre_rubro_activo}
+                                {T['header_client']} {nombre_proyecto} &nbsp;|&nbsp; {nombre_rubro_activo} &nbsp;|&nbsp; ID: {codigo_unico_id}
                             </div>
                             <div style="font-size:8px; color:#cbd5e1; margin-top:2px;">
-                                📍 Lat: {lat_actual}, Lon: {lon_actual} &nbsp;|&nbsp; 🕒 {fecha_emision} hrs (UTC-5)
+                                📍 Lat: {lat_actual}, Lon: {lon_actual} &nbsp;|&nbsp; ⚙️ {modo_eval_corto} &nbsp;|&nbsp; 🕒 {fecha_emision} hrs (UTC-5)
                             </div>
                         </div>
                     </div>
@@ -1968,25 +2008,28 @@ def disparar_pdf_infografia_una_hoja():
                     <div class="card">
                         <div class="card-title">{T['pill_peak']} ({fecha_pico})</div>
                         <div class="card-val" style="color:#dc2626;">{pico_max_dia:.1f} {UNIT_MM}</div>
-                        <div style="font-size:7.8px; font-weight:700; color:#475569;">{T['kpi1_sub'].format(acum=lluvia_acumulada)}</div>
+                        <div style="font-size:7.6px; font-weight:700; color:#475569;">{T['kpi1_sub'].format(acum=lluvia_acumulada, base_acum=lluvia_base_acum)}</div>
                     </div>
                     <div class="card">
                         <div class="card-title">{T['pill_thresh']} / {etiqueta_dif}</div>
                         <div class="card-val">{umbral_critico:.1f} {UNIT_MM} <span style="font-size:11px; color:{color_dif_pdf};">({signo_dif})</span></div>
-                        <div style="font-size:7.8px; font-weight:700; color:#475569;">{T['pill_days']}: {dias_criticos} {T['day_unit']}</div>
+                        <div style="font-size:7.6px; font-weight:700; color:#475569;">{T['pill_days']}: {dias_criticos} {T['day_unit']}</div>
                     </div>
                     <div class="card">
                         <div class="card-title">{T['kpi2_title']} & {T['pdf_quebradas']}</div>
-                        <div class="card-val">{humedad_media}% HR</div>
-                        <div style="font-size:7.8px; font-weight:700; color:#020b1e;">{estado_quebrada}</div>
+                        <div class="card-val">{humedad_txt}% HR</div>
+                        <div style="font-size:7.6px; font-weight:700; color:#020b1e;">{estado_quebrada}</div>
                     </div>
                 </div>
 
                 <div class="sec-title">{T['pdf_sec2_title']}</div>
                 <div class="chart-box">
-                    <svg viewBox="0 0 740 168" width="100%" height="150">
-                        <line x1="22" y1="142" x2="725" y2="142" stroke="#94a3b8" stroke-width="1.5"/>
+                    <svg viewBox="0 0 740 174" width="100%" height="156">
+                        <line x1="22" y1="148" x2="725" y2="148" stroke="#94a3b8" stroke-width="1.5"/>
                         ` + barrasSvg + `
+                        <line x1="` + xDivisor + `" y1="10" x2="` + xDivisor + `" y2="148" stroke="#64748b" stroke-width="1.6" stroke-dasharray="4,4"/>
+                        <text x="` + (xDivisor - 8) + `" y="14" font-size="8" font-weight="800" fill="#042454" text-anchor="end">{T['chart_div_left']}</text>
+                        <text x="` + (xDivisor + 8) + `" y="14" font-size="8" font-weight="800" fill="#475569" text-anchor="start">{T['chart_div_right']}</text>
                         <line x1="22" y1="` + yUmbral + `" x2="725" y2="` + yUmbral + `" stroke="#dc2626" stroke-width="2" stroke-dasharray="6,4"/>
                         <rect x="588" y="2" width="132" height="15" fill="#dc2626" rx="3"/>
                         <text x="654" y="12" font-size="8.5" font-weight="800" fill="#ffffff" text-anchor="middle">{T['thresh_tag'].format(umbral=f'{umbral_critico:.1f}')}</text>
@@ -2009,43 +2052,46 @@ def disparar_pdf_infografia_una_hoja():
                 <div class="sec-title">{T['pdf_sec4_title']}</div>
                 <div class="tables-2col">
                     <div>
-                        <div class="sub-tbl-hdr">{T['pdf_days_1_15']}</div>
+                        <div class="sub-tbl-hdr">{T['pdf_days_1_7']}</div>
                         <table>
                             <thead>
                                 <tr>
                                     <th>{T['pdf_col_date']}</th>
+                                    <th>{T['pdf_col_base']}</th>
                                     <th>{T['pdf_col_fcst']}</th>
                                     <th>{T['pdf_col_prob']}</th>
                                     <th>{T['pdf_col_tmax']}</th>
-                                    <th>{T['pdf_col_tmin']}</th>
                                     <th>{T['pdf_col_wind']}</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                {filas_1_15}
+                                {filas_1_7}
                             </tbody>
                         </table>
                     </div>
                     <div>
-                        <div class="sub-tbl-hdr">{T['pdf_days_16_30']}</div>
+                        <div class="sub-tbl-hdr">{T['pdf_days_8_14']}</div>
                         <table>
                             <thead>
                                 <tr>
                                     <th>{T['pdf_col_date']}</th>
+                                    <th>{T['pdf_col_base']}</th>
                                     <th>{T['pdf_col_fcst']}</th>
                                     <th>{T['pdf_col_prob']}</th>
                                     <th>{T['pdf_col_tmax']}</th>
-                                    <th>{T['pdf_col_tmin']}</th>
                                     <th>{T['pdf_col_wind']}</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                {filas_16_30}
+                                {filas_8_14}
                             </tbody>
                         </table>
                     </div>
                 </div>
 
+                <div class="sig-bar">
+                    {T['pdf_sig_box']}
+                </div>
                 <div class="footer">
                     {T['disclaimer']}
                 </div>
@@ -2068,14 +2114,20 @@ def disparar_pdf_infografia_una_hoja():
     """
     components.html(html_infografia, height=0, width=0)
 
-# Botones de Exportación (CSV 30 días y PDF 1 Hoja)
+# Botones de Exportación (CSV 14 días con cabecera de metadatos y PDF 1 Hoja)
 col_dl1, col_dl2 = st.columns(2)
-csv_data = df_mostrar.to_csv(index=False).encode('utf-8-sig')
+cabecera_csv = (
+    f"# PERCET GeoRisk - Informe Tecnico Referencial | ID: {codigo_unico_id}\n"
+    f"# Proyecto: {nombre_proyecto} | Rubro: {nombre_rubro_activo} | Umbral: {umbral_critico} {UNIT_MM}\n"
+    f"# Coordenada: Lat {lat_actual}, Lon {lon_actual} | Fuente: Weather data by Open-Meteo.com (CC BY 4.0)\n"
+)
+csv_data = (cabecera_csv + df_mostrar.to_csv(index=False)).encode('utf-8-sig')
+
 with col_dl1:
     st.download_button(
         label=T["dl_csv"],
         data=csv_data,
-        file_name=f"PERCET_GeoRisk_30D_{nombre_proyecto}_{lat_actual}_{lon_actual}.csv",
+        file_name=f"{codigo_unico_id}_PERCET_GeoRisk_14D_{nombre_proyecto}.csv",
         mime="text/csv",
         use_container_width=True
     )
@@ -2083,11 +2135,11 @@ with col_dl2:
     if st.button(T["dl_pdf"], use_container_width=True):
         disparar_pdf_infografia_una_hoja()
 
-# 13. DESPLEGABLE TÉCNICO (30 DÍAS) TRADUCIDO SEGÚN EL IDIOMA
+# 13. DESPLEGABLE TÉCNICO (14 DÍAS REALES + METODOLOGÍA Y ORIGEN DEL MODELO ML)
 with st.expander(T["exp_title"]):
     st.markdown(f"""
 {T['ml_bullet_1']}
-{T['ml_bullet_2'].format(presion=presion_media)}
+{T['ml_bullet_2'].format(presion=presion_txt)}
     """)
     st.dataframe(df_mostrar, use_container_width=True, hide_index=True)
 
@@ -2097,12 +2149,12 @@ st.markdown(f'<div class="legal-disclaimer">{T["disclaimer"]}</div>', unsafe_all
 if LANG == "ES":
     mensaje_wa = (
         f"👋 Hola PERCET, solicito cotización / asesoría de ingeniería para el proyecto "
-        f"*{nombre_proyecto}* 📍[{lat_actual}, {lon_actual}] (🏗️ {nombre_rubro_activo})."
+        f"*{nombre_proyecto}* 📍[{lat_actual}, {lon_actual}] (🏗️ {nombre_rubro_activo} | Umbral: {umbral_critico} mm/día)."
     )
 else:
     mensaje_wa = (
         f"👋 Hello PERCET, I'd like to request engineering consulting for the project "
-        f"*{nombre_proyecto}* 📍[{lat_actual}, {lon_actual}] (🏗️ {nombre_rubro_activo})."
+        f"*{nombre_proyecto}* 📍[{lat_actual}, {lon_actual}] (🏗️ {nombre_rubro_activo} | Threshold: {umbral_critico} mm/day)."
     )
 
 url_whatsapp = f"https://wa.me/{WHATSAPP_NUMERO}?text={urllib.parse.quote(mensaje_wa)}"
