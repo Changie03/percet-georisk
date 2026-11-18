@@ -60,7 +60,7 @@ TEXTOS = {
         "header_rubro": "RUBRO:",
         "sec1_title": "01. LOCALIZACIÓN TÉCNICA DE LA OBRA",
         "lat_label": "LATITUD (DECIMAL)",
-        "lon_label": "LONGITUD (DECIMAL)",
+        "lon_label": "LONGITUDE (DECIMAL)",
         "locate_btn": "📍 LOCALIZAR OBRA",
         "map_hint": "Ingrese coordenadas de planos/GPS o haga clic directamente sobre cualquier punto del mapa.",
         "sea_warning": "⚠️ Coordenada ubicada fuera de continente o sobre el océano. Verifique el punto GPS de la obra.",
@@ -69,7 +69,7 @@ TEXTOS = {
         "pdf_sec1_title": "01. RESUMEN EJECUTIVO DE INDICADORES & ESCENARIO EVALUADO (14 DÍAS)",
         "pdf_sec2_title": "02. CRONOGRAMA PLUVIAL: PRONÓSTICO (DÍAS 1–7) Y TENDENCIA (DÍAS 8–14) VS. UMBRAL",
         "pdf_sec3_title": "03. EVALUACIÓN TÉCNICA REFERENCIAL & ACCIONES PREVENTIVAS SUGERIDAS",
-        "pdf_sec4_title": "04. MATRIZ METEOROLÓGICA DE DATOS SIN RELLENO (14 DÍAS)",
+        "pdf_sec4_title": "04. RESUMEN DE MATRIZ METEOROLÓGICA COMPLETA (14 DÍAS)",
         "active_badge": "MONITOREO ACTIVO",
         "peak_banner": "PICO MÁXIMO · {fecha} · UMBRAL {umbral} mm/día",
         "card_forecast": "VALOR EVALUADO",
@@ -172,7 +172,7 @@ TEXTOS = {
         "pdf_sec1_title": "01. EXECUTIVE KPI SUMMARY & EVALUATED SCENARIO (14 DAYS)",
         "pdf_sec2_title": "02. RAINFALL SCHEDULE: FORECAST (DAYS 1–7) & TREND (DAYS 8–14) VS. THRESHOLD",
         "pdf_sec3_title": "03. REFERENTIAL TECHNICAL ASSESSMENT & SUGGESTED PREVENTIVE ACTIONS",
-        "pdf_sec4_title": "04. UNALTERED METEOROLOGICAL DATA MATRIX (14 DAYS)",
+        "pdf_sec4_title": "04. METEOROLOGICAL DATA MATRIX SUMMARY (14 DAYS)",
         "active_badge": "ACTIVE MONITORING",
         "peak_banner": "MAXIMUM PEAK · {fecha} · THRESHOLD {umbral} mm/day",
         "card_forecast": "EVALUATED VALUE",
@@ -1879,7 +1879,7 @@ checks_cols_html = "".join([
     f"<div class='rec-check-card'><span style='color:#ef4444; font-weight:900;'>✔</span> {r}</div>"
     for r in lista_recs
 ])
-checks_pdf_html = "".join([f"<div style='margin-bottom:3px; font-weight:600; color:#1e293b;'><span style='color:#dc2626;'>✔</span> {r}</div>" for r in lista_recs])
+checks_pdf_html = "".join([f"<div style='margin-bottom:4px; font-weight:600; color:#1e293b;'><span style='color:#dc2626;'>✔</span> {r}</div>" for r in lista_recs])
 
 bg_banner_pdf = "#fff1f2" if pico_max_dia > umbral_critico else ("#fffbeb" if pico_max_dia >= umbral_critico * 0.7 else "#f0fdf4")
 border_banner_pdf = "#fecdd3" if pico_max_dia > umbral_critico else ("#fde68a" if pico_max_dia >= umbral_critico * 0.7 else "#bbf7d0")
@@ -1903,12 +1903,12 @@ st.markdown(f"""
 
 st.markdown("<br>", unsafe_allow_html=True)
 
-# 12. GENERADOR DE INFORME TÉCNICO REFERENCIAL PDF (1 HOJA A4 - 14 DÍAS REALES + FIRMA CIP + ID ÚNICO)
+# 12. GENERADOR DE INFORME TÉCNICO REFERENCIAL PDF (HOJA A4 VERTICAL 100% COMPLETA SIN ABOUT:BLANK)
 def disparar_pdf_infografia_una_hoja():
     fechas_js = json.dumps(df_diario["Fecha"].tolist())
     valores_js = json.dumps(df_diario["Pronóstico"].tolist())
     colores_js = json.dumps(colores_barras)
-    logo_img_tag = f'<img src="data:image/png;base64,{LOGO_B64}" style="height:52px; border-radius:8px;">' if LOGO_B64 else "<b>PERCET</b>"
+    logo_img_tag = f'<img src="data:image/png;base64,{LOGO_B64}" style="height:58px; border-radius:8px;">' if LOGO_B64 else "<b>PERCET</b>"
     
     hora_peru = datetime.utcnow() - timedelta(hours=5)
     fecha_emision = hora_peru.strftime("%d/%m/%Y — %H:%M:%S")
@@ -1929,14 +1929,14 @@ def disparar_pdf_infografia_una_hoja():
     html_infografia = f"""
     <script>
     function abrirInfografiaPDF() {{
-        var win = window.open("", "_blank", "width=1100,height=850");
+        var win = window.open("", "_blank", "width=1100,height=900");
         var fechas = {fechas_js};
         var valores = {valores_js};
         var colores = {colores_js};
         var maxVal = {max_chart_pdf};
         
-        var chartTop = 24;
-        var chartBottom = 148;
+        var chartTop = 28;
+        var chartBottom = 182;
         var chartHeight = chartBottom - chartTop;
         var barrasSvg = "";
 
@@ -1945,9 +1945,9 @@ def disparar_pdf_infografia_una_hoja():
             var h = (valores[i] / maxVal) * chartHeight;
             var y = chartBottom - h;
             var op = (i < 7) ? "1.0" : "0.68";
-            barrasSvg += '<rect x="' + x + '" y="' + y + '" width="30" height="' + h + '" fill="' + colores[i] + '" fill-opacity="' + op + '" rx="3"/>';
-            barrasSvg += '<text x="' + (x + 15) + '" y="' + (y - 5) + '" font-size="9.5" font-weight="800" text-anchor="middle" fill="#020b1e">' + valores[i] + '</text>';
-            barrasSvg += '<text x="' + (x + 15) + '" y="164" font-size="8.8" font-weight="700" text-anchor="middle" fill="#334155">' + fechas[i] + '</text>';
+            barrasSvg += '<rect x="' + x + '" y="' + y + '" width="30" height="' + h + '" fill="' + colores[i] + '" fill-opacity="' + op + '" rx="3.5"/>';
+            barrasSvg += '<text x="' + (x + 15) + '" y="' + (y - 6) + '" font-size="10" font-weight="800" text-anchor="middle" fill="#020b1e">' + valores[i] + '</text>';
+            barrasSvg += '<text x="' + (x + 15) + '" y="200" font-size="9.2" font-weight="700" text-anchor="middle" fill="#334155">' + fechas[i] + '</text>';
         }}
         var yUmbral = chartBottom - ({umbral_critico} / maxVal) * chartHeight;
         var xDivisor = 35 + 6 * 48 + 39;
@@ -1959,139 +1959,153 @@ def disparar_pdf_infografia_una_hoja():
             <title>{codigo_unico_id}_{nombre_proyecto}</title>
             <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800;900&display=swap" rel="stylesheet">
             <style>
-                @page {{ size: A4 portrait; margin: 6.5mm; }}
+                @page {{ size: A4 portrait; margin: 0mm; }}
                 * {{ box-sizing: border-box; font-family: 'Montserrat', sans-serif; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }}
-                body {{ margin: 0; padding: 0; background: #ffffff; color: #020b1e; }}
-                .page {{ width: 100%; border: 2px solid #042454; border-radius: 10px; padding: 10px 12px; }}
-                .header {{ display: flex; justify-content: space-between; align-items: center; background: linear-gradient(135deg, #020b1e 0%, #042454 100%); color: white; padding: 9px 14px; border-radius: 8px; border-bottom: 4px solid #00b4d8; margin-bottom: 7px; }}
-                .grid-3 {{ display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 7px; }}
-                .card {{ border: 1px solid #cbd5e1; border-top: 3.5px solid #042454; border-radius: 7px; padding: 6px 9px; background: #f8fafc; text-align: center; }}
-                .card-title {{ font-size: 7.8px; font-weight: 800; color: #475569; text-transform: uppercase; text-align: center; }}
-                .card-val {{ font-size: 14.5px; font-weight: 900; color: #020b1e; margin: 2px 0; }}
-                .sec-title {{ font-size: 9.2px; font-weight: 800; color: #042454; text-transform: uppercase; border-bottom: 1.5px solid #e2e8f0; padding-bottom: 2px; margin: 6px 0 5px 0; }}
-                .chart-box {{ border: 1px solid #cbd5e1; border-radius: 7px; padding: 6px 6px 2px 6px; text-align: center; background: #ffffff; margin-bottom: 7px; }}
-                .alert-box {{ background: {bg_banner_pdf}; border: 1.5px solid {border_banner_pdf}; border-radius: 8px; padding: 8px 12px; display: grid; grid-template-columns: 1.15fr 1.25fr; gap: 10px; margin-bottom: 7px; }}
-                .tables-2col {{ display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 6px; }}
-                table {{ width: 100%; border-collapse: collapse; font-size: 7.5px; }}
-                th {{ background: #042454; color: white; padding: 3.5px 2px; text-transform: uppercase; font-weight: 700; font-size: 6.5px; }}
-                td {{ border-bottom: 1px solid #e2e8f0; padding: 2.8px 2px; text-align: center; font-weight: 600; }}
-                .sub-tbl-hdr {{ background: #e0f2fe; color: #0369a1; font-size: 7.4px; font-weight: 800; text-align: center; padding: 3px; border-radius: 4px 4px 0 0; border: 1px solid #bae6fd; border-bottom: none; }}
-                .sig-bar {{ background: #ffffff; color: #020b1e; font-size: 7.5px; padding: 7px 10px; border: 1px dashed #64748b; border-radius: 5px; margin-bottom: 6px; text-align: center; }}
-                .footer {{ font-size: 6.9px; color: #64748b; background: #f1f5f9; padding: 5px 9px; border-radius: 5px 5px 0 0; line-height: 1.25; border: 1px solid #cbd5e1; border-bottom: none; }}
-                .audit-bar {{ background: #020b1e; color: #ffffff; font-size: 7.1px; padding: 5px 10px; border-radius: 0 0 5px 5px; text-align: center; letter-spacing: 0.3px; border-top: 2px solid #00b4d8; }}
+                html, body {{ width: 210mm; height: 297mm; margin: 0; padding: 8mm 9mm; background: #ffffff; color: #020b1e; }}
+                .page {{ width: 100%; height: 281mm; border: 2.2px solid #042454; border-radius: 12px; padding: 14px 16px; display: flex; flex-direction: column; justify-content: space-between; }}
+                .header {{ display: flex; justify-content: space-between; align-items: center; background: linear-gradient(135deg, #020b1e 0%, #042454 100%); color: white; padding: 12px 18px; border-radius: 9px; border-bottom: 4px solid #00b4d8; }}
+                .sec-block {{ display: flex; flex-direction: column; }}
+                .grid-3 {{ display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }}
+                .card {{ border: 1px solid #cbd5e1; border-top: 4px solid #042454; border-radius: 8px; padding: 10px 12px; background: #f8fafc; text-align: center; }}
+                .card-title {{ font-size: 8.5px; font-weight: 800; color: #475569; text-transform: uppercase; text-align: center; }}
+                .card-val {{ font-size: 17px; font-weight: 900; color: #020b1e; margin: 4px 0; }}
+                .sec-title {{ font-size: 10px; font-weight: 800; color: #042454; text-transform: uppercase; border-bottom: 1.8px solid #e2e8f0; padding-bottom: 3px; margin-bottom: 7px; letter-spacing: 0.3px; }}
+                .chart-box {{ border: 1px solid #cbd5e1; border-radius: 8px; padding: 10px 10px 6px 10px; text-align: center; background: #ffffff; }}
+                .alert-box {{ background: {bg_banner_pdf}; border: 1.5px solid {border_banner_pdf}; border-radius: 9px; padding: 12px 16px; display: grid; grid-template-columns: 1.12fr 1.28fr; gap: 14px; align-items: center; }}
+                .tables-2col {{ display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }}
+                table {{ width: 100%; border-collapse: collapse; font-size: 8.4px; }}
+                th {{ background: #042454; color: white; padding: 5.5px 3px; text-transform: uppercase; font-weight: 700; font-size: 7.2px; }}
+                td {{ border-bottom: 1px solid #cbd5e1; padding: 5.2px 3px; text-align: center; font-weight: 600; }}
+                .sub-tbl-hdr {{ background: #e0f2fe; color: #0369a1; font-size: 8.2px; font-weight: 800; text-align: center; padding: 4.5px; border-radius: 5px 5px 0 0; border: 1px solid #bae6fd; border-bottom: none; }}
+                .bottom-group {{ display: flex; flex-direction: column; gap: 6px; }}
+                .sig-bar {{ background: #f8fafc; color: #020b1e; font-size: 8.2px; padding: 9px 12px; border: 1.2px dashed #64748b; border-radius: 6px; text-align: center; }}
+                .footer {{ font-size: 7.4px; color: #475569; background: #f1f5f9; padding: 7px 11px; border-radius: 6px 6px 0 0; line-height: 1.35; border: 1px solid #cbd5e1; border-bottom: none; }}
+                .audit-bar {{ background: #020b1e; color: #ffffff; font-size: 7.6px; padding: 6.5px 12px; border-radius: 0 0 6px 6px; text-align: center; letter-spacing: 0.3px; border-top: 2.5px solid #00b4d8; }}
             </style>
         </head>
         <body>
             <div class="page">
                 <div class="header">
-                    <div style="display:flex; align-items:center; gap:12px;">
+                    <div style="display:flex; align-items:center; gap:14px;">
                         {logo_img_tag}
                         <div>
-                            <div style="font-size:12.5px; font-weight:900; letter-spacing:0.4px;">{T['pdf_report_main_title']}</div>
-                            <div style="font-size:9px; color:#38bdf8; font-weight:700; margin-top:2px;">
+                            <div style="font-size:13.2px; font-weight:900; letter-spacing:0.4px;">{T['pdf_report_main_title']}</div>
+                            <div style="font-size:9.5px; color:#38bdf8; font-weight:700; margin-top:3px;">
                                 {T['header_client']} {nombre_proyecto} &nbsp;|&nbsp; {nombre_rubro_activo} &nbsp;|&nbsp; ID: {codigo_unico_id}
                             </div>
-                            <div style="font-size:8px; color:#cbd5e1; margin-top:2px;">
+                            <div style="font-size:8.4px; color:#cbd5e1; margin-top:3px;">
                                 📍 Lat: {lat_actual}, Lon: {lon_actual} &nbsp;|&nbsp; ⚙️ {modo_eval_corto} &nbsp;|&nbsp; 🕒 {fecha_emision} hrs (UTC-5)
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <div class="sec-title">{T['pdf_sec1_title']}</div>
-                <div class="grid-3">
-                    <div class="card">
-                        <div class="card-title">{T['pill_peak']} ({fecha_pico})</div>
-                        <div class="card-val" style="color:#dc2626;">{pico_max_dia:.1f} {UNIT_MM}</div>
-                        <div style="font-size:7.6px; font-weight:700; color:#475569;">{T['kpi1_sub'].format(acum=lluvia_acumulada, base_acum=lluvia_base_acum)}</div>
-                    </div>
-                    <div class="card">
-                        <div class="card-title">{T['pill_thresh']} / {etiqueta_dif}</div>
-                        <div class="card-val">{umbral_critico:.1f} {UNIT_MM} <span style="font-size:11px; color:{color_dif_pdf};">({signo_dif})</span></div>
-                        <div style="font-size:7.6px; font-weight:700; color:#475569;">{T['pill_days']}: {dias_criticos} {T['day_unit']}</div>
-                    </div>
-                    <div class="card">
-                        <div class="card-title">{T['kpi2_title']} & {T['pdf_quebradas']}</div>
-                        <div class="card-val">{humedad_txt}% HR</div>
-                        <div style="font-size:7.6px; font-weight:700; color:#020b1e;">{estado_quebrada}</div>
-                    </div>
-                </div>
-
-                <div class="sec-title">{T['pdf_sec2_title']}</div>
-                <div class="chart-box">
-                    <svg viewBox="0 0 740 174" width="100%" height="156">
-                        <line x1="22" y1="148" x2="725" y2="148" stroke="#94a3b8" stroke-width="1.5"/>
-                        ` + barrasSvg + `
-                        <line x1="` + xDivisor + `" y1="10" x2="` + xDivisor + `" y2="148" stroke="#64748b" stroke-width="1.6" stroke-dasharray="4,4"/>
-                        <text x="` + (xDivisor - 8) + `" y="14" font-size="8" font-weight="800" fill="#042454" text-anchor="end">{T['chart_div_left']}</text>
-                        <text x="` + (xDivisor + 8) + `" y="14" font-size="8" font-weight="800" fill="#475569" text-anchor="start">{T['chart_div_right']}</text>
-                        <line x1="22" y1="` + yUmbral + `" x2="725" y2="` + yUmbral + `" stroke="#dc2626" stroke-width="2" stroke-dasharray="6,4"/>
-                        <rect x="588" y="2" width="132" height="15" fill="#dc2626" rx="3"/>
-                        <text x="654" y="12" font-size="8.5" font-weight="800" fill="#ffffff" text-anchor="middle">{T['thresh_tag'].format(umbral=f'{umbral_critico:.1f}')}</text>
-                    </svg>
-                </div>
-
-                <div class="sec-title">{T['pdf_sec3_title']}</div>
-                <div class="alert-box">
-                    <div>
-                        <div style="font-size:9.2px; font-weight:900; color:{color_titulo_pdf}; margin-bottom:2px;">{badge_txt}</div>
-                        <div style="font-size:8.8px; font-weight:800; margin-bottom:2px;">{nombre_rubro_activo}</div>
-                        <div style="font-size:7.8px; color:#334155; line-height:1.3;">{desc_txt}</div>
-                    </div>
-                    <div>
-                        <div style="font-size:8.3px; font-weight:800; color:#042454; margin-bottom:2px;">{T['rec_title']}:</div>
-                        <div style="font-size:7.6px; line-height:1.3;">{checks_pdf_html}</div>
+                <div class="sec-block">
+                    <div class="sec-title">{T['pdf_sec1_title']}</div>
+                    <div class="grid-3">
+                        <div class="card">
+                            <div class="card-title">{T['pill_peak']} ({fecha_pico})</div>
+                            <div class="card-val" style="color:#dc2626;">{pico_max_dia:.1f} {UNIT_MM}</div>
+                            <div style="font-size:8.2px; font-weight:700; color:#475569;">{T['kpi1_sub'].format(acum=lluvia_acumulada, base_acum=lluvia_base_acum)}</div>
+                        </div>
+                        <div class="card">
+                            <div class="card-title">{T['pill_thresh']} / {etiqueta_dif}</div>
+                            <div class="card-val">{umbral_critico:.1f} {UNIT_MM} <span style="font-size:12px; color:{color_dif_pdf};">({signo_dif})</span></div>
+                            <div style="font-size:8.2px; font-weight:700; color:#475569;">{T['pill_days']}: {dias_criticos} {T['day_unit']}</div>
+                        </div>
+                        <div class="card">
+                            <div class="card-title">{T['kpi2_title']} & {T['pdf_quebradas']}</div>
+                            <div class="card-val">{humedad_txt}% HR</div>
+                            <div style="font-size:8.2px; font-weight:700; color:#020b1e;">{estado_quebrada}</div>
+                        </div>
                     </div>
                 </div>
 
-                <div class="sec-title">{T['pdf_sec4_title']}</div>
-                <div class="tables-2col">
-                    <div>
-                        <div class="sub-tbl-hdr">{T['pdf_days_1_7']}</div>
-                        <table>
-                            <thead>
-                                <tr>
-                                    <th>{T['pdf_col_date']}</th>
-                                    <th>{T['pdf_col_base']}</th>
-                                    <th>{T['pdf_col_fcst']}</th>
-                                    <th>{T['pdf_col_prob']}</th>
-                                    <th>{T['pdf_col_tmax']}</th>
-                                    <th>{T['pdf_col_wind']}</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {filas_1_7}
-                            </tbody>
-                        </table>
-                    </div>
-                    <div>
-                        <div class="sub-tbl-hdr">{T['pdf_days_8_14']}</div>
-                        <table>
-                            <thead>
-                                <tr>
-                                    <th>{T['pdf_col_date']}</th>
-                                    <th>{T['pdf_col_base']}</th>
-                                    <th>{T['pdf_col_fcst']}</th>
-                                    <th>{T['pdf_col_prob']}</th>
-                                    <th>{T['pdf_col_tmax']}</th>
-                                    <th>{T['pdf_col_wind']}</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {filas_8_14}
-                            </tbody>
-                        </table>
+                <div class="sec-block">
+                    <div class="sec-title">{T['pdf_sec2_title']}</div>
+                    <div class="chart-box">
+                        <svg viewBox="0 0 740 210" width="100%" height="195">
+                            <line x1="22" y1="182" x2="725" y2="182" stroke="#94a3b8" stroke-width="1.5"/>
+                            ` + barrasSvg + `
+                            <line x1="` + xDivisor + `" y1="12" x2="` + xDivisor + `" y2="182" stroke="#64748b" stroke-width="1.6" stroke-dasharray="4,4"/>
+                            <text x="` + (xDivisor - 8) + `" y="16" font-size="8.5" font-weight="800" fill="#042454" text-anchor="end">{T['chart_div_left']}</text>
+                            <text x="` + (xDivisor + 8) + `" y="16" font-size="8.5" font-weight="800" fill="#475569" text-anchor="start">{T['chart_div_right']}</text>
+                            <line x1="22" y1="` + yUmbral + `" x2="725" y2="` + yUmbral + `" stroke="#dc2626" stroke-width="2.2" stroke-dasharray="6,4"/>
+                            <rect x="585" y="2" width="135" height="16" fill="#dc2626" rx="3"/>
+                            <text x="652.5" y="13" font-size="8.8" font-weight="800" fill="#ffffff" text-anchor="middle">{T['thresh_tag'].format(umbral=f'{umbral_critico:.1f}')}</text>
+                        </svg>
                     </div>
                 </div>
 
-                <div class="sig-bar">
-                    {T['pdf_sig_box']}
+                <div class="sec-block">
+                    <div class="sec-title">{T['pdf_sec3_title']}</div>
+                    <div class="alert-box">
+                        <div>
+                            <div style="font-size:10px; font-weight:900; color:{color_titulo_pdf}; margin-bottom:3px;">{badge_txt}</div>
+                            <div style="font-size:9.5px; font-weight:800; margin-bottom:3px;">{nombre_rubro_activo}</div>
+                            <div style="font-size:8.4px; color:#334155; line-height:1.4;">{desc_txt}</div>
+                        </div>
+                        <div>
+                            <div style="font-size:8.8px; font-weight:800; color:#042454; margin-bottom:4px;">{T['rec_title']}:</div>
+                            <div style="font-size:8.2px; line-height:1.4;">{checks_pdf_html}</div>
+                        </div>
+                    </div>
                 </div>
-                <div class="footer">
-                    {T['disclaimer']}
+
+                <div class="sec-block">
+                    <div class="sec-title">{T['pdf_sec4_title']}</div>
+                    <div class="tables-2col">
+                        <div>
+                            <div class="sub-tbl-hdr">{T['pdf_days_1_7']}</div>
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>{T['pdf_col_date']}</th>
+                                        <th>{T['pdf_col_base']}</th>
+                                        <th>{T['pdf_col_fcst']}</th>
+                                        <th>{T['pdf_col_prob']}</th>
+                                        <th>{T['pdf_col_tmax']}</th>
+                                        <th>{T['pdf_col_wind']}</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {filas_1_7}
+                                </tbody>
+                            </table>
+                        </div>
+                        <div>
+                            <div class="sub-tbl-hdr">{T['pdf_days_8_14']}</div>
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>{T['pdf_col_date']}</th>
+                                        <th>{T['pdf_col_base']}</th>
+                                        <th>{T['pdf_col_fcst']}</th>
+                                        <th>{T['pdf_col_prob']}</th>
+                                        <th>{T['pdf_col_tmax']}</th>
+                                        <th>{T['pdf_col_wind']}</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {filas_8_14}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
                 </div>
-                <div class="audit-bar">
-                    {sello_inferior_pdf}
+
+                <div class="bottom-group">
+                    <div class="sig-bar">
+                        {T['pdf_sig_box']}
+                    </div>
+                    <div>
+                        <div class="footer">
+                            {T['disclaimer']}
+                        </div>
+                        <div class="audit-bar">
+                            {sello_inferior_pdf}
+                        </div>
+                    </div>
                 </div>
             </div>
             <script>
