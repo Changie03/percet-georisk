@@ -1751,10 +1751,11 @@ def mostrar_modal_cotizacion():
 @st.dialog(" ")
 def mostrar_modal_sugerencias():
     logo_html = f'<img src="data:image/png;base64,{LOGO_B64}" class="modal-brand-logo">' if LOGO_B64 else ""
+    modal_title_sug = "SUGERENCIAS<br>PERCET GEORISK™" if LANG == "ES" else "SUGGESTIONS<br>PERCET GEORISK™"
     st.markdown(f"""
     <div class="modal-brand-header">
         {logo_html}
-        <div class="modal-brand-title">SUGERENCIAS<br>PERCET GEORISK™</div>
+        <div class="modal-brand-title">{modal_title_sug}</div>
     </div>
     """, unsafe_allow_html=True)
 
