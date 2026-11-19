@@ -199,7 +199,7 @@ TEXTOS = {
         "params_header": "⚙️ PARÁMETROS DEL PROYECTO",
         "client_label": "NOMBRE DEL CLIENTE / OBRA:",
         "rubro_label": "PARTIDA CRÍTICA EN EJECUCIÓN (RUBROS MACRO):",
-        "thresh_input_label": "UMBRAL ADMISIBLE DE LLUVIA (EDITABLE):",
+        "thresh_input_label": "UMBRAL ADMISIBLE DE LLUVIA (EDITABLE)",
         "threshold_caption": "Origen: Criterio PERCET / Editable según Expediente Técnico.",
         "enso_label": "ESCENARIO CONSERVADOR EL NIÑO (+25%)",
         "enso_help": "Aplica un factor preventivo de seguridad (+25%) sobre el modelo base satelital para evaluar el umbral. No constituye un pronóstico meteorológico directo.",
@@ -313,7 +313,7 @@ TEXTOS = {
         "params_header": "⚙️ PROJECT PARAMETERS",
         "client_label": "CLIENT / PROJECT NAME:",
         "rubro_label": "CRITICAL WORK PACKAGE (MACRO SECTORS):",
-        "thresh_input_label": "ALLOWABLE RAINFALL THRESHOLD (EDITABLE):",
+        "thresh_input_label": "ALLOWABLE RAINFALL THRESHOLD (EDITABLE)",
         "threshold_caption": "Origin: PERCET Criterion / Editable per Project Specifications.",
         "enso_label": "EL NIÑO CONSERVATIVE SCENARIO (+25%)",
         "enso_help": "Applies a preventive safety factor (+25%) over the base satellite model for threshold evaluation. Not a direct meteorological forecast.",
@@ -1565,7 +1565,7 @@ with st.sidebar:
     nombre_rubro_activo = rubro_actual["es_name"] if LANG == "ES" else rubro_actual["en_name"]
     
     umbral_critico = st.number_input(
-        f"{T['thresh_input_label']} ({UNIT_MM})",
+        T["thresh_input_label"],
         min_value=0.2,
         max_value=50.0,
         value=float(rubro_actual["umbral"]),
@@ -1654,7 +1654,7 @@ def mostrar_modal_cotizacion():
                 📐 COTIZACIÓN DE OBRAS E INGENIERÍA ESPECIALIZADA
             </div>
             <div style="font-size: 0.78rem; font-weight: 700; margin-top: 3px;">
-                Se generará tu ficha de cotización ordenada para enviarla por WhatsApp al +51 996 025 448 (adjunta tus planos o PDFs directamente en el chat).
+                Se generará tu ficha de cotización ordenada para enviarla por WhatsApp (adjunta tus planos o PDFs directamente en el chat).
             </div>
         </div>
         """, unsafe_allow_html=True)
@@ -1668,7 +1668,7 @@ def mostrar_modal_cotizacion():
         ).strip()
         consentimiento_ley = st.checkbox(T["privacy_check"], value=True)
         
-        if st.button("🚀 GENERAR COTIZACIÓN PARA WHATSAPP (+51 996 025 448)", type="primary", use_container_width=True):
+        if st.button("🚀 GENERAR COTIZACIÓN PARA WHATSAPP", type="primary", use_container_width=True):
             if emp and correo_cli_raw and correo_valido(correo_cli_raw) and detalle_req and consentimiento_ley:
                 mensaje_cotizacion_wa = (
                     f"*SOLICITUD DE COTIZACION - PERCET GEORISK (ES)*\n"
@@ -1689,8 +1689,8 @@ def mostrar_modal_cotizacion():
                     f"- Proteccion de datos (Ley N 29733): Aceptada"
                 )
                 wa_cot_url = f"https://wa.me/{WHATSAPP_COTIZACIONES}?text={urllib.parse.quote(mensaje_cotizacion_wa)}"
-                st.success("✅ Cotización lista para enviar al **+51 996 025 448**.")
-                st.link_button("📲 ABRIR WHATSAPP Y ENVIAR COTIZACIÓN (+51 996 025 448)", wa_cot_url, use_container_width=True)
+                st.success("✅ Cotización lista para enviar por WhatsApp.")
+                st.link_button("📲 ABRIR WHATSAPP Y ENVIAR COTIZACIÓN", wa_cot_url, use_container_width=True)
             else:
                 st.warning(T["privacy_warn"])
     else:
@@ -1700,7 +1700,7 @@ def mostrar_modal_cotizacion():
                 💻 ENGINEERING CONSULTING & PROJECT QUOTES
             </div>
             <div style="font-size: 0.78rem; font-weight: 700; margin-top: 3px;">
-                A structured quote message will be prepared to send via WhatsApp to +51 996 025 448 (attach drawings or PDFs directly in WhatsApp).
+                A structured quote message will be prepared to send via WhatsApp (attach drawings or PDFs directly in WhatsApp).
             </div>
         </div>
         """, unsafe_allow_html=True)
@@ -1714,7 +1714,7 @@ def mostrar_modal_cotizacion():
         ).strip()
         consentimiento_ley = st.checkbox(T["privacy_check"], value=True)
         
-        if st.button("🚀 GENERATE QUOTE FOR WHATSAPP (+51 996 025 448)", type="primary", use_container_width=True):
+        if st.button("🚀 GENERATE QUOTE FOR WHATSAPP", type="primary", use_container_width=True):
             if emp and correo_cli_raw and correo_valido(correo_cli_raw) and detalle_req and consentimiento_ley:
                 mensaje_cotizacion_wa = (
                     f"*QUOTE REQUEST - PERCET GEORISK (EN)*\n"
@@ -1735,12 +1735,12 @@ def mostrar_modal_cotizacion():
                     f"- Data Protection (Law N 29733): Accepted"
                 )
                 wa_cot_url = f"https://wa.me/{WHATSAPP_COTIZACIONES}?text={urllib.parse.quote(mensaje_cotizacion_wa)}"
-                st.success("✅ Quote ready to send to **+51 996 025 448**.")
-                st.link_button("📲 OPEN WHATSAPP AND SEND QUOTE (+51 996 025 448)", wa_cot_url, use_container_width=True)
+                st.success("✅ Quote ready to send via WhatsApp.")
+                st.link_button("📲 OPEN WHATSAPP AND SEND QUOTE", wa_cot_url, use_container_width=True)
             else:
                 st.warning(T["privacy_warn"])
 
-# 7B. MODAL INTERACTIVO DE SUGERENCIAS Y MEJORAS DE LA PÁGINA
+# 7B. MODAL INTERACTIVO DE SUGERENCIAS Y MEJORAS HACIA WHATSAPP (+51 981328639) CON ESTRELLAS (1 A 5)
 @st.dialog(" ")
 def mostrar_modal_sugerencias():
     logo_html = f'<img src="data:image/png;base64,{LOGO_B64}" class="modal-brand-logo">' if LOGO_B64 else ""
@@ -1755,10 +1755,10 @@ def mostrar_modal_sugerencias():
         st.markdown("""
         <div style="background: rgba(0, 180, 216, 0.20); border-left: 5px solid #00b4d8; padding: 10px 14px; border-radius: 8px; margin-bottom: 12px;">
             <div style="font-size: 0.85rem; font-weight: 900; text-transform: uppercase; letter-spacing: 0.4px;">
-                💡 AYÚDANOS A MEJORAR LA PLATAFORMA
+                💡 MEJORAS DE LA PÁGINA (WHATSAPP +51 981 328 639)
             </div>
             <div style="font-size: 0.78rem; font-weight: 700; margin-top: 3px;">
-                Cuéntanos qué función, gráfico, rubro o mejora te gustaría ver en PERCET GeoRisk™.
+                Envía tus sugerencias o ideas de mejora para ir perfeccionando la plataforma paso a paso.
             </div>
         </div>
         """, unsafe_allow_html=True)
@@ -1767,45 +1767,41 @@ def mostrar_modal_sugerencias():
             "SECCIÓN A MEJORAR:",
             ["Mapa y coordenadas", "Gráficos y umbrales", "Informe PDF / Matriz CSV", "Nueva partida o rubro", "Experiencia / diseño general"]
         )
-        calificacion = st.slider("VALORACIÓN ACTUAL DE LA PÁGINA:", min_value=1, max_value=5, value=5)
+        st.markdown("<div style='font-size:0.78rem; font-weight:800; margin-top:4px; margin-bottom:2px;'>VALORACIÓN DE LA PÁGINA (1 A 5 ESTRELLAS):</div>", unsafe_allow_html=True)
+        estrellas_sel = st.feedback("stars", key="stars_feedback_es")
         comentario_sug = st.text_area(
             "ESCRIBE TU SUGERENCIA O IDEA DE MEJORA:",
-            placeholder="Ej. Me gustaría agregar un umbral de viento o exportar más días...",
+            placeholder="Ej. Me gustaría ajustar el tamaño de fuente o agregar un dato extra...",
             height=95,
             max_chars=800
         ).strip()
 
-        if st.button("🚀 PREPARAR SUGERENCIA", type="primary", use_container_width=True):
+        if st.button("🚀 GENERAR SUGERENCIA PARA WHATSAPP (+51 981 328 639)", type="primary", use_container_width=True):
             if comentario_sug:
+                valor_estrellas = (estrellas_sel + 1) if estrellas_sel is not None else 5
+                estrellas_visual = "*" * valor_estrellas
                 texto_sug = (
                     f"*SUGERENCIA / MEJORA - PERCET GEORISK*\n"
                     f"----------------------------------------\n"
                     f"- Nombre / Rol: {nombre_sug if nombre_sug else 'Visitante'}\n"
                     f"- Seccion: {area_mejora}\n"
-                    f"- Valoracion: {calificacion}/5\n"
+                    f"- Valoracion: {valor_estrellas}/5 ({estrellas_visual})\n"
                     f"- Proyecto / Coord.: {nombre_proyecto} [{st.session_state.lat}, {st.session_state.lon}]\n"
                     f"- Sugerencia:\n{comentario_sug}"
                 )
-                wa_sug_url = f"https://wa.me/{WHATSAPP_COTIZACIONES}?text={urllib.parse.quote(texto_sug)}"
-                mailto_sug_url = (
-                    f"mailto:{CORREO_CORPORATIVO}?subject={urllib.parse.quote('Sugerencia PERCET GeoRisk')}&body={urllib.parse.quote(texto_sug)}"
-                )
-                st.success("✅ ¡Gracias por tu aporte! Elige dónde enviarlo:")
-                st.link_button("📲 ENVIAR SUGERENCIA POR WHATSAPP", wa_sug_url, use_container_width=True)
-                st.markdown(
-                    f'<a href="{mailto_sug_url}" target="_blank" style="display:inline-block; margin-top:6px; font-size:0.82rem; font-weight:900; text-decoration:underline;">📧 Enviar también por correo ({CORREO_CORPORATIVO})</a>',
-                    unsafe_allow_html=True
-                )
+                wa_sug_url = f"https://wa.me/{WHATSAPP_NUMERO}?text={urllib.parse.quote(texto_sug)}"
+                st.success("✅ Sugerencia lista para enviar al **+51 981 328 639**.")
+                st.link_button("📲 ENVIAR SUGERENCIA POR WHATSAPP (+51 981 328 639)", wa_sug_url, use_container_width=True)
             else:
                 st.warning("⚠️ Escribe una sugerencia o comentario antes de continuar.")
     else:
         st.markdown("""
         <div style="background: rgba(0, 180, 216, 0.20); border-left: 5px solid #00b4d8; padding: 10px 14px; border-radius: 8px; margin-bottom: 12px;">
             <div style="font-size: 0.85rem; font-weight: 900; text-transform: uppercase; letter-spacing: 0.4px;">
-                💡 HELP US IMPROVE THE PLATFORM
+                💡 PAGE IMPROVEMENTS (WHATSAPP +51 981 328 639)
             </div>
             <div style="font-size: 0.78rem; font-weight: 700; margin-top: 3px;">
-                Share ideas, features, or improvements you would like to see in PERCET GeoRisk™.
+                Share suggestions or ideas to improve the platform step by step.
             </div>
         </div>
         """, unsafe_allow_html=True)
@@ -1814,35 +1810,31 @@ def mostrar_modal_sugerencias():
             "SECTION TO IMPROVE:",
             ["Map & Coordinates", "Charts & Thresholds", "PDF Report / CSV Matrix", "New Work Sector", "General UX / Design"]
         )
-        calificacion = st.slider("CURRENT PAGE RATING:", min_value=1, max_value=5, value=5)
+        st.markdown("<div style='font-size:0.78rem; font-weight:800; margin-top:4px; margin-bottom:2px;'>PAGE RATING (1 TO 5 STARS):</div>", unsafe_allow_html=True)
+        estrellas_sel = st.feedback("stars", key="stars_feedback_en")
         comentario_sug = st.text_area(
             "WRITE YOUR SUGGESTION OR IMPROVEMENT IDEA:",
-            placeholder="e.g., Add wind threshold alerts or custom date range...",
+            placeholder="e.g., Adjust font sizing or add an extra metric...",
             height=95,
             max_chars=800
         ).strip()
 
-        if st.button("🚀 PREPARE SUGGESTION", type="primary", use_container_width=True):
+        if st.button("🚀 GENERATE SUGGESTION FOR WHATSAPP (+51 981 328 639)", type="primary", use_container_width=True):
             if comentario_sug:
+                valor_estrellas = (estrellas_sel + 1) if estrellas_sel is not None else 5
+                estrellas_visual = "*" * valor_estrellas
                 texto_sug = (
                     f"*PAGE SUGGESTION - PERCET GEORISK*\n"
                     f"----------------------------------------\n"
                     f"- Name / Role: {nombre_sug if nombre_sug else 'Visitor'}\n"
                     f"- Section: {area_mejora}\n"
-                    f"- Rating: {calificacion}/5\n"
+                    f"- Rating: {valor_estrellas}/5 ({estrellas_visual})\n"
                     f"- Project / Coord.: {nombre_proyecto} [{st.session_state.lat}, {st.session_state.lon}]\n"
                     f"- Suggestion:\n{comentario_sug}"
                 )
-                wa_sug_url = f"https://wa.me/{WHATSAPP_COTIZACIONES}?text={urllib.parse.quote(texto_sug)}"
-                mailto_sug_url = (
-                    f"mailto:{CORREO_CORPORATIVO}?subject={urllib.parse.quote('PERCET GeoRisk Suggestion')}&body={urllib.parse.quote(texto_sug)}"
-                )
-                st.success("✅ Thank you for your feedback! Choose where to send it:")
-                st.link_button("📲 SEND SUGGESTION VIA WHATSAPP", wa_sug_url, use_container_width=True)
-                st.markdown(
-                    f'<a href="{mailto_sug_url}" target="_blank" style="display:inline-block; margin-top:6px; font-size:0.82rem; font-weight:900; text-decoration:underline;">📧 Also send via email ({CORREO_CORPORATIVO})</a>',
-                    unsafe_allow_html=True
-                )
+                wa_sug_url = f"https://wa.me/{WHATSAPP_NUMERO}?text={urllib.parse.quote(texto_sug)}"
+                st.success("✅ Suggestion ready to send to **+51 981 328 639**.")
+                st.link_button("📲 SEND SUGGESTION VIA WHATSAPP (+51 981 328 639)", wa_sug_url, use_container_width=True)
             else:
                 st.warning("⚠️ Please enter a suggestion or comment before continuing.")
 
@@ -2545,7 +2537,7 @@ st.markdown(f'<div class="legal-disclaimer">{T["disclaimer"]}</div>', unsafe_all
 st.markdown(f"""
 <div class="b2b-banner">
     <div class="b2b-banner-title">{T['b2b_title']}</div>
-    <div class="b2b-banner-sub">{T['b2b_sub']}</div>
+    <div class="b2b_banner-sub">{T['b2b_sub']}</div>
 </div>
 """, unsafe_allow_html=True)
 
