@@ -21,6 +21,29 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
+CODIGOS_USADOS_FILE = "codigos_usados.json"
+
+def cargar_codigos_usados_disco():
+    if os.path.exists(CODIGOS_USADOS_FILE):
+        try:
+            with open(CODIGOS_USADOS_FILE, "r", encoding="utf-8") as f:
+                data = json.load(f)
+                if isinstance(data, list):
+                    return {str(x).strip().upper() for x in data if x}
+        except Exception:
+            pass
+    return set()
+
+def guardar_codigo_usado_disco(codigo_str):
+    actuales = cargar_codigos_usados_disco()
+    actuales.add(codigo_str.strip().upper())
+    try:
+        with open(CODIGOS_USADOS_FILE, "w", encoding="utf-8") as f:
+            json.dump(sorted(list(actuales)), f)
+    except Exception:
+        pass
+    return actuales
+
 if "lat" not in st.session_state:
     st.session_state.lat = -6.8112
 if "lon" not in st.session_state:
@@ -36,7 +59,15 @@ if "accion_pendiente_pack" not in st.session_state:
 if "disparar_pdf_ahora" not in st.session_state:
     st.session_state.disparar_pdf_ahora = False
 if "codigos_usados" not in st.session_state:
-    st.session_state.codigos_usados = set()
+    st.session_state.codigos_usados = cargar_codigos_usados_disco()
+
+# Sincronizar códigos quemados desde localStorage del navegador (vía query param si existe)
+qp_used = st.query_params.get("used_codes", "")
+if qp_used:
+    for c in str(qp_used).split(","):
+        c_clean = c.strip().upper()
+        if c_clean:
+            st.session_state.codigos_usados.add(c_clean)
 
 LOGO_FILE = "logo.png"
 QR_FILE = "qr_pago.png"
@@ -592,8 +623,9 @@ def obtener_datos_satelitales_14d(lat_val, lon_val):
 
     return None, None, None, False, ultimo_error
 
-# 4. SISTEMA DE ESTILOS ADAPTATIVO (LIGHT & DARK MODE + MENÚ DE 3 PUNTOS LIMPIO)
+# 4. SISTEMA DE ESTILOS ADAPTATIVO (LIGHT & DARK MODE + MENÚ DE 3 PUNTOS LIMPIO + PERSISTENCIA EN NAVEGADOR)
 def aplicar_estilo_corporativo():
+    codigos_json_str = json.dumps(sorted(list(st.session_state.codigos_usados)))
     st.markdown("""
     <style>
     @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800;900&display=swap');
@@ -1281,10 +1313,27 @@ def aplicar_estilo_corporativo():
     </style>
     """, unsafe_allow_html=True)
 
-    components.html("""
+    components.html(f"""
     <script>
-    (function() {
+    (function() {{
         var WA_URL = "https://wa.me/51981328639?text=Hola%20PERCET%2C%20solicito%20informacion%20sobre%20PERCET%20GeoRisk";
+        var SERVER_USED = {codigos_json_str};
+
+        try {{
+            var prevRaw = window.parent.localStorage.getItem("percet_used_codes") || "[]";
+            var prevArr = JSON.parse(prevRaw);
+            if (!Array.isArray(prevArr)) prevArr = [];
+            var merged = Array.from(new Set(prevArr.concat(SERVER_USED).map(function(x) {{ return String(x).toUpperCase().trim(); }}).filter(Boolean)));
+            window.parent.localStorage.setItem("percet_used_codes", JSON.stringify(merged));
+
+            var pUrl = new URL(window.parent.location.href);
+            var curParam = (pUrl.searchParams.get("used_codes") || "").split(",").map(function(x) {{ return x.toUpperCase().trim(); }}).filter(Boolean);
+            var allCodes = Array.from(new Set(merged.concat(curParam)));
+            if (allCodes.length > 0 && curParam.join(",") !== allCodes.join(",")) {{
+                pUrl.searchParams.set("used_codes", allCodes.join(","));
+                window.parent.history.replaceState({{}}, "", pUrl.toString());
+            }}
+        }} catch (e) {{}}
 
         var CSS_LIMPIEZA = `
             [data-testid="manage-app-button"],
@@ -1297,8 +1346,8 @@ def aplicar_estilo_corporativo():
             [data-baseweb="popover"] [role="separator"],
             [data-baseweb="popover"] ul[role="option"] > li,
             [data-baseweb="popover"] [data-testid="stMainMenuList"] > li,
-            [data-testid="stMainMenuPopover"] hr,
-            [data-testid="stMainMenuPopover"] [role="separator"],
+            [data-baseweb="popover"] hr,
+            [data-baseweb="popover"] [role="separator"],
             .stAppDeployButton,
             a[href*="streamlit.io"],
             a[href*="github.com"],
@@ -1306,7 +1355,7 @@ def aplicar_estilo_corporativo():
             [class*="profileContainer"],
             [class*="profileImage"],
             img[data-testid="appCreatorAvatar"],
-            footer {
+            footer {{
                 transform: scale(0.0000001) !important;
                 width: 0px !important;
                 height: 0px !important;
@@ -1318,56 +1367,56 @@ def aplicar_estilo_corporativo():
                 bottom: -99999px !important;
                 right: -99999px !important;
                 display: none !important;
-            }
+            }}
         `;
 
-        function getLuminanceFromRgb(rgbStr) {
+        function getLuminanceFromRgb(rgbStr) {{
             if (!rgbStr) return null;
             var nums = rgbStr.match(/\\d+/g);
-            if (nums && nums.length >= 3) {
+            if (nums && nums.length >= 3) {{
                 var r = parseInt(nums[0]), g = parseInt(nums[1]), b = parseInt(nums[2]);
                 if (nums.length >= 4 && parseFloat(nums[3]) === 0) return null;
                 return (r * 299 + g * 587 + b * 114) / 1000;
-            }
+            }}
             return null;
-        }
+        }}
 
-        function detectarModoOscuro(pDoc) {
+        function detectarModoOscuro(pDoc) {{
             var cajas = pDoc.querySelectorAll('div[data-baseweb="base-input"], div[data-baseweb="input"], [data-testid="stNumberInput"] input, [data-testid="stTextInput"] input');
-            for (var i = 0; i < cajas.length; i++) {
+            for (var i = 0; i < cajas.length; i++) {{
                 var el = cajas[i];
                 if (el.closest('[role="dialog"]')) continue;
                 var bg = window.parent.getComputedStyle(el).backgroundColor;
                 var lum = getLuminanceFromRgb(bg);
-                if (lum !== null) {
+                if (lum !== null) {{
                     return (lum < 128);
-                }
-            }
-            try {
-                for (var k = 0; k < window.parent.localStorage.length; k++) {
+                }}
+            }}
+            try {{
+                for (var k = 0; k < window.parent.localStorage.length; k++) {{
                     var key = window.parent.localStorage.key(k);
-                    if (key && key.indexOf("stActiveTheme") !== -1) {
+                    if (key && key.indexOf("stActiveTheme") !== -1) {{
                         var val = window.parent.localStorage.getItem(key) || "";
                         if (val.indexOf('"Dark"') !== -1 || val.indexOf('#0e1117') !== -1) return true;
                         if (val.indexOf('"Light"') !== -1 || val.indexOf('#ffffff') !== -1) return false;
-                    }
-                }
-            } catch (e) {}
+                    }}
+                }}
+            }} catch (e) {{}}
             return false;
-        }
+        }}
 
-        function ocultarInsigniaExterna(el) {
+        function ocultarInsigniaExterna(el) {{
             if (!el || el.dataset.percetHidden === "1") return;
             if (el.closest('[data-baseweb="popover"], [data-testid="stMainMenuPopover"], [data-testid="stMainMenu"]')) return;
             el.dataset.percetHidden = "1";
-            try {
+            try {{
                 if (el.tagName === "A") el.href = WA_URL;
-                el.onclick = function(e) {
-                    if (e) { e.preventDefault(); e.stopPropagation(); }
+                el.onclick = function(e) {{
+                    if (e) {{ e.preventDefault(); e.stopPropagation(); }}
                     window.open(WA_URL, "_blank");
                     return false;
-                };
-            } catch (err) {}
+                }};
+            }} catch (err) {{}}
             el.style.setProperty("transform", "scale(0.0000001)", "important");
             el.style.setProperty("width", "0px", "important");
             el.style.setProperty("height", "0px", "important");
@@ -1375,26 +1424,26 @@ def aplicar_estilo_corporativo():
             el.style.setProperty("position", "fixed", "important");
             el.style.setProperty("bottom", "-99999px", "important");
             el.style.setProperty("display", "none", "important");
-        }
+        }}
 
-        function limpiarMenuTresPuntos(pDoc) {
+        function limpiarMenuTresPuntos(pDoc) {{
             var popovers = pDoc.querySelectorAll('[data-baseweb="popover"], [data-testid="stMainMenuPopover"], [data-testid="stMainMenuList"], ul[role="option"], ul[role="menu"]');
-            for (var p = 0; p < popovers.length; p++) {
+            for (var p = 0; p < popovers.length; p++) {{
                 var pop = popovers[p];
                 var sep = pop.querySelectorAll('hr, [role="separator"], [data-testid="stMainMenuDivider"]');
-                for (var s = 0; s < sep.length; s++) {
+                for (var s = 0; s < sep.length; s++) {{
                     sep[s].style.setProperty("display", "none", "important");
-                }
+                }}
                 var items = pop.querySelectorAll('li, button, a, footer');
-                for (var i = 0; i < items.length; i++) {
+                for (var i = 0; i < items.length; i++) {{
                     var it = items[i];
                     if (it.dataset.percetItemHidden === "1") continue;
                     var txt = (it.innerText || it.textContent || "").trim().toLowerCase();
                     if (!txt) continue;
 
-                    if (txt.indexOf("system") !== -1 || txt.indexOf("light") !== -1 || txt.indexOf("dark") !== -1) {
+                    if (txt.indexOf("system") !== -1 || txt.indexOf("light") !== -1 || txt.indexOf("dark") !== -1) {{
                         continue;
-                    }
+                    }}
 
                     if (
                         txt.indexOf("rerun") === 0 ||
@@ -1407,71 +1456,71 @@ def aplicar_estilo_corporativo():
                         txt === "about" ||
                         txt.indexOf("report a bug") === 0 ||
                         txt.indexOf("get help") === 0
-                    ) {
+                    ) {{
                         var target = it.closest("li") || it;
                         var targetTxt = (target.innerText || target.textContent || "").toLowerCase();
-                        if (targetTxt.indexOf("system") === -1 && targetTxt.indexOf("light") === -1 && targetTxt.indexOf("dark") === -1) {
+                        if (targetTxt.indexOf("system") === -1 && targetTxt.indexOf("light") === -1 && targetTxt.indexOf("dark") === -1) {{
                             target.dataset.percetItemHidden = "1";
                             target.style.setProperty("display", "none", "important");
-                        }
-                    }
-                }
-            }
-        }
+                        }}
+                    }}
+                }}
+            }}
+        }}
 
-        function cicloPrincipal() {
-            try {
+        function cicloPrincipal() {{
+            try {{
                 var pDoc = window.parent.document;
                 if (!pDoc) return;
 
-                if (pDoc.head && !pDoc.getElementById("percet-fast-css")) {
+                if (pDoc.head && !pDoc.getElementById("percet-fast-css")) {{
                     var st = pDoc.createElement("style");
                     st.id = "percet-fast-css";
                     st.innerHTML = CSS_LIMPIEZA;
                     pDoc.head.appendChild(st);
-                }
-                try {
-                    if (window.top && window.top.document && window.top.document.head && !window.top.document.getElementById("percet-fast-css-top")) {
+                }}
+                try {{
+                    if (window.top && window.top.document && window.top.document.head && !window.top.document.getElementById("percet-fast-css-top")) {{
                         var stTop = window.top.document.createElement("style");
                         stTop.id = "percet-fast-css-top";
                         stTop.innerHTML = CSS_LIMPIEZA;
                         window.top.document.head.appendChild(stTop);
-                    }
-                } catch (e) {}
+                    }}
+                }} catch (e) {{}}
 
                 limpiarMenuTresPuntos(pDoc);
 
                 var links = pDoc.querySelectorAll('a[href*="streamlit.io"], [data-testid="manage-app-button"]');
-                for (var j = 0; j < links.length; j++) {
+                for (var j = 0; j < links.length; j++) {{
                     ocultarInsigniaExterna(links[j]);
-                }
+                }}
 
                 var isDark = detectarModoOscuro(pDoc);
                 var temaActual = isDark ? "dark" : "light";
-                if (pDoc.body.getAttribute("data-percet-theme") !== temaActual) {
+                if (pDoc.body.getAttribute("data-percet-theme") !== temaActual) {{
                     pDoc.body.setAttribute("data-percet-theme", temaActual);
-                }
+                }}
 
                 var textColor = isDark ? "#ffffff" : "#020b1e";
                 var svgTexts = pDoc.querySelectorAll(".js-plotly-plot svg text");
-                for (var k = 0; k < svgTexts.length; k++) {
+                for (var k = 0; k < svgTexts.length; k++) {{
                     var t = svgTexts[k];
                     var desired = t.closest(".annotation-text-g") ? "#ffffff" : textColor;
-                    if (t.dataset.percetColor !== desired) {
+                    if (t.dataset.percetColor !== desired) {{
                         t.dataset.percetColor = desired;
                         t.style.setProperty("fill", desired, "important");
-                    }
-                }
-            } catch (e) {}
-        }
+                    }}
+                }}
+            }} catch (e) {{}}
+        }}
 
         cicloPrincipal();
         setInterval(cicloPrincipal, 200);
 
-        setInterval(function() {
-            try { fetch(window.parent.location.href, { method: "HEAD", cache: "no-store" }); } catch (e) {}
-        }, 300000);
-    })();
+        setInterval(function() {{
+            try {{ fetch(window.parent.location.href, {{ method: "HEAD", cache: "no-store" }}); }} catch (e) {{}}
+        }}, 300000);
+    }})();
     </script>
     """, height=0, width=0)
 
@@ -1569,7 +1618,10 @@ def mostrar_modal_pago_pack():
 
     codigo_ingresado = st.text_input(T["qr_code_label"], placeholder="Ej. PE7M4Q9", max_chars=20).strip().upper()
     if st.button(T["qr_unlock_btn"], type="primary", use_container_width=True):
-        if codigo_ingresado in CODIGOS_UN_SOLO_USO and codigo_ingresado not in st.session_state.codigos_usados:
+        usados_actuales = st.session_state.codigos_usados.union(cargar_codigos_usados_disco())
+        st.session_state.codigos_usados = usados_actuales
+        if codigo_ingresado in CODIGOS_UN_SOLO_USO and codigo_ingresado not in usados_actuales:
+            guardar_codigo_usado_disco(codigo_ingresado)
             st.session_state.codigos_usados.add(codigo_ingresado)
             st.session_state.pack_desbloqueado = True
             st.session_state.codigo_activo_pack = codigo_ingresado
