@@ -76,6 +76,7 @@ LOGO_FILE = "logo.png"
 QR_FILE = "qr_pago.png"
 CORREO_CORPORATIVO = "oficina.tecnica.puh@outlook.com"
 WHATSAPP_NUMERO = "51981328639"
+WHATSAPP_COTIZACIONES = "51996025448"
 PRECIO_PACK_PEN = 39
 
 CODIGOS_UN_SOLO_USO = {
@@ -671,9 +672,9 @@ def aplicar_estilo_corporativo():
     [data-baseweb="popover"] [role="separator"],
     [data-baseweb="popover"] ul[role="option"] > li,
     [data-baseweb="popover"] [data-testid="stMainMenuList"] > li,
-    [data-testid="stMainMenuPopover"] hr,
-    [data-testid="stMainMenuPopover"] [role="separator"],
-    [data-testid="stMainMenuPopover"] ul > li {
+    [data-baseweb="popover"] hr,
+    [data-baseweb="popover"] [role="separator"],
+    [data-baseweb="popover"] ul > li {
         display: none !important;
     }
 
@@ -1635,7 +1636,7 @@ def mostrar_modal_pago_pack():
         else:
             st.warning(T["qr_code_err"])
 
-# 7. MODAL DE SOLICITUD CON VALIDACIÓN DE CORREO, ESTADO REAL DE ENVÍO Y LEY N° 29733
+# 7. MODAL DE SOLICITUD REDIRIGIDO A WHATSAPP (+51 996 025 448) CON MENSAJE DE COTIZACIÓN ORDENADO
 @st.dialog(" ")
 def mostrar_modal_cotizacion():
     logo_html = f'<img src="data:image/png;base64,{LOGO_B64}" class="modal-brand-logo">' if LOGO_B64 else ""
@@ -1653,70 +1654,51 @@ def mostrar_modal_cotizacion():
                 📐 COTIZACIÓN DE OBRAS E INGENIERÍA ESPECIALIZADA
             </div>
             <div style="font-size: 0.78rem; font-weight: 700; margin-top: 3px;">
-                Ejecución física de obras disponible en Perú. Consultoría especializada y supervisión BIM/VDC remota disponible en Latinoamérica.
+                Se generará tu ficha de cotización ordenada para enviarla directamente por WhatsApp al +51 996 025 448.
             </div>
         </div>
         """, unsafe_allow_html=True)
-        emp = html.escape(st.text_input("EMPRESA / CONSTRUCTORA O CLIENTE:", max_chars=100).strip())
+        emp = st.text_input("EMPRESA / CONSTRUCTORA O CLIENTE:", max_chars=100).strip()
         correo_cli_raw = st.text_input("CORREO CORPORATIVO:", placeholder="cliente@empresa.com", max_chars=100).strip()
-        correo_cli = html.escape(correo_cli_raw)
-        tel_cli = html.escape(st.text_input("TELÉFONO / WHATSAPP DE CONTACTO:", max_chars=40).strip())
-        detalle_req = html.escape(st.text_area("DETALLE SU REQUERIMIENTO O PROYECTO A COTIZAR (Ej. Estructura metálica, remodelación, obras civiles, consultoría BIM/VDC):", height=95, max_chars=1200).strip())
+        tel_cli = st.text_input("TELÉFONO / WHATSAPP DE CONTACTO:", max_chars=40).strip()
+        detalle_req = st.text_area(
+            "DETALLE SU REQUERIMIENTO O PROYECTO A COTIZAR (Ej. Estructura metálica, remodelación, obras civiles, consultoría BIM/VDC):",
+            height=95,
+            max_chars=1200
+        ).strip()
         archivo = st.file_uploader("ADJUNTAR PLANO O EXPEDIENTE (OPCIONAL - MÁX 15 MB):", type=["pdf", "png", "jpg"])
         consentimiento_ley = st.checkbox(T["privacy_check"], value=True)
         
-        if st.button("🚀 ENVIAR SOLICITUD A OFICINA TÉCNICA", type="primary", use_container_width=True):
+        if st.button("🚀 GENERAR COTIZACIÓN PARA WHATSAPP (+51 996 025 448)", type="primary", use_container_width=True):
             if archivo and archivo.size > 15 * 1024 * 1024:
                 st.warning("⚠️ El archivo adjunto supera el límite de seguridad de 15 MB.")
             elif emp and correo_cli_raw and correo_valido(correo_cli_raw) and detalle_req and consentimiento_ley:
-                nombre_arch = html.escape(os.path.basename(archivo.name)) if archivo else "No adjuntado"
-                asunto = f"Cotización / Ingeniería PERCET - {emp} ({nombre_proyecto})"
-                cuerpo = (
-                    f"Empresa / Cliente: {emp}\n"
-                    f"Correo del Cliente: {correo_cli_raw}\n"
-                    f"Teléfono / WhatsApp: {tel_cli}\n"
-                    f"Proyecto Evaluado: {nombre_proyecto}\n"
-                    f"Rubro: {nombre_rubro_activo} (Umbral: {umbral_critico} mm/día)\n"
-                    f"Requerimiento del Cliente:\n{detalle_req}\n\n"
-                    f"Coordenadas: Lat {st.session_state.lat}, Lon {st.session_state.lon}\n"
-                    f"Archivo referencial: {nombre_arch}\n"
-                    f"Consentimiento Ley N° 29733: Aceptado"
+                nombre_arch = os.path.basename(archivo.name) if archivo else "Ninguno"
+                nota_adjunto = (
+                    f"Archivo adjunto en formulario: {nombre_arch} (enviarlo tambien en este chat de WhatsApp)"
+                    if archivo else "Archivo adjunto en formulario: Ninguno"
                 )
-                envio_ok = False
-                detalle_envio = ""
-                try:
-                    resp_mail = requests.post(
-                        f"https://formsubmit.co/ajax/{CORREO_CORPORATIVO}",
-                        data={
-                            "Empresa": emp,
-                            "Correo_Cliente": correo_cli_raw,
-                            "Telefono": tel_cli,
-                            "Proyecto": nombre_proyecto,
-                            "Rubro": nombre_rubro_activo,
-                            "Umbral_Configurado": f"{umbral_critico} mm/dia",
-                            "Requerimiento": detalle_req,
-                            "Coordenadas": f"{st.session_state.lat}, {st.session_state.lon}",
-                            "Archivo": nombre_arch,
-                            "Consentimiento_Ley_29733": "Aceptado",
-                            "_subject": asunto,
-                            "_replyto": correo_cli_raw
-                        },
-                        headers={"Accept": "application/json"},
-                        timeout=8
-                    )
-                    if resp_mail.status_code in (200, 201):
-                        envio_ok = True
-                    else:
-                        detalle_envio = f"Código HTTP {resp_mail.status_code}"
-                except Exception as exc_mail:
-                    detalle_envio = str(exc_mail)
-
-                mailto_url = f"mailto:{CORREO_CORPORATIVO}?subject={urllib.parse.quote(asunto)}&body={urllib.parse.quote(cuerpo)}"
-                if envio_ok:
-                    st.success(f"✅ Solicitud procesada hacia **{CORREO_CORPORATIVO}**. Si es el primer envío a esta casilla, revisa también **Correo no deseado / Junk** para activar o ver el mensaje.")
-                else:
-                    st.warning(f"⚠️ No se pudo confirmar el envío automático ({detalle_envio}). Usa el enlace de abajo para abrir tu correo directamente.")
-                st.markdown(f'<a href="{mailto_url}" target="_blank" style="display:inline-block; margin-top:6px; font-size:0.82rem; font-weight:900; text-decoration:underline;">📧 Confirmar copia directa en mi cliente de correo</a>', unsafe_allow_html=True)
+                mensaje_cotizacion_wa = (
+                    f"*SOLICITUD DE COTIZACION - PERCET GEORISK (ES)*\n"
+                    f"----------------------------------------\n"
+                    f"*1. DATOS DEL CLIENTE / EMPRESA*\n"
+                    f"- Empresa / Cliente: {emp}\n"
+                    f"- Correo: {correo_cli_raw}\n"
+                    f"- Telefono / WhatsApp: {tel_cli if tel_cli else 'No indicado'}\n\n"
+                    f"*2. CONTEXTO DE OBRA / EVALUACION*\n"
+                    f"- Proyecto / Obra: {nombre_proyecto}\n"
+                    f"- Rubro: {nombre_rubro_activo}\n"
+                    f"- Umbral configurado: {umbral_critico:.1f} mm/dia\n"
+                    f"- Coordenadas: [{st.session_state.lat}, {st.session_state.lon}]\n\n"
+                    f"*3. REQUERIMIENTOS A COTIZAR*\n"
+                    f"{detalle_req}\n\n"
+                    f"*4. ADJUNTOS Y CONFORMIDAD*\n"
+                    f"- {nota_adjunto}\n"
+                    f"- Proteccion de datos (Ley N 29733): Aceptada"
+                )
+                wa_cot_url = f"https://wa.me/{WHATSAPP_COTIZACIONES}?text={urllib.parse.quote(mensaje_cotizacion_wa)}"
+                st.success(f"✅ Cotización lista para enviar al **+51 996 025 448**.")
+                st.link_button("📲 ABRIR WHATSAPP Y ENVIAR COTIZACIÓN (+51 996 025 448)", wa_cot_url, use_container_width=True)
             else:
                 st.warning(T["privacy_warn"])
     else:
@@ -1726,70 +1708,51 @@ def mostrar_modal_cotizacion():
                 💻 ENGINEERING CONSULTING & PROJECT QUOTES
             </div>
             <div style="font-size: 0.78rem; font-weight: 700; margin-top: 3px;">
-                Remote hydrological & BIM/VDC consulting available worldwide. Physical civil works execution available in Peru.
+                A structured quote message will be prepared to send directly via WhatsApp to +51 996 025 448.
             </div>
         </div>
         """, unsafe_allow_html=True)
-        emp = html.escape(st.text_input("COMPANY / CONTRACTOR OR CLIENT NAME:", max_chars=100).strip())
+        emp = st.text_input("COMPANY / CONTRACTOR OR CLIENT NAME:", max_chars=100).strip()
         correo_cli_raw = st.text_input("CORPORATE EMAIL:", placeholder="client@company.com", max_chars=100).strip()
-        correo_cli = html.escape(correo_cli_raw)
-        tel_cli = html.escape(st.text_input("CONTACT PHONE / WHATSAPP:", max_chars=40).strip())
-        detalle_req = html.escape(st.text_area("PLEASE DETAIL YOUR PROJECT OR TECHNICAL REQUEST (e.g., Remote BIM/VDC consulting, hydrological study, civil works in Peru):", height=95, max_chars=1200).strip())
+        tel_cli = st.text_input("CONTACT PHONE / WHATSAPP:", max_chars=40).strip()
+        detalle_req = st.text_area(
+            "PLEASE DETAIL YOUR PROJECT OR TECHNICAL REQUEST (e.g., Remote BIM/VDC consulting, hydrological study, civil works in Peru):",
+            height=95,
+            max_chars=1200
+        ).strip()
         archivo = st.file_uploader("UPLOAD BLUEPRINT OR DOCUMENT (OPTIONAL - MAX 15 MB):", type=["pdf", "png", "jpg"])
         consentimiento_ley = st.checkbox(T["privacy_check"], value=True)
         
-        if st.button("🚀 SUBMIT REQUEST TO TECHNICAL OFFICE", type="primary", use_container_width=True):
+        if st.button("🚀 GENERATE QUOTE FOR WHATSAPP (+51 996 025 448)", type="primary", use_container_width=True):
             if archivo and archivo.size > 15 * 1024 * 1024:
                 st.warning("⚠️ Attached file exceeds the 15 MB security limit.")
             elif emp and correo_cli_raw and correo_valido(correo_cli_raw) and detalle_req and consentimiento_ley:
-                nombre_arch = html.escape(os.path.basename(archivo.name)) if archivo else "Not attached"
-                asunto = f"PERCET Engineering Request - {emp} ({nombre_proyecto})"
-                cuerpo = (
-                    f"Company / Client: {emp}\n"
-                    f"Client Email: {correo_cli_raw}\n"
-                    f"Phone / WhatsApp: {tel_cli}\n"
-                    f"Evaluated Project: {nombre_proyecto}\n"
-                    f"Sector: {nombre_rubro_activo} (Threshold: {umbral_critico} mm/day)\n"
-                    f"Client Request:\n{detalle_req}\n\n"
-                    f"Coordinates: Lat {st.session_state.lat}, Lon {st.session_state.lon}\n"
-                    f"Reference File: {nombre_arch}\n"
-                    f"Law N° 29733 Consent: Accepted"
+                nombre_arch = os.path.basename(archivo.name) if archivo else "None"
+                nota_adjunto = (
+                    f"Uploaded file in form: {nombre_arch} (please also attach it in this WhatsApp chat)"
+                    if archivo else "Uploaded file in form: None"
                 )
-                envio_ok = False
-                detalle_envio = ""
-                try:
-                    resp_mail = requests.post(
-                        f"https://formsubmit.co/ajax/{CORREO_CORPORATIVO}",
-                        data={
-                            "Company": emp,
-                            "Client_Email": correo_cli_raw,
-                            "Phone": tel_cli,
-                            "Project": nombre_proyecto,
-                            "Sector": nombre_rubro_activo,
-                            "Threshold": f"{umbral_critico} mm/day",
-                            "Request": detalle_req,
-                            "Coordinates": f"{st.session_state.lat}, {st.session_state.lon}",
-                            "File": nombre_arch,
-                            "Law_29733_Consent": "Accepted",
-                            "_subject": asunto,
-                            "_replyto": correo_cli_raw
-                        },
-                        headers={"Accept": "application/json"},
-                        timeout=8
-                    )
-                    if resp_mail.status_code in (200, 201):
-                        envio_ok = True
-                    else:
-                        detalle_envio = f"HTTP {resp_mail.status_code}"
-                except Exception as exc_mail:
-                    detalle_envio = str(exc_mail)
-
-                mailto_url = f"mailto:{CORREO_CORPORATIVO}?subject={urllib.parse.quote(asunto)}&body={urllib.parse.quote(cuerpo)}"
-                if envio_ok:
-                    st.success(f"✅ Request sent toward **{CORREO_CORPORATIVO}**. If this is the first submission to this mailbox, also check **Junk / Spam** for activation or delivery.")
-                else:
-                    st.warning(f"⚠️ Automatic submission could not be confirmed ({detalle_envio}). Use the link below to open your email client directly.")
-                st.markdown(f'<a href="{mailto_url}" target="_blank" style="display:inline-block; margin-top:6px; font-size:0.82rem; font-weight:900; text-decoration:underline;">📧 Confirm direct copy in email client</a>', unsafe_allow_html=True)
+                mensaje_cotizacion_wa = (
+                    f"*QUOTE REQUEST - PERCET GEORISK (EN)*\n"
+                    f"----------------------------------------\n"
+                    f"*1. CLIENT / COMPANY DETAILS*\n"
+                    f"- Company / Client: {emp}\n"
+                    f"- Email: {correo_cli_raw}\n"
+                    f"- Phone / WhatsApp: {tel_cli if tel_cli else 'Not provided'}\n\n"
+                    f"*2. PROJECT & SITE CONTEXT*\n"
+                    f"- Project / Site: {nombre_proyecto}\n"
+                    f"- Sector: {nombre_rubro_activo}\n"
+                    f"- Configured Threshold: {umbral_critico:.1f} mm/day\n"
+                    f"- Coordinates: [{st.session_state.lat}, {st.session_state.lon}]\n\n"
+                    f"*3. PROJECT REQUIREMENTS*\n"
+                    f"{detalle_req}\n\n"
+                    f"*4. ATTACHMENTS & CONSENT*\n"
+                    f"- {nota_adjunto}\n"
+                    f"- Data Protection (Law N 29733): Accepted"
+                )
+                wa_cot_url = f"https://wa.me/{WHATSAPP_COTIZACIONES}?text={urllib.parse.quote(mensaje_cotizacion_wa)}"
+                st.success(f"✅ Quote ready to send to **+51 996 025 448**.")
+                st.link_button("📲 OPEN WHATSAPP AND SEND QUOTE (+51 996 025 448)", wa_cot_url, use_container_width=True)
             else:
                 st.warning(T["privacy_warn"])
 
