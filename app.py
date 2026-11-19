@@ -27,18 +27,28 @@ if "lon" not in st.session_state:
     st.session_state.lon = -79.7326
 if "last_click" not in st.session_state:
     st.session_state.last_click = None
+if "pack_desbloqueado" not in st.session_state:
+    st.session_state.pack_desbloqueado = False
+if "accion_pendiente_pack" not in st.session_state:
+    st.session_state.accion_pendiente_pack = None
+if "disparar_pdf_ahora" not in st.session_state:
+    st.session_state.disparar_pdf_ahora = False
 
 LOGO_FILE = "logo.png"
+QR_FILE = "qr_pago.png"
 CORREO_CORPORATIVO = "oficina.tecnica.puh@outlook.com"
 WHATSAPP_NUMERO = "51981328639"
+PRECIO_PACK_PEN = 39
+CODIGOS_VALIDOS_PACK = {"PERCET39", "PACK39", "GEORISK39"}
 
-def obtener_logo_base64(ruta):
+def obtener_imagen_base64(ruta):
     if os.path.exists(ruta):
         with open(ruta, "rb") as f:
             return base64.b64encode(f.read()).decode()
     return ""
 
-LOGO_B64 = obtener_logo_base64(LOGO_FILE)
+LOGO_B64 = obtener_imagen_base64(LOGO_FILE)
+QR_B64 = obtener_imagen_base64(QR_FILE)
 
 # 2. DICCIONARIO BILINGÜE (HORIZONTE 14 DÍAS REALES - ESPAÑOL & ENGLISH)
 TEXTOS = {
@@ -60,7 +70,7 @@ TEXTOS = {
         "header_rubro": "RUBRO:",
         "sec1_title": "01. LOCALIZACIÓN TÉCNICA DE LA OBRA",
         "lat_label": "LATITUD (DECIMAL)",
-        "lon_label": "LONGITUDE (DECIMAL)",
+        "lon_label": "LONGITUD (DECIMAL)",
         "locate_btn": "📍 LOCALIZAR OBRA",
         "map_hint": "Ingrese coordenadas de planos/GPS o haga clic directamente sobre cualquier punto del mapa.",
         "sea_warning": "⚠️ Coordenada ubicada fuera de continente o sobre el océano. Verifique el punto GPS de la obra.",
@@ -110,6 +120,17 @@ TEXTOS = {
         "chart_div_right": "TENDENCIA (D8-D14) ▶",
         "dl_csv": "📥 DESCARGAR MATRIZ 14 DÍAS (EXCEL / CSV)",
         "dl_pdf": "📄 EXPORTAR INFORME TÉCNICO PDF (1 HOJA)",
+        "pack_badge_txt": "PACK TÉCNICO (PDF + CSV) · S/ 39",
+        "pack_unlocked_txt": "✅ Pack Técnico (PDF + CSV) desbloqueado para esta sesión.",
+        "qr_modal_sub": "Incluye <b>Informe PDF (1 hoja)</b> + <b>Matriz CSV/Excel (14 días)</b> con un solo pago de <b>S/ 39</b>.",
+        "qr_step_1": "1. Escanea el QR y paga <b>S/ 39</b>.",
+        "qr_step_2": "2. Envía tu comprobante por WhatsApp para recibir tu código.",
+        "qr_step_3": "3. Ingresa aquí tu código de desbloqueo:",
+        "qr_btn_wa": "📲 ENVIAR COMPROBANTE POR WHATSAPP",
+        "qr_code_label": "CÓDIGO DE DESBLOQUEO:",
+        "qr_unlock_btn": "🔓 DESBLOQUEAR PACK (PDF + CSV)",
+        "qr_code_err": "⚠️ Código incorrecto. Solicita tu código por WhatsApp tras confirmar el pago.",
+        "qr_missing_file": "Sube el archivo qr_pago.png a tu repositorio para mostrar aquí tu código QR.",
         "exp_title": "🛠️ VER METODOLOGÍA, FUENTES Y MATRIZ METEOROLÓGICA COMPLETA (14 DÍAS)",
         "ml_bullet_1": "* **Fuente Meteorológica en Vivo:** Datos satelitales y modelos numéricos provistos por **Open-Meteo.com (CC BY 4.0)**. Días 1–7 corresponden a Pronóstico Operativo; Días 8–14 corresponden a Tendencia Referencial.",
         "ml_bullet_2": "* **Nota sobre Investigación ML PERCET & Presión Media:** Los parámetros $R^2 = 0.947$, $\\text{{RMSE}} = 0.599\\text{{ mm/día}}$, $\\text{{MAE}} = 0.394\\text{{ mm/día}}$ ($y = 0.871x + 0.163$) corresponden al modelo base de validación científica desarrollado por PERCET. | **Presión Superficial Media:** `{presion} hPa`.",
@@ -213,6 +234,17 @@ TEXTOS = {
         "chart_div_right": "TREND (D8-D14) ▶",
         "dl_csv": "📥 DOWNLOAD 14-DAY MATRIX (EXCEL / CSV)",
         "dl_pdf": "📄 EXPORT TECHNICAL PDF REPORT (1 PAGE)",
+        "pack_badge_txt": "TECHNICAL PACK (PDF + CSV) · S/ 39",
+        "pack_unlocked_txt": "✅ Technical Pack (PDF + CSV) unlocked for this session.",
+        "qr_modal_sub": "Includes <b>1-Page PDF Report</b> + <b>14-Day CSV/Excel Matrix</b> with a single payment of <b>S/ 39</b>.",
+        "qr_step_1": "1. Scan the QR code and pay <b>S/ 39</b>.",
+        "qr_step_2": "2. Send your payment receipt via WhatsApp to get your code.",
+        "qr_step_3": "3. Enter your unlock code here:",
+        "qr_btn_wa": "📲 SEND RECEIPT VIA WHATSAPP",
+        "qr_code_label": "UNLOCK CODE:",
+        "qr_unlock_btn": "🔓 UNLOCK PACK (PDF + CSV)",
+        "qr_code_err": "⚠️ Invalid code. Request your code on WhatsApp after confirming payment.",
+        "qr_missing_file": "Upload qr_pago.png to your repository to display your QR code here.",
         "exp_title": "🛠️ VIEW METHODOLOGY, SOURCES & FULL METEOROLOGICAL MATRIX (14 DAYS)",
         "ml_bullet_1": "* **Live Meteorological Source:** Satellite and numerical weather prediction data provided by **Open-Meteo.com (CC BY 4.0)**. Days 1–7 represent Operational Forecast; Days 8–14 represent Referential Trend.",
         "ml_bullet_2": "* **PERCET ML Calibration Research & Mean Pressure:** Metrics $R^2 = 0.947$, $\\text{{RMSE}} = 0.599\\text{{ mm/day}}$, $\\text{{MAE}} = 0.394\\text{{ mm/day}}$ ($y = 0.871x + 0.163$) correspond to PERCET's scientific calibration model. | **Mean Surface Pressure:** `{presion} hPa`.",
@@ -392,7 +424,7 @@ def obtener_datos_satelitales_14d(lat_val, lon_val):
     )
 
     ultimo_error = None
-    for intento in range(3):
+    for _ in range(3):
         try:
             resp = requests.get(url, timeout=10)
             resp.raise_for_status()
@@ -960,6 +992,22 @@ def aplicar_estilo_corporativo():
         color: var(--p-text-primary) !important;
     }
 
+    .pack-status-bar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 10px;
+        background-color: var(--p-bg-card);
+        border: 1px solid var(--p-border-card);
+        border-left: 5px solid #00b4d8;
+        border-radius: 10px;
+        padding: 10px 16px;
+        margin-bottom: 12px;
+        font-size: 0.82rem;
+        font-weight: 800;
+    }
+
     .b2b-banner {
         background: linear-gradient(135deg, #020b1e 0%, #042454 60%, #00357a 100%);
         color: white;
@@ -1040,6 +1088,25 @@ def aplicar_estilo_corporativo():
         margin: 0 !important;
     }
 
+    .qr-box-center {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        background: rgba(255, 255, 255, 0.96);
+        border: 2px solid #38bdf8;
+        border-radius: 12px;
+        padding: 12px;
+        margin: 8px auto 12px auto;
+        max-width: 240px;
+    }
+    .qr-box-center img {
+        width: 185px;
+        height: 185px;
+        object-fit: contain;
+        border-radius: 8px;
+    }
+
     body[data-percet-theme="light"] div[role="dialog"] {
         background: linear-gradient(145deg, #020b1e 0%, #042454 65%, #00357a 100%) !important;
         border: 2px solid #00b4d8 !important;
@@ -1055,6 +1122,10 @@ def aplicar_estilo_corporativo():
     body[data-percet-theme="light"] div[role="dialog"] button[aria-label="Close"] {
         color: #ffffff !important;
         font-weight: 800 !important;
+    }
+    body[data-percet-theme="light"] div[role="dialog"] .qr-box-center span,
+    body[data-percet-theme="light"] div[role="dialog"] .qr-box-center p {
+        color: #020b1e !important;
     }
     body[data-percet-theme="light"] div[role="dialog"] input,
     body[data-percet-theme="light"] div[role="dialog"] textarea {
@@ -1348,7 +1419,60 @@ with st.sidebar:
     modo_enso = st.toggle(T["enso_label"], value=True, help=T["enso_help"])
     st.caption(f"📌 **{T['enso_mode_active'] if modo_enso else T['enso_mode_base']}**")
 
-# 6. MODAL DE SOLICITUD CON CLÁUSULA DE PROTECCIÓN DE DATOS (LEY N° 29733) Y LÍMITE DE ARCHIVO
+# 6. MODAL DE PAGO CON QR (qr_pago.png) PARA DESBLOQUEAR EL PACK (PDF + CSV POR S/ 39)
+@st.dialog(" ")
+def mostrar_modal_pago_pack():
+    logo_html = f'<img src="data:image/png;base64,{LOGO_B64}" class="modal-brand-logo">' if LOGO_B64 else ""
+    st.markdown(f"""
+    <div class="modal-brand-header">
+        {logo_html}
+        <div class="modal-brand-title">PACK TÉCNICO<br>PERCET · S/ {PRECIO_PACK_PEN}</div>
+    </div>
+    """, unsafe_allow_html=True)
+
+    st.markdown(f"""
+    <div style="background: rgba(0, 180, 216, 0.20); border-left: 5px solid #00b4d8; padding: 10px 14px; border-radius: 8px; margin-bottom: 10px;">
+        <div style="font-size: 0.84rem; font-weight: 800; line-height: 1.4;">
+            {T['qr_modal_sub']}
+        </div>
+        <div style="font-size: 0.78rem; font-weight: 700; margin-top: 6px; line-height: 1.45;">
+            {T['qr_step_1']}<br>
+            {T['qr_step_2']}<br>
+            {T['qr_step_3']}
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
+
+    if QR_B64:
+        st.markdown(f"""
+        <div class="qr-box-center">
+            <img src="data:image/png;base64,{QR_B64}" alt="QR de Pago PERCET">
+            <span style="font-size:0.75rem; font-weight:900; margin-top:6px;">PACK PDF + CSV · S/ {PRECIO_PACK_PEN}</span>
+        </div>
+        """, unsafe_allow_html=True)
+    else:
+        st.warning(T["qr_missing_file"])
+
+    msg_pago_wa = (
+        f"Hola PERCET, realicé el pago de S/ {PRECIO_PACK_PEN} por el Pack Técnico (PDF + CSV) "
+        f"para el proyecto *{nombre_proyecto}* 📍[{st.session_state.lat}, {st.session_state.lon}] "
+        f"({nombre_rubro_activo}). Adjunto mi comprobante para recibir mi código de desbloqueo."
+    )
+    link_pago_wa = f"https://wa.me/{WHATSAPP_NUMERO}?text={urllib.parse.quote(msg_pago_wa)}"
+    st.link_button(T["qr_btn_wa"], link_pago_wa, use_container_width=True)
+
+    codigo_ingresado = st.text_input(T["qr_code_label"], placeholder="Ej. PERCET39", max_chars=30).strip().upper()
+    if st.button(T["qr_unlock_btn"], type="primary", use_container_width=True):
+        if codigo_ingresado in CODIGOS_VALIDOS_PACK:
+            st.session_state.pack_desbloqueado = True
+            if st.session_state.accion_pendiente_pack == "pdf":
+                st.session_state.disparar_pdf_ahora = True
+            st.session_state.accion_pendiente_pack = None
+            st.rerun()
+        else:
+            st.warning(T["qr_code_err"])
+
+# 7. MODAL DE SOLICITUD CON CLÁUSULA DE PROTECCIÓN DE DATOS (LEY N° 29733) Y LÍMITE DE ARCHIVO
 @st.dialog(" ")
 def mostrar_modal_cotizacion():
     logo_html = f'<img src="data:image/png;base64,{LOGO_B64}" class="modal-brand-logo">' if LOGO_B64 else ""
@@ -1480,7 +1604,7 @@ def mostrar_modal_cotizacion():
             else:
                 st.warning(T["privacy_warn"])
 
-# 7. ENCABEZADO SUPERIOR
+# 8. ENCABEZADO SUPERIOR
 st.markdown(f"""
 <div class="corporate-header">
     <p class="corporate-title">{T['header_title']}</p>
@@ -1489,7 +1613,7 @@ st.markdown(f"""
 </div>
 """, unsafe_allow_html=True)
 
-# 8. OBTENCIÓN DE DATOS SATELITALES REALES (14 DÍAS: 1–7 PRONÓSTICO Y 8–14 TENDENCIA)
+# 9. OBTENCIÓN DE DATOS SATELITALES REALES (14 DÍAS: 1–7 PRONÓSTICO Y 8–14 TENDENCIA)
 lat_actual = float(st.session_state.lat)
 lon_actual = float(st.session_state.lon)
 
@@ -1546,7 +1670,7 @@ else:
 
 codigo_unico_id = f"PG-{datetime.now().strftime('%Y')}-{abs(hash(f'{nombre_proyecto}_{lat_actual}_{lon_actual}_{fecha_pico}')) % 90000 + 10000}"
 
-# 9. SECCIÓN 01 (MAPA CON NORTE) Y SECCIÓN 02 (EVALUACIÓN OPERATIVA)
+# 10. SECCIÓN 01 (MAPA CON NORTE) Y SECCIÓN 02 (EVALUACIÓN OPERATIVA)
 col_mapa, col_panel = st.columns([1.22, 1], gap="large")
 
 with col_mapa:
@@ -1733,7 +1857,7 @@ with col_panel:
 
 st.markdown("<br>", unsafe_allow_html=True)
 
-# 10. SECCIÓN 03: INDICADORES CLAVE SIN NUMERACIÓN Y 100% CENTRADOS (14 DÍAS)
+# 11. SECCIÓN 03: INDICADORES CLAVE SIN NUMERACIÓN Y 100% CENTRADOS (14 DÍAS)
 st.markdown(f"""
 <div class="sec-header">
     <p class="sec-header-title">📊 {T['sec3_title']}</p>
@@ -1768,7 +1892,7 @@ with k3:
 
 st.markdown("<br>", unsafe_allow_html=True)
 
-# 11. SECCIÓN 04: CRONOGRAMA DE IMPACTO (DÍAS 1–7 PRONÓSTICO Y DÍAS 8–14 TENDENCIA)
+# 12. SECCIÓN 04: CRONOGRAMA DE IMPACTO (DÍAS 1–7 PRONÓSTICO Y DÍAS 8–14 TENDENCIA)
 st.markdown(f"""
 <div class="sec-header">
     <p class="sec-header-title">📅 {T['sec4_title']}</p>
@@ -1903,7 +2027,7 @@ st.markdown(f"""
 
 st.markdown("<br>", unsafe_allow_html=True)
 
-# 12. GENERADOR DE INFORME TÉCNICO REFERENCIAL PDF (HOJA A4 VERTICAL 100% COMPLETA SIN ABOUT:BLANK)
+# 13. GENERADOR DE INFORME TÉCNICO REFERENCIAL PDF (HOJA A4 VERTICAL 100% COMPLETA SIN ABOUT:BLANK)
 def disparar_pdf_infografia_una_hoja():
     fechas_js = json.dumps(df_diario["Fecha"].tolist())
     valores_js = json.dumps(df_diario["Pronóstico"].tolist())
@@ -2123,8 +2247,12 @@ def disparar_pdf_infografia_una_hoja():
     """
     components.html(html_infografia, height=0, width=0)
 
-# Botones de Exportación (CSV 14 días con cabecera de metadatos y PDF 1 Hoja)
-col_dl1, col_dl2 = st.columns(2)
+# Si el usuario acaba de ingresar el código y pidió exportar el PDF, dispararlo automáticamente
+if st.session_state.disparar_pdf_ahora:
+    st.session_state.disparar_pdf_ahora = False
+    disparar_pdf_infografia_una_hoja()
+
+# Botones de Exportación del Pack (PDF + CSV por S/ 39 con QR qr_pago.png)
 cabecera_csv = (
     f"# PERCET GeoRisk - Informe Tecnico Referencial | ID: {codigo_unico_id}\n"
     f"# Proyecto: {nombre_proyecto} | Rubro: {nombre_rubro_activo} | Umbral: {umbral_critico} {UNIT_MM}\n"
@@ -2132,19 +2260,38 @@ cabecera_csv = (
 )
 csv_data = (cabecera_csv + df_mostrar.to_csv(index=False)).encode('utf-8-sig')
 
-with col_dl1:
-    st.download_button(
-        label=T["dl_csv"],
-        data=csv_data,
-        file_name=f"{codigo_unico_id}_PERCET_GeoRisk_14D_{nombre_proyecto}.csv",
-        mime="text/csv",
-        use_container_width=True
-    )
-with col_dl2:
-    if st.button(T["dl_pdf"], use_container_width=True):
-        disparar_pdf_infografia_una_hoja()
+estado_pack_html = (
+    f'<span style="color:#16a34a;">{T["pack_unlocked_txt"]}</span>'
+    if st.session_state.pack_desbloqueado
+    else f'<span>🔒 {T["pack_badge_txt"]}</span>'
+)
+st.markdown(f'<div class="pack-status-bar">{estado_pack_html}</div>', unsafe_allow_html=True)
 
-# 13. DESPLEGABLE TÉCNICO (14 DÍAS REALES + METODOLOGÍA Y ORIGEN DEL MODELO ML)
+col_dl1, col_dl2 = st.columns(2)
+with col_dl1:
+    if st.session_state.pack_desbloqueado:
+        st.download_button(
+            label=T["dl_csv"],
+            data=csv_data,
+            file_name=f"{codigo_unico_id}_PERCET_GeoRisk_14D_{nombre_proyecto}.csv",
+            mime="text/csv",
+            use_container_width=True
+        )
+    else:
+        if st.button(T["dl_csv"], key="btn_pack_csv", use_container_width=True):
+            st.session_state.accion_pendiente_pack = "csv"
+            mostrar_modal_pago_pack()
+
+with col_dl2:
+    if st.session_state.pack_desbloqueado:
+        if st.button(T["dl_pdf"], key="btn_pack_pdf_ok", use_container_width=True):
+            disparar_pdf_infografia_una_hoja()
+    else:
+        if st.button(T["dl_pdf"], key="btn_pack_pdf_lock", use_container_width=True):
+            st.session_state.accion_pendiente_pack = "pdf"
+            mostrar_modal_pago_pack()
+
+# 14. DESPLEGABLE TÉCNICO (14 DÍAS REALES + METODOLOGÍA Y ORIGEN DEL MODELO ML)
 with st.expander(T["exp_title"]):
     st.markdown(f"""
 {T['ml_bullet_1']}
@@ -2152,7 +2299,7 @@ with st.expander(T["exp_title"]):
     """)
     st.dataframe(df_mostrar, use_container_width=True, hide_index=True)
 
-# 14. DISCLAIMER Y BANNER B2B MEJORADO
+# 15. DISCLAIMER Y BANNER B2B MEJORADO
 st.markdown(f'<div class="legal-disclaimer">{T["disclaimer"]}</div>', unsafe_allow_html=True)
 
 if LANG == "ES":
