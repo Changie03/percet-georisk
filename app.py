@@ -29,12 +29,14 @@ if "last_click" not in st.session_state:
     st.session_state.last_click = None
 if "pack_desbloqueado" not in st.session_state:
     st.session_state.pack_desbloqueado = False
-if "empresa_codigo_activo" not in st.session_state:
-    st.session_state.empresa_codigo_activo = None
+if "codigo_activo_pack" not in st.session_state:
+    st.session_state.codigo_activo_pack = None
 if "accion_pendiente_pack" not in st.session_state:
     st.session_state.accion_pendiente_pack = None
 if "disparar_pdf_ahora" not in st.session_state:
     st.session_state.disparar_pdf_ahora = False
+if "codigos_usados" not in st.session_state:
+    st.session_state.codigos_usados = set()
 
 LOGO_FILE = "logo.png"
 QR_FILE = "qr_pago.png"
@@ -42,8 +44,7 @@ CORREO_CORPORATIVO = "oficina.tecnica.puh@outlook.com"
 WHATSAPP_NUMERO = "51981328639"
 PRECIO_PACK_PEN = 39
 
-# Lote de códigos asignables por empresa (1 código único por empresa)
-CODIGOS_POR_EMPRESA = {
+CODIGOS_UN_SOLO_USO = {
     "PE4K9M2", "PE7R2X8", "PE1B8V4", "PE9T3L6", "PE5W0Z1", "PE2D7N9", "PE8F4C3", "PE6H1P5", "PE3J9Q7", "PE0S5K8",
     "PE4M2R6", "PE7X8B1", "PE1V4T9", "PE9L6W3", "PE5Z1D0", "PE2N9F7", "PE8C3H4", "PE6P5J2", "PE3Q7S8", "PE0K8M1",
     "PEA49K2", "PEB72R8", "PEC18V4", "PED93L6", "PEF50Z1", "PEG27N9", "PEH84C3", "PEJ61P5", "PEK39Q7", "PEL05K8",
@@ -225,16 +226,16 @@ TEXTOS = {
         "chart_div_right": "TENDENCIA (D8-D14) ▶",
         "dl_csv": "📥 DESCARGAR MATRIZ 14 DÍAS (EXCEL / CSV)",
         "dl_pdf": "📄 EXPORTAR INFORME TÉCNICO PDF (1 HOJA)",
-        "pack_badge_txt": "PACK TÉCNICO (PDF + CSV) · S/ 39 · CÓDIGO ÚNICO POR EMPRESA",
-        "pack_unlocked_txt": "✅ Pack Técnico (PDF + CSV) desbloqueado para la empresa ({codigo}).",
-        "qr_modal_sub": "Incluye <b>Informe PDF (1 hoja)</b> + <b>Matriz CSV/Excel (14 días)</b> con <b>código único por empresa</b> por <b>S/ 39</b>.",
+        "pack_badge_txt": "PACK TÉCNICO (PDF + CSV) · S/ 39 · CÓDIGO DE UN SOLO USO",
+        "pack_unlocked_txt": "✅ Pack Técnico (PDF + CSV) desbloqueado con código ({codigo}).",
+        "qr_modal_sub": "Incluye <b>Informe PDF (1 hoja)</b> + <b>Matriz CSV/Excel (14 días)</b> con un solo pago de <b>S/ 39</b> (código de un solo uso).",
         "qr_step_1": "1. Escanea el QR y paga <b>S/ 39</b>.",
-        "qr_step_2": "2. Envía tu comprobante por WhatsApp para recibir el código único de tu empresa.",
-        "qr_step_3": "3. Ingresa aquí el código único de tu empresa:",
+        "qr_step_2": "2. Envía tu comprobante por WhatsApp para recibir tu código de un solo uso.",
+        "qr_step_3": "3. Ingresa aquí tu código de desbloqueo (solo 1 uso):",
         "qr_btn_wa": "📲 ENVIAR COMPROBANTE POR WHATSAPP",
-        "qr_code_label": "CÓDIGO ÚNICO DE EMPRESA:",
+        "qr_code_label": "CÓDIGO DE DESBLOQUEO (UN SOLO USO):",
         "qr_unlock_btn": "🔓 DESBLOQUEAR PACK (PDF + CSV)",
-        "qr_code_err": "⚠️ Código no válido. Solicita el código único de tu empresa por WhatsApp tras confirmar el pago.",
+        "qr_code_err": "⚠️ Código no válido o ya utilizado. Solicita un código nuevo por WhatsApp tras confirmar el pago.",
         "qr_missing_file": "Sube el archivo qr_pago.png a tu repositorio para mostrar aquí tu código QR.",
         "exp_title": "🛠️ VER METODOLOGÍA, FUENTES Y MATRIZ METEOROLÓGICA COMPLETA (14 DÍAS)",
         "ml_bullet_1": "* **Fuente Meteorológica en Vivo:** Datos satelitales y modelos numéricos provistos por **Open-Meteo.com (CC BY 4.0)**. Días 1–7 corresponden a Pronóstico Operativo; Días 8–14 corresponden a Tendencia Referencial.",
@@ -339,16 +340,16 @@ TEXTOS = {
         "chart_div_right": "TREND (D8-D14) ▶",
         "dl_csv": "📥 DOWNLOAD 14-DAY MATRIX (EXCEL / CSV)",
         "dl_pdf": "📄 EXPORT TECHNICAL PDF REPORT (1 PAGE)",
-        "pack_badge_txt": "TECHNICAL PACK (PDF + CSV) · S/ 39 · UNIQUE COMPANY CODE",
-        "pack_unlocked_txt": "✅ Technical Pack (PDF + CSV) unlocked for company ({codigo}).",
-        "qr_modal_sub": "Includes <b>1-Page PDF Report</b> + <b>14-Day CSV/Excel Matrix</b> with a <b>unique company code</b> for <b>S/ 39</b>.",
+        "pack_badge_txt": "TECHNICAL PACK (PDF + CSV) · S/ 39 · SINGLE-USE CODE",
+        "pack_unlocked_txt": "✅ Technical Pack (PDF + CSV) unlocked with code ({codigo}).",
+        "qr_modal_sub": "Includes <b>1-Page PDF Report</b> + <b>14-Day CSV/Excel Matrix</b> with a single payment of <b>S/ 39</b> (single-use code).",
         "qr_step_1": "1. Scan the QR code and pay <b>S/ 39</b>.",
-        "qr_step_2": "2. Send your payment receipt via WhatsApp to get your company's unique code.",
-        "qr_step_3": "3. Enter your company's unique code here:",
+        "qr_step_2": "2. Send your payment receipt via WhatsApp to receive your single-use code.",
+        "qr_step_3": "3. Enter your unlock code here (single use only):",
         "qr_btn_wa": "📲 SEND RECEIPT VIA WHATSAPP",
-        "qr_code_label": "UNIQUE COMPANY CODE:",
+        "qr_code_label": "UNLOCK CODE (SINGLE USE):",
         "qr_unlock_btn": "🔓 UNLOCK PACK (PDF + CSV)",
-        "qr_code_err": "⚠️ Invalid code. Request your company's unique code via WhatsApp after payment confirmation.",
+        "qr_code_err": "⚠️ Invalid or already used code. Request a new code via WhatsApp after payment confirmation.",
         "qr_missing_file": "Upload qr_pago.png to your repository to display your QR code here.",
         "exp_title": "🛠️ VIEW METHODOLOGY, SOURCES & FULL METEOROLOGICAL MATRIX (14 DAYS)",
         "ml_bullet_1": "* **Live Meteorological Source:** Satellite and numerical weather prediction data provided by **Open-Meteo.com (CC BY 4.0)**. Days 1–7 represent Operational Forecast; Days 8–14 represent Referential Trend.",
@@ -1524,7 +1525,7 @@ with st.sidebar:
     modo_enso = st.toggle(T["enso_label"], value=True, help=T["enso_help"])
     st.caption(f"📌 **{T['enso_mode_active'] if modo_enso else T['enso_mode_base']}**")
 
-# 6. MODAL DE PAGO CON QR (qr_pago.png) Y CÓDIGO ÚNICO POR EMPRESA PARA DESBLOQUEAR EL PACK (S/ 39)
+# 6. MODAL DE PAGO CON QR (qr_pago.png) Y CÓDIGOS DE UN SOLO USO PARA DESBLOQUEAR EL PACK (S/ 39)
 @st.dialog(" ")
 def mostrar_modal_pago_pack():
     logo_html = f'<img src="data:image/png;base64,{LOGO_B64}" class="modal-brand-logo">' if LOGO_B64 else ""
@@ -1560,17 +1561,18 @@ def mostrar_modal_pago_pack():
 
     msg_pago_wa = (
         f"Hola PERCET, realice el pago de S/ {PRECIO_PACK_PEN} por el Pack Tecnico (PDF + CSV) "
-        f"para la empresa / proyecto *{nombre_proyecto}* | Coord. [{st.session_state.lat}, {st.session_state.lon}] "
-        f"({nombre_rubro_activo}). Adjunto mi comprobante para recibir el codigo unico de mi empresa."
+        f"para el proyecto *{nombre_proyecto}* | Coord. [{st.session_state.lat}, {st.session_state.lon}] "
+        f"({nombre_rubro_activo}). Adjunto mi comprobante para recibir mi codigo de un solo uso."
     )
     link_pago_wa = f"https://wa.me/{WHATSAPP_NUMERO}?text={urllib.parse.quote(msg_pago_wa)}"
     st.link_button(T["qr_btn_wa"], link_pago_wa, use_container_width=True)
 
     codigo_ingresado = st.text_input(T["qr_code_label"], placeholder="Ej. PE7M4Q9", max_chars=20).strip().upper()
     if st.button(T["qr_unlock_btn"], type="primary", use_container_width=True):
-        if codigo_ingresado in CODIGOS_POR_EMPRESA:
+        if codigo_ingresado in CODIGOS_UN_SOLO_USO and codigo_ingresado not in st.session_state.codigos_usados:
+            st.session_state.codigos_usados.add(codigo_ingresado)
             st.session_state.pack_desbloqueado = True
-            st.session_state.empresa_codigo_activo = codigo_ingresado
+            st.session_state.codigo_activo_pack = codigo_ingresado
             if st.session_state.accion_pendiente_pack == "pdf":
                 st.session_state.disparar_pdf_ahora = True
             st.session_state.accion_pendiente_pack = None
@@ -2365,7 +2367,7 @@ cabecera_csv = (
 csv_data = (cabecera_csv + df_mostrar.to_csv(index=False)).encode('utf-8-sig')
 
 estado_pack_html = (
-    f'<span style="color:#16a34a;">{T["pack_unlocked_txt"].format(codigo=st.session_state.empresa_codigo_activo)}</span>'
+    f'<span style="color:#16a34a;">{T["pack_unlocked_txt"].format(codigo=st.session_state.codigo_activo_pack)}</span>'
     if st.session_state.pack_desbloqueado
     else f'<span>🔒 {T["pack_badge_txt"]}</span>'
 )
