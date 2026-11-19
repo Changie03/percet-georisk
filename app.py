@@ -33,13 +33,117 @@ if "accion_pendiente_pack" not in st.session_state:
     st.session_state.accion_pendiente_pack = None
 if "disparar_pdf_ahora" not in st.session_state:
     st.session_state.disparar_pdf_ahora = False
+if "codigos_usados" not in st.session_state:
+    st.session_state.codigos_usados = set()
 
 LOGO_FILE = "logo.png"
 QR_FILE = "qr_pago.png"
 CORREO_CORPORATIVO = "oficina.tecnica.puh@outlook.com"
 WHATSAPP_NUMERO = "51981328639"
 PRECIO_PACK_PEN = 39
-CODIGOS_VALIDOS_PACK = {"PERCET39", "PACK39", "GEORISK39"}
+
+CODIGOS_UN_SOLO_USO = {
+    "PE4K9M2", "PE7R2X8", "PE1B8V4", "PE9T3L6", "PE5W0Z1", "PE2D7N9", "PE8F4C3", "PE6H1P5", "PE3J9Q7", "PE0S5K8",
+    "PE4M2R6", "PE7X8B1", "PE1V4T9", "PE9L6W3", "PE5Z1D0", "PE2N9F7", "PE8C3H4", "PE6P5J2", "PE3Q7S8", "PE0K8M1",
+    "PEA49K2", "PEB72R8", "PEC18V4", "PED93L6", "PEF50Z1", "PEG27N9", "PEH84C3", "PEJ61P5", "PEK39Q7", "PEL05K8",
+    "PEM42R6", "PEN78B1", "PEP14T9", "PEQ96W3", "PER51D0", "PES29F7", "PET83H4", "PEU65J2", "PEV37S8", "PEW08M1",
+    "PE9A4K2", "PE7B2R8", "PE1C8V4", "PE9D3L6", "PE5F0Z1", "PE2G7N9", "PE8H4C3", "PE6J1P5", "PE3K9Q7", "PE0L5K8",
+    "PE4M8R2", "PE7N1B6", "PE1P9T4", "PE9Q3W8", "PE5R0D1", "PE2S7F9", "PE8T4H3", "PE6U1J5", "PE3V9S7", "PE0W5M8",
+    "PE48A2K", "PE71B8R", "PE19C4V", "PE93D6L", "PE50F1Z", "PE27G9N", "PE84H3C", "PE61J5P", "PE39K7Q", "PE05L8K",
+    "PE42M6R", "PE78N1B", "PE14P9T", "PE96Q3W", "PE51R0D", "PE29S7F", "PE83T4H", "PE65U1J", "PE37V9S", "PE08W5M",
+    "PEAK492", "PEBR728", "PECV184", "PEDL936", "PEFZ501", "PEGN279", "PEHC843", "PEJP615", "PEKQ397", "PELK058",
+    "PEMR426", "PENB781", "PEPT149", "PEQW963", "PERD510", "PESF297", "PETH834", "PEUJ652", "PEVS378", "PEWM081",
+    "PE2A8C9", "PE4B1D7", "PE6E3F5", "PE8G5H3", "PE0J7K1", "PE1L9M8", "PE3N2P6", "PE5Q4R4", "PE7S6T2", "PE9U8V0",
+    "PE2W0X9", "PE4Y2Z7", "PE6A4B5", "PE8C6D3", "PE0E8F1", "PE1G0H8", "PE3J2K6", "PE5L4M4", "PE7N6P2", "PE9Q8R0",
+    "PE2S1T9", "PE4U3V7", "PE6W5X5", "PE8Y7Z3", "PE0A9B1", "PE1C1D8", "PE3E3F6", "PE5G5H4", "PE7J7K2", "PE9L9M0",
+    "PE2N1P8", "PE4Q3R6", "PE6S5T4", "PE8U7V2", "PE0W9X0", "PE1Y1Z8", "PE3A3B6", "PE5C5D4", "PE7E7F2", "PE9G9H0",
+    "PE2J2K8", "PE4L4M6", "PE6N6P4", "PE8Q8R2", "PE0S0T0", "PE1U2V8", "PE3W4X6", "PE5Y6Z4", "PE7A8B2", "PE9C0D0",
+    "PE2E3F8", "PE4G5H6", "PE6J7K4", "PE8L9M2", "PE0N1P0", "PE1Q3R8", "PE3S5T6", "PE5U7V4", "PE7W9X2", "PE9Y1Z0",
+    "PE2A4B8", "PE4C6D6", "PE6E8F4", "PE8G0H2", "PE0J2K0", "PE1L4M8", "PE3N6P6", "PE5Q8R4", "PE7S0T2", "PE9U2V0",
+    "PE2W5X8", "PE4Y7Z6", "PE6A9B4", "PE8C1D2", "PE0E3F0", "PE1G5H8", "PE3J7K6", "PE5L9M4", "PE7N1P2", "PE9Q3R0",
+    "PE2S6T8", "PE4U8V6", "PE6W0X4", "PE8Y2Z2", "PE0A4B0", "PE1C6D8", "PE3E8F6", "PE5G0H4", "PE7J2K2", "PE9L4M0",
+    "PE2N7P8", "PE4Q9R6", "PE6S1T4", "PE8U3V2", "PE0W5X0", "PE1Y7Z8", "PE3A9B6", "PE5C1D4", "PE7E3F2", "PE9G5H0",
+    "PEA12B3", "PEB23C4", "PEC34D5", "PED45E6", "PEE56F7", "PEF67G8", "PEG78H9", "PEH89J0", "PEJ90K1", "PEK01L2",
+    "PEL12M3", "PEM23N4", "PEN34P5", "PEP45Q6", "PEQ56R7", "PER67S8", "PES78T9", "PET89U0", "PEU90V1", "PEV01W2",
+    "PEW12X3", "PEX23Y4", "PEY34Z5", "PEZ45A6", "PEA56B7", "PEB67C8", "PEC78D9", "PED89E0", "PEE90F1", "PEF01G2",
+    "PEG12H3", "PEH23J4", "PEJ34K5", "PEK45L6", "PEL56M7", "PEM67N8", "PEN78P9", "PEP89Q0", "PEQ90R1", "PER01S2",
+    "PES12T3", "PET23U4", "PEU34V5", "PEV45W6", "PEW56X7", "PEX67Y8", "PEY78Z9", "PEZ89A0", "PEA90B1", "PEB01C2",
+    "PEC12D3", "PED23E4", "PEE34F5", "PEF45G6", "PEG56H7", "PEH67J8", "PEJ78K9", "PEK89L0", "PEL90M1", "PEM01N2",
+    "PEN12P3", "PEP23Q4", "PEQ34R5", "PER45S6", "PES56T7", "PET67U8", "PEU78V9", "PEV89W0", "PEW90X1", "PEX01Y2",
+    "PEY12Z3", "PEZ23A4", "PEA34B5", "PEB45C6", "PEC56D7", "PED67E8", "PEE78F9", "PEF89G0", "PEG90H1", "PEH01J2",
+    "PEJ12K3", "PEK23L4", "PEL34M5", "PEM45N6", "PEN56P7", "PEP67Q8", "PEQ78R9", "PER89S0", "PES90T1", "PET01U2",
+    "PEU12V3", "PEV23W4", "PEW34X5", "PEX45Y6", "PEY56Z7", "PEZ67A8", "PEA78B9", "PEB89C0", "PEC90D1", "PE11A22",
+    "PE22B33", "PE33C44", "PE44D55", "PE55E66", "PE66F77", "PE77G88", "PE88H99", "PE99J00", "PE00K11", "PE12L34",
+    "PE23M45", "PE34N56", "PE45P67", "PE56Q78", "PE67R89", "PE78S90", "PE89T01", "PE90U12", "PE01V23", "PE13W57",
+    "PE24X68", "PE35Y79", "PE46Z80", "PE57A91", "PE68B02", "PE79C13", "PE80D24", "PE91E35", "PE02F46", "PE14G70",
+    "PE25H81", "PE36J92", "PE47K03", "PE58L14", "PE69M25", "PE70N36", "PE81P47", "PE92Q58", "PE03R69", "PE15S93",
+    "PE26T04", "PE37U15", "PE48V26", "PE59W37", "PE60X48", "PE71Y59", "PE82Z60", "PE93A71", "PE04B82", "PE16C15",
+    "PE27D26", "PE38E37", "PE49F48", "PE50G59", "PE61H60", "PE72J71", "PE83K82", "PE94L93", "PE05M04", "PE17N37",
+    "PE28P48", "PE39Q59", "PE40R60", "PE51S71", "PE62T82", "PE73U93", "PE84V04", "PE95W15", "PE06X26", "PE18Y59",
+    "PE29Z60", "PE30A71", "PE41B82", "PE52C93", "PE63D04", "PE74E15", "PE85F26", "PE96G37", "PE07H48", "PE19J71",
+    "PE20K82", "PE31L93", "PE42M04", "PE53N15", "PE64P26", "PE75Q37", "PE86R48", "PE97S59", "PE08T60", "PE10U93",
+    "PE21V04", "PE32W15", "PE43X26", "PE54Y37", "PE65Z48", "PE76A59", "PE87B60", "PE98C71", "PE09D82", "PEAB123",
+    "PECD234", "PEEF345", "PEGH456", "PEJK567", "PELM678", "PENP789", "PEQR890", "PEST901", "PEUV012", "PEWX123",
+    "PEYZ234", "PEAC345", "PEBD456", "PECE567", "PEDF678", "PEEG789", "PEFH890", "PEGJ901", "PEHK012", "PEJL123",
+    "PEKM234", "PELN345", "PEMP456", "PENQ567", "PEPR678", "PEQS789", "PERT890", "PESU901", "PETV012", "PEUW123",
+    "PEVX234", "PEWY345", "PEXZ456", "PEYA567", "PEZB678", "PEAD789", "PEBE890", "PECF901", "PEDG012", "PEEH123",
+    "PEFJ234", "PEGK345", "PEHL456", "PEJM567", "PEKN678", "PELP789", "PEMQ890", "PENR901", "PEPS012", "PEQT123",
+    "PERU234", "PESV345", "PETW456", "PEUX567", "PEVY678", "PEWZ789", "PEXA890", "PEYB901", "PEZC012", "PEAE123",
+    "PEBF234", "PECG345", "PEDH456", "PEEJ567", "PEFK678", "PEGL789", "PEHM890", "PEJN901", "PEKP012", "PELQ123",
+    "PEMR234", "PENS345", "PEPT456", "PEQU567", "PERV678", "PESW789", "PETX890", "PEUY901", "PEVZ012", "PEWA123",
+    "PEXB234", "PEYC345", "PEZD456", "PEAF567", "PEBG678", "PECH789", "PEDJ890", "PEEK901", "PEFL012", "PEGM123",
+    "PEHN234", "PEJP345", "PEKQ456", "PELR567", "PEMS678", "PENT789", "PEPU890", "PEQV901", "PERW012", "PE9X8Y7",
+    "PE8W7V6", "PE7U6T5", "PE6S5R4", "PE5Q4P3", "PE4N3M2", "PE3L2K1", "PE2J1H0", "PE1G0F9", "PE0E9D8", "PE9C8B7",
+    "PE8A7Z6", "PE7Y6X5", "PE6W5V4", "PE5U4T3", "PE4S3R2", "PE3Q2P1", "PE2N1M0", "PE1L0K9", "PE0J9H8", "PE9G8F7",
+    "PE8E7D6", "PE7C6B5", "PE6A5Z4", "PE5Y4X3", "PE4W3V2", "PE3U2T1", "PE2S1R0", "PE1Q0P9", "PE0N9M8", "PE9L8K7",
+    "PE8J7H6", "PE7G6F5", "PE6E5D4", "PE5C4B3", "PE4A3Z2", "PE3Y2X1", "PE2W1V0", "PE1U0T9", "PE0S9R8", "PE9Q8P7",
+    "PE8N7M6", "PE7L6K5", "PE6J5H4", "PE5G4F3", "PE4E3D2", "PE3C2B1", "PE2A1Z0", "PE1Y0X9", "PE0W9V8", "PE9U8T7",
+    "PE8S7R6", "PE7Q6P5", "PE6N5M4", "PE5L4K3", "PE4J3H2", "PE3G2F1", "PE2E1D0", "PE1C0B9", "PE0A9Z8", "PE9Y8X7",
+    "PE8W7V5", "PE7U6T4", "PE6S5R3", "PE5Q4P2", "PE4N3M1", "PE3L2K0", "PE2J1H9", "PE1G0F8", "PE0E9D7", "PE9C8B6",
+    "PE8A7Z5", "PE7Y6X4", "PE6W5V3", "PE5U4T2", "PE4S3R1", "PE3Q2P0", "PE2N1M9", "PE1L0K8", "PE0J9H7", "PE9G8F6",
+    "PE8E7D5", "PE7C6B4", "PE6A5Z3", "PE5Y4X2", "PE4W3V1", "PE3U2T0", "PE2S1R9", "PE1Q0P8", "PE0N9M7", "PE9L8K6",
+    "PE8J7H5", "PE7G6F4", "PE6E5D3", "PE5C4B2", "PE4A3Z1", "PE3Y2X0", "PE2W1V9", "PE1U0T8", "PE0S9R7", "PE7A1B9",
+    "PE7C2D8", "PE7E3F7", "PE7G4H6", "PE7J5K5", "PE7L6M4", "PE7N7P3", "PE7Q8R2", "PE7S9T1", "PE7U0V0", "PE8A2B8",
+    "PE8C3D7", "PE8E4F6", "PE8G5H5", "PE8J6K4", "PE8L7M3", "PE8N8P2", "PE8Q9R1", "PE8S0T0", "PE8U1V9", "PE9A3B7",
+    "PE9C4D6", "PE9E5F5", "PE9G6G4", "PE9J7K3", "PE9L8M2", "PE9N9P1", "PE9Q0R0", "PE9S1T9", "PE9U2V8", "PE0A4B6",
+    "PE0C5D5", "PE0E6F4", "PE0G7H3", "PE0J8K2", "PE0L9M1", "PE0N0P0", "PE0Q1R9", "PE0S2T8", "PE0U3V7", "PE1A5B5",
+    "PE1C6D4", "PE1E7F3", "PE1G8H2", "PE1J9K1", "PE1L0M0", "PE1N1P9", "PE1Q2R8", "PE1S3T7", "PE1U4V6", "PE2A6B4",
+    "PE2C7D3", "PE2E8F2", "PE2G9H1", "PE2J0K0", "PE2L1M9", "PE2N2P8", "PE2Q3R7", "PE2S4T6", "PE2U5V5", "PE3A7B3",
+    "PE3C8D2", "PE3E9F1", "PE3G0H0", "PE3J1K9", "PE3L2M8", "PE3N3P7", "PE3Q4R6", "PE3S5T5", "PE3U6V4", "PE4A8B2",
+    "PE4C9D1", "PE4E0F0", "PE4G1H9", "PE4J2K8", "PE4L3M7", "PE4N4P6", "PE4Q5R5", "PE4S6T4", "PE4U7V3", "PE5A9B1",
+    "PE5C0D0", "PE5E1F9", "PE5G2H8", "PE5J3K7", "PE5L4M6", "PE5N5P5", "PE5Q6R4", "PE5S7T3", "PE5U8V2", "PE6A0B0",
+    "PE6C1D9", "PE6E2F8", "PE6G3H7", "PE6J4K6", "PE6L5M5", "PE6N6P4", "PE6Q7R3", "PE6S8T2", "PE6U9V1", "PE891AB",
+    "PE782CD", "PE673EF", "PE564GH", "PE455JK", "PE346LM", "PE237NP", "PE128QR", "PE019ST", "PE900UV", "PE892WX",
+    "PE783YZ", "PE674AC", "PE565BD", "PE456CE", "PE347DF", "PE238EG", "PE129FH", "PE010GJ", "PE901HK", "PE893JL",
+    "PE784KM", "PE675LN", "PE566MP", "PE457NQ", "PE348PR", "PE239QS", "PE120RT", "PE011SU", "PE902TV", "PE894UW",
+    "PE785VX", "PE676WY", "PE567XZ", "PE458YA", "PE349ZB", "PE230AD", "PE121BE", "PE012CF", "PE903DG", "PE895EH",
+    "PE786FJ", "PE677GK", "PE568HL", "PE459JM", "PE340KN", "PE231LP", "PE122MQ", "PE013NR", "PE904PS", "PE896QT",
+    "PE787RU", "PE678SV", "PE569TW", "PE450UX", "PE341VY", "PE232WZ", "PE123XA", "PE014YB", "PE905ZC", "PE897AE",
+    "PE788BF", "PE679CG", "PE560DH", "PE451EJ", "PE342FK", "PE233GL", "PE124HM", "PE015JN", "PE906KP", "PE898LQ",
+    "PE789MR", "PE670NS", "PE561PT", "PE452QU", "PE343RV", "PE234SW", "PE125TX", "PE016UY", "PE907VZ", "PE899WA",
+    "PE780XB", "PE671YC", "PE562ZD", "PE453AF", "PE344BG", "PE235CH", "PE126DJ", "PE017EK", "PE908FL", "PE890GM",
+    "PE781HN", "PE672JP", "PE563KQ", "PE454LR", "PE345MS", "PE236NT", "PE127PU", "PE018QV", "PE909RW", "PE891SX",
+    "PE782TY", "PE673UZ", "PE564VA", "PE455WB", "PE346XC", "PE237YD", "PE128ZE", "PE019AG", "PE900BH", "PE892CJ",
+    "PE783DK", "PE674EL", "PE565FM", "PE456GN", "PE347HP", "PE238JQ", "PE129KR", "PE010LS", "PE901MT", "PE893NU",
+    "PE784PV", "PE675QW", "PE566RX", "PE457SY", "PE348TZ", "PE239UA", "PE120VB", "PE011WC", "PE902XD", "PE894YE",
+    "PE785ZF", "PE676AH", "PE567BJ", "PE458CK", "PE349DL", "PE230EM", "PE121FN", "PE012GP", "PE903HQ", "PE895JR",
+    "PE786KS", "PE677LT", "PE568MU", "PE459NV", "PE340PW", "PE231QX", "PE122RY", "PE013SZ", "PE904TA", "PE896UB",
+    "PE787VC", "PE678WD", "PE569XE", "PE450YF", "PE341ZG", "PE232AJ", "PE123BK", "PE014CL", "PE905DM", "PE897EN",
+    "PE788FP", "PE679GQ", "PE560HR", "PE451JS", "PE342KT", "PE233LU", "PE124MV", "PE015NW", "PE906PX", "PE898QY",
+    "PE789RZ", "PE670SA", "PE561TB", "PE452UC", "PE343VD", "PE234WE", "PE125XF", "PE016YG", "PE907ZH", "PE899AK",
+    "PE780BL", "PE671CM", "PE562DN", "PE453EP", "PE344FQ", "PE235GR", "PE126HS", "PE017JT", "PE908KU", "PE890LV",
+    "PE781MW", "PE672NX", "PE563PY", "PE454QZ", "PE345RA", "PE236SB", "PE127TC", "PE018UD", "PE909VE", "PEZ19X8",
+    "PEY28W7", "PEX37V6", "PEW46U5", "PEV55T4", "PEU64S3", "PET73R2", "PES82Q1", "PER91P0", "PEQ09N8", "PEP18M7",
+    "PEN27L6", "PEM36K5", "PEL45J4", "PEK54H3", "PEJ63G2", "PEH72F1", "PEG81E0", "PEF90D9", "PEE09C7", "PED18B6",
+    "PEC27A5", "PEB36Z4", "PEA45Y3", "PEZ54X2", "PEY63W1", "PEX72V0", "PEW81U9", "PEV90T8", "PEU09S6", "PET18R5",
+    "PES27Q4", "PER36P3", "PEQ45N2", "PEP54M1", "PEN63L0", "PEM72K9", "PEL81J8", "PEK90H7", "PEJ09G5", "PEH18F4",
+    "PEG27E3", "PEF36D2", "PEE45C1", "PED54B0", "PEC63A9", "PEB72Z8", "PEA81Y7", "PEZ90X6", "PEY09W4", "PEX18V3",
+    "PEW27U2", "PEV36T1", "PEU45S0", "PET54R9", "PES63Q8", "PER72P7", "PEQ81N6", "PEP90M5", "PEN09L3", "PEM18K2",
+    "PEL27J1", "PEK36H0", "PEJ45G9", "PEH54F8", "PEG63E7", "PEF72D6", "PEE81C5", "PED90B4", "PEC09A2", "PEB18Z1",
+    "PEA27Y0", "PEZ36X9", "PEY45W8", "PEX54V7", "PEW63U6", "PEV72T5", "PEU81S4", "PET90R3", "PES09Q1", "PER18P0",
+    "PEQ27N9", "PEP36M8", "PEN45L7", "PEM54K6", "PEL63J5", "PEK72H4", "PEJ81G3", "PEH90F2", "PEG09E0", "PEF18D9",
+    "PEE27C8", "PED36B7", "PEC45A6", "PEB54Z5", "PEA63Y4", "PEZ72X3", "PEY81W2", "PEX90V1"
+}
 
 def obtener_imagen_base64(ruta):
     if os.path.exists(ruta):
@@ -120,16 +224,16 @@ TEXTOS = {
         "chart_div_right": "TENDENCIA (D8-D14) ▶",
         "dl_csv": "📥 DESCARGAR MATRIZ 14 DÍAS (EXCEL / CSV)",
         "dl_pdf": "📄 EXPORTAR INFORME TÉCNICO PDF (1 HOJA)",
-        "pack_badge_txt": "PACK TÉCNICO (PDF + CSV) · S/ 39",
+        "pack_badge_txt": "PACK TÉCNICO (PDF + CSV) · S/ 39 · CÓDIGO DE UN SOLO USO",
         "pack_unlocked_txt": "✅ Pack Técnico (PDF + CSV) desbloqueado para esta sesión.",
-        "qr_modal_sub": "Incluye <b>Informe PDF (1 hoja)</b> + <b>Matriz CSV/Excel (14 días)</b> con un solo pago de <b>S/ 39</b>.",
+        "qr_modal_sub": "Incluye <b>Informe PDF (1 hoja)</b> + <b>Matriz CSV/Excel (14 días)</b> con un solo pago de <b>S/ 39</b> (código de un solo uso).",
         "qr_step_1": "1. Escanea el QR y paga <b>S/ 39</b>.",
-        "qr_step_2": "2. Envía tu comprobante por WhatsApp para recibir tu código.",
-        "qr_step_3": "3. Ingresa aquí tu código de desbloqueo:",
+        "qr_step_2": "2. Envía tu comprobante por WhatsApp para recibir tu código único.",
+        "qr_step_3": "3. Ingresa aquí tu código de desbloqueo (solo 1 uso):",
         "qr_btn_wa": "📲 ENVIAR COMPROBANTE POR WHATSAPP",
-        "qr_code_label": "CÓDIGO DE DESBLOQUEO:",
+        "qr_code_label": "CÓDIGO DE DESBLOQUEO (UN SOLO USO):",
         "qr_unlock_btn": "🔓 DESBLOQUEAR PACK (PDF + CSV)",
-        "qr_code_err": "⚠️ Código incorrecto. Solicita tu código por WhatsApp tras confirmar el pago.",
+        "qr_code_err": "⚠️ Código no válido o ya utilizado. Solicita un código nuevo por WhatsApp tras confirmar el pago.",
         "qr_missing_file": "Sube el archivo qr_pago.png a tu repositorio para mostrar aquí tu código QR.",
         "exp_title": "🛠️ VER METODOLOGÍA, FUENTES Y MATRIZ METEOROLÓGICA COMPLETA (14 DÍAS)",
         "ml_bullet_1": "* **Fuente Meteorológica en Vivo:** Datos satelitales y modelos numéricos provistos por **Open-Meteo.com (CC BY 4.0)**. Días 1–7 corresponden a Pronóstico Operativo; Días 8–14 corresponden a Tendencia Referencial.",
@@ -234,16 +338,16 @@ TEXTOS = {
         "chart_div_right": "TREND (D8-D14) ▶",
         "dl_csv": "📥 DOWNLOAD 14-DAY MATRIX (EXCEL / CSV)",
         "dl_pdf": "📄 EXPORT TECHNICAL PDF REPORT (1 PAGE)",
-        "pack_badge_txt": "TECHNICAL PACK (PDF + CSV) · S/ 39",
+        "pack_badge_txt": "TECHNICAL PACK (PDF + CSV) · S/ 39 · SINGLE-USE CODE",
         "pack_unlocked_txt": "✅ Technical Pack (PDF + CSV) unlocked for this session.",
-        "qr_modal_sub": "Includes <b>1-Page PDF Report</b> + <b>14-Day CSV/Excel Matrix</b> with a single payment of <b>S/ 39</b>.",
+        "qr_modal_sub": "Includes <b>1-Page PDF Report</b> + <b>14-Day CSV/Excel Matrix</b> with a single payment of <b>S/ 39</b> (single-use code).",
         "qr_step_1": "1. Scan the QR code and pay <b>S/ 39</b>.",
-        "qr_step_2": "2. Send your payment receipt via WhatsApp to get your code.",
-        "qr_step_3": "3. Enter your unlock code here:",
+        "qr_step_2": "2. Send your payment receipt via WhatsApp to receive your unique code.",
+        "qr_step_3": "3. Enter your unlock code here (single use only):",
         "qr_btn_wa": "📲 SEND RECEIPT VIA WHATSAPP",
-        "qr_code_label": "UNLOCK CODE:",
+        "qr_code_label": "UNLOCK CODE (SINGLE USE):",
         "qr_unlock_btn": "🔓 UNLOCK PACK (PDF + CSV)",
-        "qr_code_err": "⚠️ Invalid code. Request your code on WhatsApp after confirming payment.",
+        "qr_code_err": "⚠️ Invalid or already used code. Request a new code via WhatsApp after payment confirmation.",
         "qr_missing_file": "Upload qr_pago.png to your repository to display your QR code here.",
         "exp_title": "🛠️ VIEW METHODOLOGY, SOURCES & FULL METEOROLOGICAL MATRIX (14 DAYS)",
         "ml_bullet_1": "* **Live Meteorological Source:** Satellite and numerical weather prediction data provided by **Open-Meteo.com (CC BY 4.0)**. Days 1–7 represent Operational Forecast; Days 8–14 represent Referential Trend.",
@@ -1419,7 +1523,7 @@ with st.sidebar:
     modo_enso = st.toggle(T["enso_label"], value=True, help=T["enso_help"])
     st.caption(f"📌 **{T['enso_mode_active'] if modo_enso else T['enso_mode_base']}**")
 
-# 6. MODAL DE PAGO CON QR (qr_pago.png) PARA DESBLOQUEAR EL PACK (PDF + CSV POR S/ 39)
+# 6. MODAL DE PAGO CON QR (qr_pago.png) Y CÓDIGOS DE UN SOLO USO PARA DESBLOQUEAR EL PACK (S/ 39)
 @st.dialog(" ")
 def mostrar_modal_pago_pack():
     logo_html = f'<img src="data:image/png;base64,{LOGO_B64}" class="modal-brand-logo">' if LOGO_B64 else ""
@@ -1461,9 +1565,10 @@ def mostrar_modal_pago_pack():
     link_pago_wa = f"https://wa.me/{WHATSAPP_NUMERO}?text={urllib.parse.quote(msg_pago_wa)}"
     st.link_button(T["qr_btn_wa"], link_pago_wa, use_container_width=True)
 
-    codigo_ingresado = st.text_input(T["qr_code_label"], placeholder="Ej. PERCET39", max_chars=30).strip().upper()
+    codigo_ingresado = st.text_input(T["qr_code_label"], placeholder="Ej. PE4K9M2", max_chars=20).strip().upper()
     if st.button(T["qr_unlock_btn"], type="primary", use_container_width=True):
-        if codigo_ingresado in CODIGOS_VALIDOS_PACK:
+        if codigo_ingresado in CODIGOS_UN_SOLO_USO and codigo_ingresado not in st.session_state.codigos_usados:
+            st.session_state.codigos_usados.add(codigo_ingresado)
             st.session_state.pack_desbloqueado = True
             if st.session_state.accion_pendiente_pack == "pdf":
                 st.session_state.disparar_pdf_ahora = True
@@ -2247,12 +2352,10 @@ def disparar_pdf_infografia_una_hoja():
     """
     components.html(html_infografia, height=0, width=0)
 
-# Si el usuario acaba de ingresar el código y pidió exportar el PDF, dispararlo automáticamente
 if st.session_state.disparar_pdf_ahora:
     st.session_state.disparar_pdf_ahora = False
     disparar_pdf_infografia_una_hoja()
 
-# Botones de Exportación del Pack (PDF + CSV por S/ 39 con QR qr_pago.png)
 cabecera_csv = (
     f"# PERCET GeoRisk - Informe Tecnico Referencial | ID: {codigo_unico_id}\n"
     f"# Proyecto: {nombre_proyecto} | Rubro: {nombre_rubro_activo} | Umbral: {umbral_critico} {UNIT_MM}\n"
