@@ -279,9 +279,9 @@ TEXTOS = {
         "pdf_sig_box": "✍️ <b>REVISADO EN OBRA POR:</b> ______________________________________ &nbsp;&nbsp;|&nbsp;&nbsp; <b>ING. RESIDENTE / CIP N°:</b> ______________________",
         "pdf_audit_stamp": "🆔 <b>ID INFORME:</b> {rep_id} &nbsp;|&nbsp; 🕒 <b>EMISIÓN:</b> {fecha_hora} hrs (UTC-5) &nbsp;|&nbsp; 📍 <b>COORD:</b> [{lat}, {lon}] &nbsp;|&nbsp; 🏢 <b>PERCET UNIVERSAL HOLDINGS S.A.C. (RUC: 20614633345)</b>",
         "b2b_title": "🏢 PERCET UNIVERSAL HOLDINGS S.A.C. | INGENIERÍA, OBRAS Y CONSULTORÍA",
-        "b2b_sub": "Respaldamos tus proyectos de infraestructura con soluciones de alto nivel técnico:<br>🇵🇪 <b>Operaciones en Perú:</b> Cotización y ejecución física de obras civiles, estructuras metálicas, remodelaciones y supervisión BIM/VDC en campo.<br>🌎 <b>Cobertura en Latinoamérica:</b> Consultoría especializada en mitigación hidrológica, modelamiento BIM/VDC y soporte técnico remoto.",
+        "b2b_sub": "Respaldamos tus proyectos de infraestructura con soluciones de alto nivel técnico:<br>🇵🇪 <b>Perú:</b> Cotización y ejecución física de obras civiles, estructuras metálicas, remodelaciones y supervisión BIM/VDC en campo.<br>🌎 <b>Latinoamérica:</b> Consultoría especializada en mitigación hidrológica, modelamiento BIM/VDC y soporte técnico remoto.",
         "btn_quote": "📝 SOLICITAR COTIZACIÓN DE OBRA / CONSULTORÍA",
-        "btn_wa": "💬 HABLAR CON UN ASESOR POR WHATSAPP",
+        "btn_feedback": "💡 SUGERENCIAS / MEJORAS DE LA PÁGINA",
         "privacy_check": "Acepto el tratamiento de mis datos para fines comerciales y técnicos conforme a la Ley N° 29733 (Ley de Protección de Datos Personales - Perú).",
         "privacy_warn": "⚠️ Debe aceptar la cláusula de Protección de Datos Personales (Ley N° 29733), ingresar un correo válido y completar los campos obligatorios.",
         "api_err_msg": "⚠️ El servicio satelital Open-Meteo no devolvió datos completos en este momento. Por política de integridad técnica (cero datos inventados), reintente la consulta en unos segundos.",
@@ -393,9 +393,9 @@ TEXTOS = {
         "pdf_sig_box": "✍️ <b>REVIEWED ON SITE BY:</b> ______________________________________ &nbsp;&nbsp;|&nbsp;&nbsp; <b>RESIDENT ENG. / LICENSE N°:</b> ______________________",
         "pdf_audit_stamp": "🆔 <b>REPORT ID:</b> {rep_id} &nbsp;|&nbsp; 🕒 <b>ISSUED:</b> {fecha_hora} hrs (UTC-5) &nbsp;|&nbsp; 📍 <b>COORD:</b> [{lat}, {lon}] &nbsp;|&nbsp; 🏢 <b>PERCET UNIVERSAL HOLDINGS S.A.C. (TAX ID: 20614633345)</b>",
         "b2b_title": "🌎 PERCET UNIVERSAL HOLDINGS S.A.C. | ENGINEERING & INFRASTRUCTURE SUPPORT",
-        "b2b_sub": "We support your infrastructure projects with high-level engineering solutions:<br>🌐 <b>International Coverage:</b> Remote hydrological risk consulting, climate modeling, and BIM/VDC digital supervision worldwide.<br>🇵🇪 <b>Operations in Peru:</b> Full on-site civil works execution, structural steel, remodeling, and field engineering.",
+        "b2b_sub": "We support your infrastructure projects with high-level engineering solutions:<br>🌐 <b>Latin America & Global:</b> Remote hydrological risk consulting, climate modeling, and BIM/VDC digital supervision.<br>🇵🇪 <b>Peru:</b> Full on-site civil works execution, structural steel, remodeling, and field engineering.",
         "btn_quote": "📝 REQUEST ENGINEERING CONSULTING / QUOTE",
-        "btn_wa": "💬 CONTACT ENGINEERING SUPPORT (WHATSAPP)",
+        "btn_feedback": "💡 PAGE SUGGESTIONS / IMPROVEMENTS",
         "privacy_check": "I accept the processing of my data for commercial and technical purposes in accordance with Data Protection Law N° 29733 (Peru).",
         "privacy_warn": "⚠️ Please accept the Data Protection clause (Law N° 29733), enter a valid email, and complete all required fields.",
         "api_err_msg": "⚠️ Open-Meteo satellite service did not return complete data at this moment. Per our strict data integrity policy (zero fabricated data), please retry in a few seconds.",
@@ -1636,7 +1636,7 @@ def mostrar_modal_pago_pack():
         else:
             st.warning(T["qr_code_err"])
 
-# 7. MODAL DE SOLICITUD REDIRIGIDO A WHATSAPP (+51 996 025 448) CON MENSAJE DE COTIZACIÓN ORDENADO
+# 7. MODAL DE SOLICITUD REDIRIGIDO A WHATSAPP (+51 996 025 448) SIN CARGADOR DE PDF EN LA WEB
 @st.dialog(" ")
 def mostrar_modal_cotizacion():
     logo_html = f'<img src="data:image/png;base64,{LOGO_B64}" class="modal-brand-logo">' if LOGO_B64 else ""
@@ -1654,7 +1654,7 @@ def mostrar_modal_cotizacion():
                 📐 COTIZACIÓN DE OBRAS E INGENIERÍA ESPECIALIZADA
             </div>
             <div style="font-size: 0.78rem; font-weight: 700; margin-top: 3px;">
-                Se generará tu ficha de cotización ordenada para enviarla directamente por WhatsApp al +51 996 025 448.
+                Se generará tu ficha de cotización ordenada para enviarla por WhatsApp al +51 996 025 448 (adjunta tus planos o PDFs directamente en el chat).
             </div>
         </div>
         """, unsafe_allow_html=True)
@@ -1663,21 +1663,13 @@ def mostrar_modal_cotizacion():
         tel_cli = st.text_input("TELÉFONO / WHATSAPP DE CONTACTO:", max_chars=40).strip()
         detalle_req = st.text_area(
             "DETALLE SU REQUERIMIENTO O PROYECTO A COTIZAR (Ej. Estructura metálica, remodelación, obras civiles, consultoría BIM/VDC):",
-            height=95,
+            height=105,
             max_chars=1200
         ).strip()
-        archivo = st.file_uploader("ADJUNTAR PLANO O EXPEDIENTE (OPCIONAL - MÁX 15 MB):", type=["pdf", "png", "jpg"])
         consentimiento_ley = st.checkbox(T["privacy_check"], value=True)
         
         if st.button("🚀 GENERAR COTIZACIÓN PARA WHATSAPP (+51 996 025 448)", type="primary", use_container_width=True):
-            if archivo and archivo.size > 15 * 1024 * 1024:
-                st.warning("⚠️ El archivo adjunto supera el límite de seguridad de 15 MB.")
-            elif emp and correo_cli_raw and correo_valido(correo_cli_raw) and detalle_req and consentimiento_ley:
-                nombre_arch = os.path.basename(archivo.name) if archivo else "Ninguno"
-                nota_adjunto = (
-                    f"Archivo adjunto en formulario: {nombre_arch} (enviarlo tambien en este chat de WhatsApp)"
-                    if archivo else "Archivo adjunto en formulario: Ninguno"
-                )
+            if emp and correo_cli_raw and correo_valido(correo_cli_raw) and detalle_req and consentimiento_ley:
                 mensaje_cotizacion_wa = (
                     f"*SOLICITUD DE COTIZACION - PERCET GEORISK (ES)*\n"
                     f"----------------------------------------\n"
@@ -1693,11 +1685,11 @@ def mostrar_modal_cotizacion():
                     f"*3. REQUERIMIENTOS A COTIZAR*\n"
                     f"{detalle_req}\n\n"
                     f"*4. ADJUNTOS Y CONFORMIDAD*\n"
-                    f"- {nota_adjunto}\n"
+                    f"- Planos o PDFs: Adjuntarlos directamente en este chat de WhatsApp si aplica\n"
                     f"- Proteccion de datos (Ley N 29733): Aceptada"
                 )
                 wa_cot_url = f"https://wa.me/{WHATSAPP_COTIZACIONES}?text={urllib.parse.quote(mensaje_cotizacion_wa)}"
-                st.success(f"✅ Cotización lista para enviar al **+51 996 025 448**.")
+                st.success("✅ Cotización lista para enviar al **+51 996 025 448**.")
                 st.link_button("📲 ABRIR WHATSAPP Y ENVIAR COTIZACIÓN (+51 996 025 448)", wa_cot_url, use_container_width=True)
             else:
                 st.warning(T["privacy_warn"])
@@ -1708,7 +1700,7 @@ def mostrar_modal_cotizacion():
                 💻 ENGINEERING CONSULTING & PROJECT QUOTES
             </div>
             <div style="font-size: 0.78rem; font-weight: 700; margin-top: 3px;">
-                A structured quote message will be prepared to send directly via WhatsApp to +51 996 025 448.
+                A structured quote message will be prepared to send via WhatsApp to +51 996 025 448 (attach drawings or PDFs directly in WhatsApp).
             </div>
         </div>
         """, unsafe_allow_html=True)
@@ -1717,21 +1709,13 @@ def mostrar_modal_cotizacion():
         tel_cli = st.text_input("CONTACT PHONE / WHATSAPP:", max_chars=40).strip()
         detalle_req = st.text_area(
             "PLEASE DETAIL YOUR PROJECT OR TECHNICAL REQUEST (e.g., Remote BIM/VDC consulting, hydrological study, civil works in Peru):",
-            height=95,
+            height=105,
             max_chars=1200
         ).strip()
-        archivo = st.file_uploader("UPLOAD BLUEPRINT OR DOCUMENT (OPTIONAL - MAX 15 MB):", type=["pdf", "png", "jpg"])
         consentimiento_ley = st.checkbox(T["privacy_check"], value=True)
         
         if st.button("🚀 GENERATE QUOTE FOR WHATSAPP (+51 996 025 448)", type="primary", use_container_width=True):
-            if archivo and archivo.size > 15 * 1024 * 1024:
-                st.warning("⚠️ Attached file exceeds the 15 MB security limit.")
-            elif emp and correo_cli_raw and correo_valido(correo_cli_raw) and detalle_req and consentimiento_ley:
-                nombre_arch = os.path.basename(archivo.name) if archivo else "None"
-                nota_adjunto = (
-                    f"Uploaded file in form: {nombre_arch} (please also attach it in this WhatsApp chat)"
-                    if archivo else "Uploaded file in form: None"
-                )
+            if emp and correo_cli_raw and correo_valido(correo_cli_raw) and detalle_req and consentimiento_ley:
                 mensaje_cotizacion_wa = (
                     f"*QUOTE REQUEST - PERCET GEORISK (EN)*\n"
                     f"----------------------------------------\n"
@@ -1747,14 +1731,120 @@ def mostrar_modal_cotizacion():
                     f"*3. PROJECT REQUIREMENTS*\n"
                     f"{detalle_req}\n\n"
                     f"*4. ATTACHMENTS & CONSENT*\n"
-                    f"- {nota_adjunto}\n"
+                    f"- Drawings / PDFs: Attach directly in this WhatsApp chat if applicable\n"
                     f"- Data Protection (Law N 29733): Accepted"
                 )
                 wa_cot_url = f"https://wa.me/{WHATSAPP_COTIZACIONES}?text={urllib.parse.quote(mensaje_cotizacion_wa)}"
-                st.success(f"✅ Quote ready to send to **+51 996 025 448**.")
+                st.success("✅ Quote ready to send to **+51 996 025 448**.")
                 st.link_button("📲 OPEN WHATSAPP AND SEND QUOTE (+51 996 025 448)", wa_cot_url, use_container_width=True)
             else:
                 st.warning(T["privacy_warn"])
+
+# 7B. MODAL INTERACTIVO DE SUGERENCIAS Y MEJORAS DE LA PÁGINA
+@st.dialog(" ")
+def mostrar_modal_sugerencias():
+    logo_html = f'<img src="data:image/png;base64,{LOGO_B64}" class="modal-brand-logo">' if LOGO_B64 else ""
+    st.markdown(f"""
+    <div class="modal-brand-header">
+        {logo_html}
+        <div class="modal-brand-title">SUGERENCIAS<br>PERCET GEORISK™</div>
+    </div>
+    """, unsafe_allow_html=True)
+
+    if LANG == "ES":
+        st.markdown("""
+        <div style="background: rgba(0, 180, 216, 0.20); border-left: 5px solid #00b4d8; padding: 10px 14px; border-radius: 8px; margin-bottom: 12px;">
+            <div style="font-size: 0.85rem; font-weight: 900; text-transform: uppercase; letter-spacing: 0.4px;">
+                💡 AYÚDANOS A MEJORAR LA PLATAFORMA
+            </div>
+            <div style="font-size: 0.78rem; font-weight: 700; margin-top: 3px;">
+                Cuéntanos qué función, gráfico, rubro o mejora te gustaría ver en PERCET GeoRisk™.
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
+        nombre_sug = st.text_input("TU NOMBRE / ROL (Ej. Ing. Residente, Supervisor):", max_chars=80).strip()
+        area_mejora = st.selectbox(
+            "SECCIÓN A MEJORAR:",
+            ["Mapa y coordenadas", "Gráficos y umbrales", "Informe PDF / Matriz CSV", "Nueva partida o rubro", "Experiencia / diseño general"]
+        )
+        calificacion = st.slider("VALORACIÓN ACTUAL DE LA PÁGINA:", min_value=1, max_value=5, value=5)
+        comentario_sug = st.text_area(
+            "ESCRIBE TU SUGERENCIA O IDEA DE MEJORA:",
+            placeholder="Ej. Me gustaría agregar un umbral de viento o exportar más días...",
+            height=95,
+            max_chars=800
+        ).strip()
+
+        if st.button("🚀 PREPARAR SUGERENCIA", type="primary", use_container_width=True):
+            if comentario_sug:
+                texto_sug = (
+                    f"*SUGERENCIA / MEJORA - PERCET GEORISK*\n"
+                    f"----------------------------------------\n"
+                    f"- Nombre / Rol: {nombre_sug if nombre_sug else 'Visitante'}\n"
+                    f"- Seccion: {area_mejora}\n"
+                    f"- Valoracion: {calificacion}/5\n"
+                    f"- Proyecto / Coord.: {nombre_proyecto} [{st.session_state.lat}, {st.session_state.lon}]\n"
+                    f"- Sugerencia:\n{comentario_sug}"
+                )
+                wa_sug_url = f"https://wa.me/{WHATSAPP_COTIZACIONES}?text={urllib.parse.quote(texto_sug)}"
+                mailto_sug_url = (
+                    f"mailto:{CORREO_CORPORATIVO}?subject={urllib.parse.quote('Sugerencia PERCET GeoRisk')}&body={urllib.parse.quote(texto_sug)}"
+                )
+                st.success("✅ ¡Gracias por tu aporte! Elige dónde enviarlo:")
+                st.link_button("📲 ENVIAR SUGERENCIA POR WHATSAPP", wa_sug_url, use_container_width=True)
+                st.markdown(
+                    f'<a href="{mailto_sug_url}" target="_blank" style="display:inline-block; margin-top:6px; font-size:0.82rem; font-weight:900; text-decoration:underline;">📧 Enviar también por correo ({CORREO_CORPORATIVO})</a>',
+                    unsafe_allow_html=True
+                )
+            else:
+                st.warning("⚠️ Escribe una sugerencia o comentario antes de continuar.")
+    else:
+        st.markdown("""
+        <div style="background: rgba(0, 180, 216, 0.20); border-left: 5px solid #00b4d8; padding: 10px 14px; border-radius: 8px; margin-bottom: 12px;">
+            <div style="font-size: 0.85rem; font-weight: 900; text-transform: uppercase; letter-spacing: 0.4px;">
+                💡 HELP US IMPROVE THE PLATFORM
+            </div>
+            <div style="font-size: 0.78rem; font-weight: 700; margin-top: 3px;">
+                Share ideas, features, or improvements you would like to see in PERCET GeoRisk™.
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
+        nombre_sug = st.text_input("YOUR NAME / ROLE (e.g., Site Engineer, PM):", max_chars=80).strip()
+        area_mejora = st.selectbox(
+            "SECTION TO IMPROVE:",
+            ["Map & Coordinates", "Charts & Thresholds", "PDF Report / CSV Matrix", "New Work Sector", "General UX / Design"]
+        )
+        calificacion = st.slider("CURRENT PAGE RATING:", min_value=1, max_value=5, value=5)
+        comentario_sug = st.text_area(
+            "WRITE YOUR SUGGESTION OR IMPROVEMENT IDEA:",
+            placeholder="e.g., Add wind threshold alerts or custom date range...",
+            height=95,
+            max_chars=800
+        ).strip()
+
+        if st.button("🚀 PREPARE SUGGESTION", type="primary", use_container_width=True):
+            if comentario_sug:
+                texto_sug = (
+                    f"*PAGE SUGGESTION - PERCET GEORISK*\n"
+                    f"----------------------------------------\n"
+                    f"- Name / Role: {nombre_sug if nombre_sug else 'Visitor'}\n"
+                    f"- Section: {area_mejora}\n"
+                    f"- Rating: {calificacion}/5\n"
+                    f"- Project / Coord.: {nombre_proyecto} [{st.session_state.lat}, {st.session_state.lon}]\n"
+                    f"- Suggestion:\n{comentario_sug}"
+                )
+                wa_sug_url = f"https://wa.me/{WHATSAPP_COTIZACIONES}?text={urllib.parse.quote(texto_sug)}"
+                mailto_sug_url = (
+                    f"mailto:{CORREO_CORPORATIVO}?subject={urllib.parse.quote('PERCET GeoRisk Suggestion')}&body={urllib.parse.quote(texto_sug)}"
+                )
+                st.success("✅ Thank you for your feedback! Choose where to send it:")
+                st.link_button("📲 SEND SUGGESTION VIA WHATSAPP", wa_sug_url, use_container_width=True)
+                st.markdown(
+                    f'<a href="{mailto_sug_url}" target="_blank" style="display:inline-block; margin-top:6px; font-size:0.82rem; font-weight:900; text-decoration:underline;">📧 Also send via email ({CORREO_CORPORATIVO})</a>',
+                    unsafe_allow_html=True
+                )
+            else:
+                st.warning("⚠️ Please enter a suggestion or comment before continuing.")
 
 # 8. ENCABEZADO SUPERIOR
 st.markdown(f"""
@@ -2449,21 +2539,8 @@ with st.expander(T["exp_title"]):
     """)
     st.dataframe(df_mostrar, use_container_width=True, hide_index=True)
 
-# 15. DISCLAIMER Y BANNER B2B MEJORADO
+# 15. DISCLAIMER Y BANNER B2B CON DOS ACCIONES CLARAS Y COMPLEMENTARIAS
 st.markdown(f'<div class="legal-disclaimer">{T["disclaimer"]}</div>', unsafe_allow_html=True)
-
-if LANG == "ES":
-    mensaje_wa = (
-        f"Hola PERCET, solicito cotizacion / asesoria de ingenieria para el proyecto "
-        f"*{nombre_proyecto}* | Coord. [{lat_actual}, {lon_actual}] ({nombre_rubro_activo} | Umbral: {umbral_critico} mm/dia)."
-    )
-else:
-    mensaje_wa = (
-        f"Hello PERCET, I'd like to request engineering consulting for the project "
-        f"*{nombre_proyecto}* | Coord. [{lat_actual}, {lon_actual}] ({nombre_rubro_activo} | Threshold: {umbral_critico} mm/day)."
-    )
-
-url_whatsapp = f"https://wa.me/{WHATSAPP_NUMERO}?text={urllib.parse.quote(mensaje_wa)}"
 
 st.markdown(f"""
 <div class="b2b-banner">
@@ -2477,4 +2554,5 @@ with b2:
     if st.button(T['btn_quote'], use_container_width=True):
         mostrar_modal_cotizacion()
 with b3:
-    st.link_button(T["btn_wa"], url_whatsapp, use_container_width=True)
+    if st.button(T["btn_feedback"], use_container_width=True):
+        mostrar_modal_sugerencias()
