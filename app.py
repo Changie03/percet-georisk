@@ -1612,11 +1612,18 @@ def mostrar_modal_pago_pack():
     else:
         st.warning(T["qr_missing_file"])
 
-    msg_pago_wa = (
-        f"Hola PERCET, realice el pago de S/ {PRECIO_PACK_PEN} por el Pack Tecnico (PDF + CSV) "
-        f"para el proyecto *{nombre_proyecto}* | Coord. [{st.session_state.lat}, {st.session_state.lon}] "
-        f"({nombre_rubro_activo}). Adjunto mi comprobante para recibir mi codigo de un solo uso."
-    )
+    if LANG == "ES":
+        msg_pago_wa = (
+            f"Hola PERCET, realice el pago de S/ {PRECIO_PACK_PEN} por el Pack Tecnico (PDF + CSV) "
+            f"para el proyecto *{nombre_proyecto}* | Coord. [{st.session_state.lat}, {st.session_state.lon}] "
+            f"({nombre_rubro_activo}). Adjunto mi comprobante para recibir mi codigo de un solo uso."
+        )
+    else:
+        msg_pago_wa = (
+            f"Hello PERCET, I completed the S/ {PRECIO_PACK_PEN} payment for the Technical Pack (PDF + CSV) "
+            f"for project *{nombre_proyecto}* | Coord. [{st.session_state.lat}, {st.session_state.lon}] "
+            f"({nombre_rubro_activo}). Attaching my payment receipt to receive my single-use code."
+        )
     link_pago_wa = f"https://wa.me/{WHATSAPP_NUMERO}?text={urllib.parse.quote(msg_pago_wa)}"
     st.link_button(T["qr_btn_wa"], link_pago_wa, use_container_width=True)
 
@@ -1755,7 +1762,7 @@ def mostrar_modal_sugerencias():
         st.markdown("""
         <div style="background: rgba(0, 180, 216, 0.20); border-left: 5px solid #00b4d8; padding: 10px 14px; border-radius: 8px; margin-bottom: 12px;">
             <div style="font-size: 0.85rem; font-weight: 900; text-transform: uppercase; letter-spacing: 0.4px;">
-                💡 MEJORAS DE LA PÁGINA (WHATSAPP +51 981 328 639)
+                💡 MEJORAS DE LA PÁGINA
             </div>
             <div style="font-size: 0.78rem; font-weight: 700; margin-top: 3px;">
                 Envía tus sugerencias o ideas de mejora para ir perfeccionando la plataforma paso a paso.
@@ -1776,7 +1783,7 @@ def mostrar_modal_sugerencias():
             max_chars=800
         ).strip()
 
-        if st.button("🚀 GENERAR SUGERENCIA PARA WHATSAPP (+51 981 328 639)", type="primary", use_container_width=True):
+        if st.button("🚀 GENERAR SUGERENCIA PARA WHATSAPP", type="primary", use_container_width=True):
             if comentario_sug:
                 valor_estrellas = (estrellas_sel + 1) if estrellas_sel is not None else 5
                 estrellas_visual = "*" * valor_estrellas
@@ -1790,15 +1797,15 @@ def mostrar_modal_sugerencias():
                     f"- Sugerencia:\n{comentario_sug}"
                 )
                 wa_sug_url = f"https://wa.me/{WHATSAPP_NUMERO}?text={urllib.parse.quote(texto_sug)}"
-                st.success("✅ Sugerencia lista para enviar al **+51 981 328 639**.")
-                st.link_button("📲 ENVIAR SUGERENCIA POR WHATSAPP (+51 981 328 639)", wa_sug_url, use_container_width=True)
+                st.success("✅ Sugerencia lista para enviar por WhatsApp.")
+                st.link_button("📲 ENVIAR SUGERENCIA POR WHATSAPP", wa_sug_url, use_container_width=True)
             else:
                 st.warning("⚠️ Escribe una sugerencia o comentario antes de continuar.")
     else:
         st.markdown("""
         <div style="background: rgba(0, 180, 216, 0.20); border-left: 5px solid #00b4d8; padding: 10px 14px; border-radius: 8px; margin-bottom: 12px;">
             <div style="font-size: 0.85rem; font-weight: 900; text-transform: uppercase; letter-spacing: 0.4px;">
-                💡 PAGE IMPROVEMENTS (WHATSAPP +51 981 328 639)
+                💡 PAGE IMPROVEMENTS
             </div>
             <div style="font-size: 0.78rem; font-weight: 700; margin-top: 3px;">
                 Share suggestions or ideas to improve the platform step by step.
@@ -1819,22 +1826,22 @@ def mostrar_modal_sugerencias():
             max_chars=800
         ).strip()
 
-        if st.button("🚀 GENERATE SUGGESTION FOR WHATSAPP (+51 981 328 639)", type="primary", use_container_width=True):
+        if st.button("🚀 GENERATE SUGGESTION FOR WHATSAPP", type="primary", use_container_width=True):
             if comentario_sug:
                 valor_estrellas = (estrellas_sel + 1) if estrellas_sel is not None else 5
-                estrellas_visual = "*" * valor_estrellas
+                stars_visual = "*" * valor_estrellas
                 texto_sug = (
                     f"*PAGE SUGGESTION - PERCET GEORISK*\n"
                     f"----------------------------------------\n"
                     f"- Name / Role: {nombre_sug if nombre_sug else 'Visitor'}\n"
                     f"- Section: {area_mejora}\n"
-                    f"- Rating: {valor_estrellas}/5 ({estrellas_visual})\n"
+                    f"- Rating: {valor_estrellas}/5 ({stars_visual})\n"
                     f"- Project / Coord.: {nombre_proyecto} [{st.session_state.lat}, {st.session_state.lon}]\n"
                     f"- Suggestion:\n{comentario_sug}"
                 )
                 wa_sug_url = f"https://wa.me/{WHATSAPP_NUMERO}?text={urllib.parse.quote(texto_sug)}"
-                st.success("✅ Suggestion ready to send to **+51 981 328 639**.")
-                st.link_button("📲 SEND SUGGESTION VIA WHATSAPP (+51 981 328 639)", wa_sug_url, use_container_width=True)
+                st.success("✅ Suggestion ready to send via WhatsApp.")
+                st.link_button("📲 SEND SUGGESTION VIA WHATSAPP", wa_sug_url, use_container_width=True)
             else:
                 st.warning("⚠️ Please enter a suggestion or comment before continuing.")
 
@@ -2537,7 +2544,7 @@ st.markdown(f'<div class="legal-disclaimer">{T["disclaimer"]}</div>', unsafe_all
 st.markdown(f"""
 <div class="b2b-banner">
     <div class="b2b-banner-title">{T['b2b_title']}</div>
-    <div class="b2b_banner-sub">{T['b2b_sub']}</div>
+    <div class="b2b-banner-sub">{T['b2b_sub']}</div>
 </div>
 """, unsafe_allow_html=True)
 
