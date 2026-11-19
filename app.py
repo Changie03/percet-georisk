@@ -10,6 +10,7 @@ import os
 import base64
 import json
 import html
+import re
 import urllib.parse
 from datetime import datetime, timedelta
 import plotly.graph_objects as go
@@ -44,6 +45,9 @@ def guardar_codigo_usado_disco(codigo_str):
         pass
     return actuales
 
+def correo_valido(correo_str):
+    return bool(re.match(r"^[^@\s]+@[^@\s]+\.[^@\s]+$", correo_str.strip()))
+
 if "lat" not in st.session_state:
     st.session_state.lat = -6.8112
 if "lon" not in st.session_state:
@@ -61,7 +65,6 @@ if "disparar_pdf_ahora" not in st.session_state:
 if "codigos_usados" not in st.session_state:
     st.session_state.codigos_usados = cargar_codigos_usados_disco()
 
-# Sincronizar códigos quemados desde localStorage del navegador (vía query param si existe)
 qp_used = st.query_params.get("used_codes", "")
 if qp_used:
     for c in str(qp_used).split(","):
@@ -279,7 +282,7 @@ TEXTOS = {
         "btn_quote": "📝 SOLICITAR COTIZACIÓN DE OBRA / CONSULTORÍA",
         "btn_wa": "💬 HABLAR CON UN ASESOR POR WHATSAPP",
         "privacy_check": "Acepto el tratamiento de mis datos para fines comerciales y técnicos conforme a la Ley N° 29733 (Ley de Protección de Datos Personales - Perú).",
-        "privacy_warn": "⚠️ Debe aceptar la cláusula de Protección de Datos Personales (Ley N° 29733) y completar los campos obligatorios.",
+        "privacy_warn": "⚠️ Debe aceptar la cláusula de Protección de Datos Personales (Ley N° 29733), ingresar un correo válido y completar los campos obligatorios.",
         "api_err_msg": "⚠️ El servicio satelital Open-Meteo no devolvió datos completos en este momento. Por política de integridad técnica (cero datos inventados), reintente la consulta en unos segundos.",
         "col_date": "Fecha",
         "col_horizon": "Horizonte",
@@ -393,7 +396,7 @@ TEXTOS = {
         "btn_quote": "📝 REQUEST ENGINEERING CONSULTING / QUOTE",
         "btn_wa": "💬 CONTACT ENGINEERING SUPPORT (WHATSAPP)",
         "privacy_check": "I accept the processing of my data for commercial and technical purposes in accordance with Data Protection Law N° 29733 (Peru).",
-        "privacy_warn": "⚠️ Please accept the Data Protection clause (Law N° 29733) and complete all required fields.",
+        "privacy_warn": "⚠️ Please accept the Data Protection clause (Law N° 29733), enter a valid email, and complete all required fields.",
         "api_err_msg": "⚠️ Open-Meteo satellite service did not return complete data at this moment. Per our strict data integrity policy (zero fabricated data), please retry in a few seconds.",
         "col_date": "Date",
         "col_horizon": "Horizon",
@@ -1632,7 +1635,7 @@ def mostrar_modal_pago_pack():
         else:
             st.warning(T["qr_code_err"])
 
-# 7. MODAL DE SOLICITUD CON CLÁUSULA DE PROTECCIÓN DE DATOS (LEY N° 29733) Y LÍMITE DE ARCHIVO
+# 7. MODAL DE SOLICITUD CON VALIDACIÓN DE CORREO, ESTADO REAL DE ENVÍO Y LEY N° 29733
 @st.dialog(" ")
 def mostrar_modal_cotizacion():
     logo_html = f'<img src="data:image/png;base64,{LOGO_B64}" class="modal-brand-logo">' if LOGO_B64 else ""
@@ -1655,7 +1658,8 @@ def mostrar_modal_cotizacion():
         </div>
         """, unsafe_allow_html=True)
         emp = html.escape(st.text_input("EMPRESA / CONSTRUCTORA O CLIENTE:", max_chars=100).strip())
-        correo_cli = html.escape(st.text_input("CORREO CORPORATIVO:", max_chars=100).strip())
+        correo_cli_raw = st.text_input("CORREO CORPORATIVO:", placeholder="cliente@empresa.com", max_chars=100).strip()
+        correo_cli = html.escape(correo_cli_raw)
         tel_cli = html.escape(st.text_input("TELÉFONO / WHATSAPP DE CONTACTO:", max_chars=40).strip())
         detalle_req = html.escape(st.text_area("DETALLE SU REQUERIMIENTO O PROYECTO A COTIZAR (Ej. Estructura metálica, remodelación, obras civiles, consultoría BIM/VDC):", height=95, max_chars=1200).strip())
         archivo = st.file_uploader("ADJUNTAR PLANO O EXPEDIENTE (OPCIONAL - MÁX 15 MB):", type=["pdf", "png", "jpg"])
@@ -1664,12 +1668,12 @@ def mostrar_modal_cotizacion():
         if st.button("🚀 ENVIAR SOLICITUD A OFICINA TÉCNICA", type="primary", use_container_width=True):
             if archivo and archivo.size > 15 * 1024 * 1024:
                 st.warning("⚠️ El archivo adjunto supera el límite de seguridad de 15 MB.")
-            elif emp and correo_cli and detalle_req and consentimiento_ley:
+            elif emp and correo_cli_raw and correo_valido(correo_cli_raw) and detalle_req and consentimiento_ley:
                 nombre_arch = html.escape(os.path.basename(archivo.name)) if archivo else "No adjuntado"
                 asunto = f"Cotización / Ingeniería PERCET - {emp} ({nombre_proyecto})"
                 cuerpo = (
                     f"Empresa / Cliente: {emp}\n"
-                    f"Correo del Cliente: {correo_cli}\n"
+                    f"Correo del Cliente: {correo_cli_raw}\n"
                     f"Teléfono / WhatsApp: {tel_cli}\n"
                     f"Proyecto Evaluado: {nombre_proyecto}\n"
                     f"Rubro: {nombre_rubro_activo} (Umbral: {umbral_critico} mm/día)\n"
@@ -1678,12 +1682,14 @@ def mostrar_modal_cotizacion():
                     f"Archivo referencial: {nombre_arch}\n"
                     f"Consentimiento Ley N° 29733: Aceptado"
                 )
+                envio_ok = False
+                detalle_envio = ""
                 try:
-                    requests.post(
+                    resp_mail = requests.post(
                         f"https://formsubmit.co/ajax/{CORREO_CORPORATIVO}",
                         data={
                             "Empresa": emp,
-                            "Correo_Cliente": correo_cli,
+                            "Correo_Cliente": correo_cli_raw,
                             "Telefono": tel_cli,
                             "Proyecto": nombre_proyecto,
                             "Rubro": nombre_rubro_activo,
@@ -1692,14 +1698,24 @@ def mostrar_modal_cotizacion():
                             "Coordenadas": f"{st.session_state.lat}, {st.session_state.lon}",
                             "Archivo": nombre_arch,
                             "Consentimiento_Ley_29733": "Aceptado",
-                            "_subject": asunto
+                            "_subject": asunto,
+                            "_replyto": correo_cli_raw
                         },
-                        timeout=5
+                        headers={"Accept": "application/json"},
+                        timeout=8
                     )
-                except Exception:
-                    pass
+                    if resp_mail.status_code in (200, 201):
+                        envio_ok = True
+                    else:
+                        detalle_envio = f"Código HTTP {resp_mail.status_code}"
+                except Exception as exc_mail:
+                    detalle_envio = str(exc_mail)
+
                 mailto_url = f"mailto:{CORREO_CORPORATIVO}?subject={urllib.parse.quote(asunto)}&body={urllib.parse.quote(cuerpo)}"
-                st.success(f"✅ Solicitud enviada a **{CORREO_CORPORATIVO}**.")
+                if envio_ok:
+                    st.success(f"✅ Solicitud procesada hacia **{CORREO_CORPORATIVO}**. Si es el primer envío a esta casilla, revisa también **Correo no deseado / Junk** para activar o ver el mensaje.")
+                else:
+                    st.warning(f"⚠️ No se pudo confirmar el envío automático ({detalle_envio}). Usa el enlace de abajo para abrir tu correo directamente.")
                 st.markdown(f'<a href="{mailto_url}" target="_blank" style="display:inline-block; margin-top:6px; font-size:0.82rem; font-weight:900; text-decoration:underline;">📧 Confirmar copia directa en mi cliente de correo</a>', unsafe_allow_html=True)
             else:
                 st.warning(T["privacy_warn"])
@@ -1715,7 +1731,8 @@ def mostrar_modal_cotizacion():
         </div>
         """, unsafe_allow_html=True)
         emp = html.escape(st.text_input("COMPANY / CONTRACTOR OR CLIENT NAME:", max_chars=100).strip())
-        correo_cli = html.escape(st.text_input("CORPORATE EMAIL:", max_chars=100).strip())
+        correo_cli_raw = st.text_input("CORPORATE EMAIL:", placeholder="client@company.com", max_chars=100).strip()
+        correo_cli = html.escape(correo_cli_raw)
         tel_cli = html.escape(st.text_input("CONTACT PHONE / WHATSAPP:", max_chars=40).strip())
         detalle_req = html.escape(st.text_area("PLEASE DETAIL YOUR PROJECT OR TECHNICAL REQUEST (e.g., Remote BIM/VDC consulting, hydrological study, civil works in Peru):", height=95, max_chars=1200).strip())
         archivo = st.file_uploader("UPLOAD BLUEPRINT OR DOCUMENT (OPTIONAL - MAX 15 MB):", type=["pdf", "png", "jpg"])
@@ -1724,12 +1741,12 @@ def mostrar_modal_cotizacion():
         if st.button("🚀 SUBMIT REQUEST TO TECHNICAL OFFICE", type="primary", use_container_width=True):
             if archivo and archivo.size > 15 * 1024 * 1024:
                 st.warning("⚠️ Attached file exceeds the 15 MB security limit.")
-            elif emp and correo_cli and detalle_req and consentimiento_ley:
+            elif emp and correo_cli_raw and correo_valido(correo_cli_raw) and detalle_req and consentimiento_ley:
                 nombre_arch = html.escape(os.path.basename(archivo.name)) if archivo else "Not attached"
                 asunto = f"PERCET Engineering Request - {emp} ({nombre_proyecto})"
                 cuerpo = (
                     f"Company / Client: {emp}\n"
-                    f"Client Email: {correo_cli}\n"
+                    f"Client Email: {correo_cli_raw}\n"
                     f"Phone / WhatsApp: {tel_cli}\n"
                     f"Evaluated Project: {nombre_proyecto}\n"
                     f"Sector: {nombre_rubro_activo} (Threshold: {umbral_critico} mm/day)\n"
@@ -1738,12 +1755,14 @@ def mostrar_modal_cotizacion():
                     f"Reference File: {nombre_arch}\n"
                     f"Law N° 29733 Consent: Accepted"
                 )
+                envio_ok = False
+                detalle_envio = ""
                 try:
-                    requests.post(
+                    resp_mail = requests.post(
                         f"https://formsubmit.co/ajax/{CORREO_CORPORATIVO}",
                         data={
                             "Company": emp,
-                            "Client_Email": correo_cli,
+                            "Client_Email": correo_cli_raw,
                             "Phone": tel_cli,
                             "Project": nombre_proyecto,
                             "Sector": nombre_rubro_activo,
@@ -1752,14 +1771,24 @@ def mostrar_modal_cotizacion():
                             "Coordinates": f"{st.session_state.lat}, {st.session_state.lon}",
                             "File": nombre_arch,
                             "Law_29733_Consent": "Accepted",
-                            "_subject": asunto
+                            "_subject": asunto,
+                            "_replyto": correo_cli_raw
                         },
-                        timeout=5
+                        headers={"Accept": "application/json"},
+                        timeout=8
                     )
-                except Exception:
-                    pass
+                    if resp_mail.status_code in (200, 201):
+                        envio_ok = True
+                    else:
+                        detalle_envio = f"HTTP {resp_mail.status_code}"
+                except Exception as exc_mail:
+                    detalle_envio = str(exc_mail)
+
                 mailto_url = f"mailto:{CORREO_CORPORATIVO}?subject={urllib.parse.quote(asunto)}&body={urllib.parse.quote(cuerpo)}"
-                st.success(f"✅ Request submitted to **{CORREO_CORPORATIVO}**.")
+                if envio_ok:
+                    st.success(f"✅ Request sent toward **{CORREO_CORPORATIVO}**. If this is the first submission to this mailbox, also check **Junk / Spam** for activation or delivery.")
+                else:
+                    st.warning(f"⚠️ Automatic submission could not be confirmed ({detalle_envio}). Use the link below to open your email client directly.")
                 st.markdown(f'<a href="{mailto_url}" target="_blank" style="display:inline-block; margin-top:6px; font-size:0.82rem; font-weight:900; text-decoration:underline;">📧 Confirm direct copy in email client</a>', unsafe_allow_html=True)
             else:
                 st.warning(T["privacy_warn"])
