@@ -1178,7 +1178,7 @@ def aplicar_estilo_corporativo():
     components.html("""
     <script>
     (function() {
-        var WA_URL = "https://wa.me/51981328639?text=Hola%20PERCET%2C%20solicito%20informaci%C3%B3n%20sobre%20PERCET%20GeoRisk";
+        var WA_URL = "https://wa.me/51981328639?text=Hola%20PERCET%2C%20solicito%20informacion%20sobre%20PERCET%20GeoRisk";
 
         var CSS_LIMPIEZA = `
             [data-testid="manage-app-button"],
@@ -1454,9 +1454,9 @@ def mostrar_modal_pago_pack():
         st.warning(T["qr_missing_file"])
 
     msg_pago_wa = (
-        f"Hola PERCET, realicé el pago de S/ {PRECIO_PACK_PEN} por el Pack Técnico (PDF + CSV) "
-        f"para el proyecto *{nombre_proyecto}* 📍[{st.session_state.lat}, {st.session_state.lon}] "
-        f"({nombre_rubro_activo}). Adjunto mi comprobante para recibir mi código de desbloqueo."
+        f"Hola PERCET, realice el pago de S/ {PRECIO_PACK_PEN} por el Pack Tecnico (PDF + CSV) "
+        f"para el proyecto *{nombre_proyecto}* | Coord. [{st.session_state.lat}, {st.session_state.lon}] "
+        f"({nombre_rubro_activo}). Adjunto mi comprobante para recibir mi codigo de desbloqueo."
     )
     link_pago_wa = f"https://wa.me/{WHATSAPP_NUMERO}?text={urllib.parse.quote(msg_pago_wa)}"
     st.link_button(T["qr_btn_wa"], link_pago_wa, use_container_width=True)
@@ -2304,13 +2304,13 @@ st.markdown(f'<div class="legal-disclaimer">{T["disclaimer"]}</div>', unsafe_all
 
 if LANG == "ES":
     mensaje_wa = (
-        f"👋 Hola PERCET, solicito cotización / asesoría de ingeniería para el proyecto "
-        f"*{nombre_proyecto}* 📍[{lat_actual}, {lon_actual}] (🏗️ {nombre_rubro_activo} | Umbral: {umbral_critico} mm/día)."
+        f"Hola PERCET, solicito cotizacion / asesoria de ingenieria para el proyecto "
+        f"*{nombre_proyecto}* | Coord. [{lat_actual}, {lon_actual}] ({nombre_rubro_activo} | Umbral: {umbral_critico} mm/dia)."
     )
 else:
     mensaje_wa = (
-        f"👋 Hello PERCET, I'd like to request engineering consulting for the project "
-        f"*{nombre_proyecto}* 📍[{lat_actual}, {lon_actual}] (🏗️ {nombre_rubro_activo} | Threshold: {umbral_critico} mm/day)."
+        f"Hello PERCET, I'd like to request engineering consulting for the project "
+        f"*{nombre_proyecto}* | Coord. [{lat_actual}, {lon_actual}] ({nombre_rubro_activo} | Threshold: {umbral_critico} mm/day)."
     )
 
 url_whatsapp = f"https://wa.me/{WHATSAPP_NUMERO}?text={urllib.parse.quote(mensaje_wa)}"
